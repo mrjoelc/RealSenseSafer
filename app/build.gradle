@@ -21,6 +21,14 @@ android {
         }
     }
 
+    aaptOptions {
+        noCompress "tflite"  // Your model's file extension: "tflite", "lite", etc.
+    }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+
 }
 
 dependencies {
@@ -33,6 +41,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     implementation 'com.intel.realsense:librealsense:2.+@aar'
+    implementation 'com.google.mlkit:object-detection:16.2.1'
 
 }
 

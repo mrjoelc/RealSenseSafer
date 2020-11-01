@@ -1,21 +1,30 @@
 package com.example.testrealsense;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.mlkit.common.model.LocalModel;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.objects.DetectedObject;
+import com.google.mlkit.vision.objects.ObjectDetection;
+import com.google.mlkit.vision.objects.ObjectDetector;
+import com.google.mlkit.vision.objects.defaults.ObjectDetectorOptions;
 import com.intel.realsense.librealsense.Colorizer;
 import com.intel.realsense.librealsense.Config;
 import com.intel.realsense.librealsense.DepthFrame;
@@ -36,6 +45,7 @@ import static com.example.testrealsense.ImageUtils.*;
 
 
 import java.text.DecimalFormat;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "librs capture example";
@@ -79,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
             requestPermission();
             mPermissionsGranted = true;
         }
+
+
 
     }
 
@@ -182,6 +194,9 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+
+
+
     Runnable mStreaming = new Runnable() {
         final DecimalFormat df = new DecimalFormat("#.##");
 
@@ -191,7 +206,6 @@ public class MainActivity extends AppCompatActivity {
                 try(FrameSet frames = mPipeline.waitForFrames()) {
                     try (Frame f = frames.first(StreamType.COLOR)){
                         VideoFrame color = f.as(Extension.VIDEO_FRAME);
-                        
                         int c_size= color.getDataSize();
                         int c_height = color.getHeight();
                         int c_width = color.getWidth();
@@ -199,10 +213,45 @@ public class MainActivity extends AppCompatActivity {
                         color.getData(c_data);
                         final int len = c_data.length;
                         if(c_data.length !=0) {
-
                             realsenseBM = rgb2Bitmap(c_data,c_width,c_height);
+                            ObjectDetectorOptions options =
+                                    new ObjectDetectorOptions.Builder()
+                                            .setDetectorMode(ObjectDetectorOptions.STREAM_MODE)
+                                            .enableClassification()  // Optional
+                                            .build();
+                            InputImage image = InputImage.fromBitmap(realsenseBM,0);
+
+                            //inizio object detection
+                            ObjectDetector objectDetector = ObjectDetection.getClient(options);
+                            objectDetector.process(image)
+                                    .addOnSuccessListener(
+                                            new OnSuccessListener<List<DetectedObject>>() {
+                                                @Override
+                                                public void onSuccess(List<DetectedObject> detectedObjects) {
+                                                    Toast.makeText(MainActivity.this, "Sto classificando", Toast.LENGTH_SHORT).show();
+                                                    for (DetectedObject detectedObject : detectedObjects) {
+                                                        Rect boundingBox = detectedObject.getBoundingBox();
+                                                        Integer trackingId = detectedObject.getTrackingId();
+                                                        for (DetectedObject.Label label : detectedObject.getLabels()) {
+                                                            String text = label.getText();
+                                                            TextView textView = findViewById(R.id.labelTextView);
+                                                            textView.setText(text);
+                                                        }
+                                                    }
+
+                                                }
+                                            })
+                                    .addOnFailureListener(
+                                            new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    Toast.makeText(MainActivity.this, "Non riesco a classificare!", Toast.LENGTH_SHORT).show();
+                                                    // ...
+                                                }
+                                            });
                             saveBitmap(realsenseBM,"realsense.png");
                             //mySurfaceView.setBitmap(realsenseBM);
+                          //  detectedObject.getLabels().get(0).getText()
 
                             Log.d(TAG, "onCaptureData: " + c_data.length);
                             Log.d(TAG,"transform byte to bitmap successfully\n");
@@ -228,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 mHandler.post(mStreaming);
+
             }
             catch (Exception e) {
                 Log.e(TAG, "streaming, error: " + e.getMessage());
