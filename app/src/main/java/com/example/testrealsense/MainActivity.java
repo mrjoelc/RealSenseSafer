@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.mlkit.common.model.LocalModel;
@@ -24,7 +25,7 @@ import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.objects.DetectedObject;
 import com.google.mlkit.vision.objects.ObjectDetection;
 import com.google.mlkit.vision.objects.ObjectDetector;
-import com.google.mlkit.vision.objects.defaults.ObjectDetectorOptions;
+import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions;
 import com.intel.realsense.librealsense.Colorizer;
 import com.intel.realsense.librealsense.Config;
 import com.intel.realsense.librealsense.DepthFrame;
@@ -199,7 +200,6 @@ public class MainActivity extends AppCompatActivity {
 
     Runnable mStreaming = new Runnable() {
         final DecimalFormat df = new DecimalFormat("#.##");
-
         @Override
         public void run() {
             try {
@@ -214,42 +214,49 @@ public class MainActivity extends AppCompatActivity {
                         final int len = c_data.length;
                         if(c_data.length !=0) {
                             realsenseBM = rgb2Bitmap(c_data,c_width,c_height);
-                            ObjectDetectorOptions options =
-                                    new ObjectDetectorOptions.Builder()
-                                            .setDetectorMode(ObjectDetectorOptions.STREAM_MODE)
-                                            .enableClassification()  // Optional
+                            LocalModel localModel =
+                                    new LocalModel.Builder()
+                                            .setAssetFilePath("model.tflite")
                                             .build();
                             InputImage image = InputImage.fromBitmap(realsenseBM,0);
+                            saveBitmap(realsenseBM,"realsense.png");
+                            CustomObjectDetectorOptions customObjectDetectorOptions =
+                                    new CustomObjectDetectorOptions.Builder(localModel)
+                                            .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
+                                            .enableClassification()
+                                            .setClassificationConfidenceThreshold(0.5f)
+                                            .setMaxPerObjectLabelCount(3)
+                                            .build();
 
-                            //inizio object detection
-                            ObjectDetector objectDetector = ObjectDetection.getClient(options);
-                            objectDetector.process(image)
+                            ObjectDetector objectDetector =  ObjectDetection.getClient(customObjectDetectorOptions);
+                            objectDetector
+                                    .process(image)
                                     .addOnSuccessListener(
-                                            new OnSuccessListener<List<DetectedObject>>() {
-                                                @Override
-                                                public void onSuccess(List<DetectedObject> detectedObjects) {
-                                                    Toast.makeText(MainActivity.this, "Sto classificando", Toast.LENGTH_SHORT).show();
-                                                    for (DetectedObject detectedObject : detectedObjects) {
-                                                        Rect boundingBox = detectedObject.getBoundingBox();
-                                                        Integer trackingId = detectedObject.getTrackingId();
-                                                        for (DetectedObject.Label label : detectedObject.getLabels()) {
-                                                            String text = label.getText();
-                                                            TextView textView = findViewById(R.id.labelTextView);
-                                                            textView.setText(text);
-                                                        }
-                                                    }
-
+                                    new OnSuccessListener<List<DetectedObject>>() {
+                                        @Override
+                                        public void onSuccess(List<DetectedObject> detectedObjects) {
+                                            for (DetectedObject detectedObject : detectedObjects) {
+                                                Rect boundingBox = detectedObject.getBoundingBox();
+                                                Integer trackingId = detectedObject.getTrackingId();
+                                                for (DetectedObject.Label label : detectedObject.getLabels()) {
+                                                    String text = label.getText();
+                                                    TextView textView = findViewById(R.id.labelTextView);
+                                                    textView.setText(text);
                                                 }
-                                            })
+                                            }
+
+                                        }
+                                    })
                                     .addOnFailureListener(
                                             new OnFailureListener() {
                                                 @Override
                                                 public void onFailure(@NonNull Exception e) {
-                                                    Toast.makeText(MainActivity.this, "Non riesco a classificare!", Toast.LENGTH_SHORT).show();
-                                                    // ...
+                                                    TextView textView = findViewById(R.id.labelTextView);
+                                                    textView.setText(e.getMessage());
                                                 }
                                             });
-                            saveBitmap(realsenseBM,"realsense.png");
+
+
                             //mySurfaceView.setBitmap(realsenseBM);
                           //  detectedObject.getLabels().get(0).getText()
 
@@ -288,8 +295,8 @@ public class MainActivity extends AppCompatActivity {
     private void configAndStart() throws Exception {
         try(Config config  = new Config())
         {
-            config.enableStream(StreamType.DEPTH, 640, 480);
-            config.enableStream(StreamType.COLOR, 640, 480);
+            config.enableStream(StreamType.DEPTH, -1,640, 480, StreamFormat.Z16, 30 );
+            config.enableStream(StreamType.COLOR,-1,640, 480, StreamFormat.RGB8,30);
             // try statement needed here to release resources allocated by the Pipeline:start() method
             try(PipelineProfile pp = mPipeline.start(config)){}
         }
