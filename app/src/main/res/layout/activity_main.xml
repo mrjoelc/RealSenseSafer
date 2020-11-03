@@ -9,7 +9,7 @@
     <com.intel.realsense.librealsense.GLRsSurfaceView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/glSurfaceView"/>
+        android:id="@+id/glSurfaceView" />
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/buttonPanel"

@@ -9,6 +9,9 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,6 +31,7 @@ import com.google.mlkit.vision.objects.DetectedObject;
 import com.google.mlkit.vision.objects.ObjectDetection;
 import com.google.mlkit.vision.objects.ObjectDetector;
 import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions;
+import com.intel.realsense.librealsense.Align;
 import com.intel.realsense.librealsense.Colorizer;
 import com.intel.realsense.librealsense.Config;
 import com.intel.realsense.librealsense.DepthFrame;
@@ -45,6 +49,7 @@ import com.intel.realsense.librealsense.StreamType;
 import com.intel.realsense.librealsense.VideoFrame;
 
 import static com.example.testrealsense.ImageUtils.*;
+import static com.example.testrealsense.DrawView.*;
 
 
 import java.text.DecimalFormat;
@@ -60,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     private Context mAppContext;
     private TextView mBackGroundText;
     private GLRsSurfaceView mGLSurfaceView;
+    private GLRsSurfaceView mGLSurfaceViewDepth;
     private boolean mIsStreaming = false;
     private final Handler mHandler = new Handler();
 
@@ -68,6 +74,11 @@ public class MainActivity extends AppCompatActivity {
     private RsContext mRsContext;
 
     private Bitmap realsenseBM;
+
+    private Align mAlign = new Align(StreamType.DEPTH);
+
+
+    DrawView drawView;
 
 
     @Override
@@ -80,6 +91,14 @@ public class MainActivity extends AppCompatActivity {
         mBackGroundText = findViewById(R.id.connectCameraText);
         mGLSurfaceView = findViewById(R.id.glSurfaceView);
         mGLSurfaceView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+
+        mGLSurfaceViewDepth = findViewById(R.id.glSurfaceViewDepth);
+        mGLSurfaceViewDepth.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
@@ -110,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mGLSurfaceView.close();
+        mGLSurfaceViewDepth.close();
         mPipeline.close();
         mColorizer.close();
     }
@@ -176,15 +196,101 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-
-
-
     Runnable mStreaming = new Runnable() {
         final DecimalFormat df = new DecimalFormat("#.##");
         @Override
         public void run() {
             try {
-                try(FrameSet frames = mPipeline.waitForFrames()) {
+                try (FrameSet frames = mPipeline.waitForFrames()) {
+                    try (FrameSet p = frames.applyFilter(mAlign)) {
+                        try (Frame d = p.first(StreamType.DEPTH)) {
+                            DepthFrame depth = d.as(Extension.DEPTH_FRAME);
+                            //do something with depth
+                            final float deptValue = depth.getDistance(depth.getWidth() / 2, depth.getHeight() / 2);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    TextView textView = findViewById(R.id.distanceTextView);
+                                    textView.setText("Distance: " + df.format(deptValue));
+                                }
+                            });
+                        }
+                        try (Frame c = p.first(StreamType.COLOR)) {
+                            VideoFrame color = c.as(Extension.VIDEO_FRAME);
+                            //do something with color
+                            int c_size = color.getDataSize();
+                            int c_height = color.getHeight();
+                            int c_width = color.getWidth();
+                            byte[] c_data = new byte[c_size];
+                            color.getData(c_data);
+                            final int len = c_data.length;
+                            if (c_data.length != 0) {
+                                realsenseBM = rgb2Bitmap(c_data, c_width, c_height);
+                                LocalModel localModel =
+                                        new LocalModel.Builder()
+                                                .setAssetFilePath("model.tflite")
+                                                .build();
+                                InputImage image = InputImage.fromBitmap(realsenseBM, 0);
+                                // saveBitmap(realsenseBM,"realsense.png");
+                                CustomObjectDetectorOptions customObjectDetectorOptions =
+                                        new CustomObjectDetectorOptions.Builder(localModel)
+                                                .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
+                                                .enableClassification()
+                                                .setClassificationConfidenceThreshold(0.5f)
+                                                .setMaxPerObjectLabelCount(3)
+                                                .build();
+
+                                ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
+                                objectDetector
+                                        .process(image)
+                                        .addOnSuccessListener(
+                                                new OnSuccessListener<List<DetectedObject>>() {
+                                                    @Override
+                                                    public void onSuccess(List<DetectedObject> detectedObjects) {
+                                                        for (DetectedObject detectedObject : detectedObjects) {
+                                                            Rect boundingBox = detectedObject.getBoundingBox();
+                                                            Integer trackingId = detectedObject.getTrackingId();
+                                                            for (DetectedObject.Label label : detectedObject.getLabels()) {
+                                                                String text = label.getText();
+                                                                TextView textView = findViewById(R.id.labelTextView);
+                                                                textView.setText(text);
+
+
+                                                            }
+                                                        }
+
+                                                    }
+                                                })
+                                        .addOnFailureListener(
+                                                new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        TextView textView = findViewById(R.id.labelTextView);
+                                                        textView.setText(e.getMessage());
+                                                    }
+                                                });
+
+
+                                //mySurfaceView.setBitmap(realsenseBM);
+                                //  detectedObject.getLabels().get(0).getText()
+
+                                Log.d(TAG, "onCaptureData: " + c_data.length);
+                                Log.d(TAG, "transform byte to bitmap successfully\n");
+                            }
+                        }
+                    }
+                    try (FrameSet processed = frames.applyFilter(mColorizer)) {
+                        mGLSurfaceView.upload(processed);
+                    }
+                }
+                mHandler.post(mStreaming);
+                } catch (Exception e) {
+                    Log.e(TAG, "streaming, error: " + e.getMessage());
+                }
+
+            };
+            /*try {
+                try (FrameSet frames = mPipeline.waitForFrames()) {
                     try (Frame f = frames.first(StreamType.COLOR)){
                         VideoFrame color = f.as(Extension.VIDEO_FRAME);
                         int c_size= color.getDataSize();
@@ -200,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
                                             .setAssetFilePath("model.tflite")
                                             .build();
                             InputImage image = InputImage.fromBitmap(realsenseBM,0);
-                           // saveBitmap(realsenseBM,"realsense.png");
+                            // saveBitmap(realsenseBM,"realsense.png");
                             CustomObjectDetectorOptions customObjectDetectorOptions =
                                     new CustomObjectDetectorOptions.Builder(localModel)
                                             .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
@@ -213,21 +319,21 @@ public class MainActivity extends AppCompatActivity {
                             objectDetector
                                     .process(image)
                                     .addOnSuccessListener(
-                                    new OnSuccessListener<List<DetectedObject>>() {
-                                        @Override
-                                        public void onSuccess(List<DetectedObject> detectedObjects) {
-                                            for (DetectedObject detectedObject : detectedObjects) {
-                                                Rect boundingBox = detectedObject.getBoundingBox();
-                                                Integer trackingId = detectedObject.getTrackingId();
-                                                for (DetectedObject.Label label : detectedObject.getLabels()) {
-                                                    String text = label.getText();
-                                                    TextView textView = findViewById(R.id.labelTextView);
-                                                    textView.setText(text);
-                                                }
-                                            }
+                                            new OnSuccessListener<List<DetectedObject>>() {
+                                                @Override
+                                                public void onSuccess(List<DetectedObject> detectedObjects) {
+                                                    for (DetectedObject detectedObject : detectedObjects) {
+                                                        Rect boundingBox = detectedObject.getBoundingBox();
+                                                        Integer trackingId = detectedObject.getTrackingId();
+                                                        for (DetectedObject.Label label : detectedObject.getLabels()) {
+                                                            String text = label.getText();
+                                                            TextView textView = findViewById(R.id.labelTextView);
+                                                            textView.setText(text);
+                                                        }
+                                                    }
 
-                                        }
-                                    })
+                                                }
+                                            })
                                     .addOnFailureListener(
                                             new OnFailureListener() {
                                                 @Override
@@ -239,7 +345,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                             //mySurfaceView.setBitmap(realsenseBM);
-                          //  detectedObject.getLabels().get(0).getText()
+                            //  detectedObject.getLabels().get(0).getText()
 
                             Log.d(TAG, "onCaptureData: " + c_data.length);
                             Log.d(TAG,"transform byte to bitmap successfully\n");
@@ -260,18 +366,18 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
                     }
-                    try(FrameSet processed = frames.applyFilter(mColorizer)) {
+                    try (FrameSet processed = frames.applyFilter(mColorizer)) {
                         mGLSurfaceView.upload(processed);
                     }
                 }
                 mHandler.post(mStreaming);
-
             }
             catch (Exception e) {
                 Log.e(TAG, "streaming, error: " + e.getMessage());
             }
-        }
+        }*/
     };
+
 
     private void configAndStart() throws Exception {
         try(Config config  = new Config())
