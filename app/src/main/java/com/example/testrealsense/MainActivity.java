@@ -2,8 +2,6 @@ package com.example.testrealsense;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.Context;
@@ -57,10 +55,11 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "librs capture example";
-    private static final int PERMISSIONS_REQUEST_CAMERA = 0;
+    private static final int PERMISSIONS_REQUEST = 0;
+    private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
+    private static final String PERMISSION_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
     private boolean mPermissionsGranted = false;
-
 
     private Context mAppContext;
     private TextView mBackGroundText;
@@ -97,43 +96,54 @@ public class MainActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 
-        mGLSurfaceViewDepth = findViewById(R.id.glSurfaceViewDepth);
-        mGLSurfaceViewDepth.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 
-        // Android 9 also requires camera permissions
-        if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.O &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST_CAMERA);
-            return;
+        if (!hasPermission()) {
+            requestPermission();
+            mPermissionsGranted = true;
         }
 
-        mPermissionsGranted = true;
 
-    }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST_CAMERA);
-            return;
-        }
-        mPermissionsGranted = true;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mGLSurfaceView.close();
-        mGLSurfaceViewDepth.close();
-        mPipeline.close();
-        mColorizer.close();
     }
 
+    @Override
+    public void onRequestPermissionsResult(
+            final int requestCode, final String[] permissions, final int[] grantResults) {
+        if (requestCode == PERMISSIONS_REQUEST) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+            } else {
+                requestPermission();
+            }
+        }
+    }
+
+    private boolean hasPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return checkSelfPermission(PERMISSION_CAMERA) == PackageManager.PERMISSION_GRANTED &&
+                    checkSelfPermission(PERMISSION_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        } else {
+            return true;
+        }
+    }
+
+    private void requestPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (shouldShowRequestPermissionRationale(PERMISSION_CAMERA) ||
+                    shouldShowRequestPermissionRationale(PERMISSION_STORAGE)) {
+                Toast.makeText(this,
+                        "Camera AND storage permission are required for this demo", Toast.LENGTH_LONG).show();
+            }
+            requestPermissions(new String[]{PERMISSION_CAMERA, PERMISSION_STORAGE}, PERMISSIONS_REQUEST);
+        }
+    }
 
     @Override
     protected void onResume() {
@@ -308,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
                                             .setAssetFilePath("model.tflite")
                                             .build();
                             InputImage image = InputImage.fromBitmap(realsenseBM,0);
-                            // saveBitmap(realsenseBM,"realsense.png");
+                            saveBitmap(realsenseBM,"realsense.png");
                             CustomObjectDetectorOptions customObjectDetectorOptions =
                                     new CustomObjectDetectorOptions.Builder(localModel)
                                             .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
@@ -384,8 +394,8 @@ public class MainActivity extends AppCompatActivity {
     private void configAndStart() throws Exception {
         try(Config config  = new Config())
         {
-            config.enableStream(StreamType.DEPTH, 640, 480);
-            config.enableStream(StreamType.COLOR,640, 480);
+            config.enableStream(StreamType.DEPTH, -1,640, 480, StreamFormat.Z16, 30 );
+            config.enableStream(StreamType.COLOR,-1,640, 480, StreamFormat.RGB8,30);
             // try statement needed here to release resources allocated by the Pipeline:start() method
             try(PipelineProfile pp = mPipeline.start(config)){}
         }
@@ -419,8 +429,6 @@ public class MainActivity extends AppCompatActivity {
             mGLSurfaceViewDepth.clear();
             Log.d(TAG, "streaming stopped successfully");
         } catch (Exception e) {
-            mPipeline = null;
-            mColorizer.close();
             Log.d(TAG, "failed to stop streaming");
         }
     }
