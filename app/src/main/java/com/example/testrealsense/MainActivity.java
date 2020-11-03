@@ -213,7 +213,6 @@ public class MainActivity extends AppCompatActivity {
             try {
                 try (FrameSet frames = mPipeline.waitForFrames()) {
                     try (FrameSet p = frames.applyFilter(mAlign)) {
-
                         try (Frame d = p.first(StreamType.DEPTH)) {
                             DepthFrame depth = d.as(Extension.DEPTH_FRAME);
                             //do something with depth
@@ -225,8 +224,6 @@ public class MainActivity extends AppCompatActivity {
                                     textView.setText("Distance: " + df.format(deptValue));
                                 }
                             });
-
-
                         }
                         try (Frame c = p.first(StreamType.COLOR)) {
                             VideoFrame color = c.as(Extension.VIDEO_FRAME);
@@ -290,9 +287,10 @@ public class MainActivity extends AppCompatActivity {
                                 Log.d(TAG, "onCaptureData: " + c_data.length);
                                 Log.d(TAG, "transform byte to bitmap successfully\n");
                             }
-                            mGLSurfaceView.upload(c);
                         }
-
+                    }
+                    try (FrameSet processed = frames.applyFilter(mColorizer)) {
+                        mGLSurfaceView.upload(processed);
                     }
                 }
                 mHandler.post(mStreaming);
@@ -407,7 +405,6 @@ public class MainActivity extends AppCompatActivity {
         try{
             Log.d(TAG, "try start streaming");
             mGLSurfaceView.clear();
-            mGLSurfaceViewDepth.clear();
             configAndStart();
             mIsStreaming = true;
             mHandler.post(mStreaming);
@@ -426,7 +423,6 @@ public class MainActivity extends AppCompatActivity {
             mHandler.removeCallbacks(mStreaming);
             mPipeline.stop();
             mGLSurfaceView.clear();
-            mGLSurfaceViewDepth.clear();
             Log.d(TAG, "streaming stopped successfully");
         } catch (Exception e) {
             Log.d(TAG, "failed to stop streaming");
