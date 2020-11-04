@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Bitmap realsenseBM;
 
-    private Align mAlign = new Align(StreamType.DEPTH);
+    private Align mAlign = new Align(StreamType.COLOR);
 
 
     DrawView drawView;
@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    Runnable mStreaming = new Runnable() {
+    /*Runnable mStreaming = new Runnable() {
         final DecimalFormat df = new DecimalFormat("#.##");
         @Override
         public void run() {
@@ -275,26 +275,28 @@ public class MainActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     Log.e(TAG, "streaming, error: " + e.getMessage());
                 }
-
-            };
-            /*try {
+            };*/
+    Runnable mStreaming = new Runnable() {
+        final DecimalFormat df = new DecimalFormat("#.##");
+        @Override
+        public void run() {
+            try {
                 try (FrameSet frames = mPipeline.waitForFrames()) {
-                    try (Frame f = frames.first(StreamType.COLOR)){
+                    try (Frame f = frames.first(StreamType.COLOR)) {
                         VideoFrame color = f.as(Extension.VIDEO_FRAME);
-                        int c_size= color.getDataSize();
+                        int c_size = color.getDataSize();
                         int c_height = color.getHeight();
                         int c_width = color.getWidth();
-                        byte[] c_data = new  byte[c_size];
+                        byte[] c_data = new byte[c_size];
                         color.getData(c_data);
                         final int len = c_data.length;
-                        if(c_data.length !=0) {
-                            realsenseBM = rgb2Bitmap(c_data,c_width,c_height);
+                        if (c_data.length != 0) {
+                            realsenseBM = rgb2Bitmap(c_data, c_width, c_height);
                             LocalModel localModel =
                                     new LocalModel.Builder()
                                             .setAssetFilePath("model.tflite")
                                             .build();
-                            InputImage image = InputImage.fromBitmap(realsenseBM,0);
-                            saveBitmap(realsenseBM,"realsense.png");
+                            InputImage image = InputImage.fromBitmap(realsenseBM, 0);
                             CustomObjectDetectorOptions customObjectDetectorOptions =
                                     new CustomObjectDetectorOptions.Builder(localModel)
                                             .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
@@ -303,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
                                             .setMaxPerObjectLabelCount(3)
                                             .build();
 
-                            ObjectDetector objectDetector =  ObjectDetection.getClient(customObjectDetectorOptions);
+                            ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
                             objectDetector
                                     .process(image)
                                     .addOnSuccessListener(
@@ -331,21 +333,11 @@ public class MainActivity extends AppCompatActivity {
                                                 }
                                             });
 
-
-                            //mySurfaceView.setBitmap(realsenseBM);
-                            //  detectedObject.getLabels().get(0).getText()
-
-                            Log.d(TAG, "onCaptureData: " + c_data.length);
-                            Log.d(TAG,"transform byte to bitmap successfully\n");
-
-                        }else{
-                            Log.d(TAG,"fail to load color data\n");
                         }
                     }
-                    try (Frame f = frames.first(StreamType.DEPTH))
-                    {
+                    try (Frame f = frames.first(StreamType.DEPTH)) {
                         DepthFrame depth = f.as(Extension.DEPTH_FRAME);
-                        final float deptValue = depth.getDistance(depth.getWidth()/2, depth.getHeight()/2);
+                        final float deptValue = depth.getDistance(depth.getWidth() / 2, depth.getHeight() / 2);
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -363,15 +355,15 @@ public class MainActivity extends AppCompatActivity {
             catch (Exception e) {
                 Log.e(TAG, "streaming, error: " + e.getMessage());
             }
-        }*/
+        }
     };
 
 
     private void configAndStart() throws Exception {
         try(Config config  = new Config())
         {
-            config.enableStream(StreamType.DEPTH, -1,640, 480, StreamFormat.Z16, 30 );
-            config.enableStream(StreamType.COLOR,-1,640, 480, StreamFormat.RGB8,30);
+            config.enableStream(StreamType.DEPTH,640, 480);
+            config.enableStream(StreamType.COLOR,640, 480);
             // try statement needed here to release resources allocated by the Pipeline:start() method
             try(PipelineProfile pp = mPipeline.start(config)){}
         }
