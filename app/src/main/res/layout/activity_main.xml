@@ -6,16 +6,16 @@
     android:background="@color/black"
     android:orientation="horizontal">
 
-    <com.example.testrealsense.Helper.GraphicOverlay
-        android:layout_width="fill_parent"
-        android:id="@+id/graphicOverlay"
-        android:layout_above="@+id/glSurfaceView"
-        android:layout_height="fill_parent"/>
 
     <com.intel.realsense.librealsense.GLRsSurfaceView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/glSurfaceView" />
+
+    <com.example.testrealsense.Helper.GraphicOverlay
+        android:layout_width="match_parent"
+        android:id="@+id/graphicOverlay"
+        android:layout_height="match_parent"/>
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/buttonPanel"
@@ -39,7 +39,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:paddingBottom="50dp">
+        android:paddingBottom="50dp"
+        android:id="@+id/linearLayout">
         <TextView
             android:id="@+id/distanceTextView"
             android:layout_width="match_parent"

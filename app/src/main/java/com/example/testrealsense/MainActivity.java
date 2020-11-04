@@ -300,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
                                                 .setAssetFilePath("model.tflite")
                                                 .build();
                                 InputImage image = InputImage.fromBitmap(realsenseBM, 0);
-                                //graphicOverlay.clear();
+
                                 CustomObjectDetectorOptions customObjectDetectorOptions =
                                         new CustomObjectDetectorOptions.Builder(localModel)
                                                 .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
@@ -316,13 +316,12 @@ public class MainActivity extends AppCompatActivity {
                                                 new OnSuccessListener<List<DetectedObject>>() {
                                                     @Override
                                                     public void onSuccess(List<DetectedObject> detectedObjects) {
+                                                        graphicOverlay.clear();
                                                         for (DetectedObject detectedObject : detectedObjects) {
                                                             Rect boundingBox = detectedObject.getBoundingBox();
                                                             Integer trackingId = detectedObject.getTrackingId();
 
-                                                            Rect rect = new Rect(10, 10, c_width, c_height);
-
-                                                            RectOverlay rectOverlay = new RectOverlay(graphicOverlay, rect);
+                                                            RectOverlay rectOverlay = new RectOverlay(graphicOverlay, boundingBox);
                                                             graphicOverlay.add(rectOverlay);
 
                                                             for (DetectedObject.Label label : detectedObject.getLabels()) {
