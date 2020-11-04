@@ -23,6 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.example.testrealsense.Helper.GraphicOverlay;
+import com.example.testrealsense.Helper.RectOverlay;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.mlkit.common.model.LocalModel;
@@ -49,7 +51,7 @@ import com.intel.realsense.librealsense.StreamType;
 import com.intel.realsense.librealsense.VideoFrame;
 
 import static com.example.testrealsense.ImageUtils.*;
-import static com.example.testrealsense.DrawView.*;
+
 
 
 import java.text.DecimalFormat;
@@ -76,8 +78,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Align mAlign = new Align(StreamType.COLOR);
 
-
-    DrawView drawView;
+    GraphicOverlay graphicOverlay;
 
 
     @Override
@@ -85,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        graphicOverlay = findViewById(R.id.graphicOverlay);
 
         mAppContext = getApplicationContext();
         mBackGroundText = findViewById(R.id.connectCameraText);
@@ -298,6 +300,7 @@ public class MainActivity extends AppCompatActivity {
                                                 .setAssetFilePath("model.tflite")
                                                 .build();
                                 InputImage image = InputImage.fromBitmap(realsenseBM, 0);
+                                //graphicOverlay.clear();
                                 CustomObjectDetectorOptions customObjectDetectorOptions =
                                         new CustomObjectDetectorOptions.Builder(localModel)
                                                 .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
@@ -316,6 +319,12 @@ public class MainActivity extends AppCompatActivity {
                                                         for (DetectedObject detectedObject : detectedObjects) {
                                                             Rect boundingBox = detectedObject.getBoundingBox();
                                                             Integer trackingId = detectedObject.getTrackingId();
+
+                                                            Rect rect = new Rect(10, 10, c_width, c_height);
+
+                                                            RectOverlay rectOverlay = new RectOverlay(graphicOverlay, rect);
+                                                            graphicOverlay.add(rectOverlay);
+
                                                             for (DetectedObject.Label label : detectedObject.getLabels()) {
                                                                 String text = label.getText();
                                                                 TextView textView = findViewById(R.id.labelTextView);
