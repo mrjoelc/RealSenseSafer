@@ -282,72 +282,73 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             try {
                 try (FrameSet frames = mPipeline.waitForFrames()) {
-                    try (Frame f = frames.first(StreamType.COLOR)) {
-                        VideoFrame color = f.as(Extension.VIDEO_FRAME);
-                        int c_size = color.getDataSize();
-                        int c_height = color.getHeight();
-                        int c_width = color.getWidth();
-                        byte[] c_data = new byte[c_size];
-                        color.getData(c_data);
-                        final int len = c_data.length;
-                        if (c_data.length != 0) {
-                            realsenseBM = rgb2Bitmap(c_data, c_width, c_height);
-                            LocalModel localModel =
-                                    new LocalModel.Builder()
-                                            .setAssetFilePath("model.tflite")
-                                            .build();
-                            InputImage image = InputImage.fromBitmap(realsenseBM, 0);
-                            CustomObjectDetectorOptions customObjectDetectorOptions =
-                                    new CustomObjectDetectorOptions.Builder(localModel)
-                                            .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
-                                            .enableClassification()
-                                            .setClassificationConfidenceThreshold(0.5f)
-                                            .setMaxPerObjectLabelCount(3)
-                                            .build();
+                    try (FrameSet p = frames.applyFilter(mAlign)) {
+                        try (Frame f = p.first(StreamType.COLOR)) {
+                            VideoFrame color = f.as(Extension.VIDEO_FRAME);
+                            int c_size = color.getDataSize();
+                            int c_height = color.getHeight();
+                            int c_width = color.getWidth();
+                            byte[] c_data = new byte[c_size];
+                            color.getData(c_data);
+                            final int len = c_data.length;
+                            if (c_data.length != 0) {
+                                realsenseBM = rgb2Bitmap(c_data, c_width, c_height);
+                                LocalModel localModel =
+                                        new LocalModel.Builder()
+                                                .setAssetFilePath("model.tflite")
+                                                .build();
+                                InputImage image = InputImage.fromBitmap(realsenseBM, 0);
+                                CustomObjectDetectorOptions customObjectDetectorOptions =
+                                        new CustomObjectDetectorOptions.Builder(localModel)
+                                                .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
+                                                .enableClassification()
+                                                .setClassificationConfidenceThreshold(0.5f)
+                                                .setMaxPerObjectLabelCount(3)
+                                                .build();
 
-                            ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
-                            objectDetector
-                                    .process(image)
-                                    .addOnSuccessListener(
-                                            new OnSuccessListener<List<DetectedObject>>() {
-                                                @Override
-                                                public void onSuccess(List<DetectedObject> detectedObjects) {
-                                                    for (DetectedObject detectedObject : detectedObjects) {
-                                                        Rect boundingBox = detectedObject.getBoundingBox();
-                                                        Integer trackingId = detectedObject.getTrackingId();
-                                                        for (DetectedObject.Label label : detectedObject.getLabels()) {
-                                                            String text = label.getText();
-                                                            TextView textView = findViewById(R.id.labelTextView);
-                                                            textView.setText(text);
+                                ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
+                                objectDetector
+                                        .process(image)
+                                        .addOnSuccessListener(
+                                                new OnSuccessListener<List<DetectedObject>>() {
+                                                    @Override
+                                                    public void onSuccess(List<DetectedObject> detectedObjects) {
+                                                        for (DetectedObject detectedObject : detectedObjects) {
+                                                            Rect boundingBox = detectedObject.getBoundingBox();
+                                                            Integer trackingId = detectedObject.getTrackingId();
+                                                            for (DetectedObject.Label label : detectedObject.getLabels()) {
+                                                                String text = label.getText();
+                                                                TextView textView = findViewById(R.id.labelTextView);
+                                                                textView.setText(text);
+                                                            }
                                                         }
+
                                                     }
+                                                })
+                                        .addOnFailureListener(
+                                                new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        TextView textView = findViewById(R.id.labelTextView);
+                                                        textView.setText(e.getMessage());
+                                                    }
+                                                });
 
-                                                }
-                                            })
-                                    .addOnFailureListener(
-                                            new OnFailureListener() {
-                                                @Override
-                                                public void onFailure(@NonNull Exception e) {
-                                                    TextView textView = findViewById(R.id.labelTextView);
-                                                    textView.setText(e.getMessage());
-                                                }
-                                            });
-
-                        }
-                    }
-                    try (Frame f = frames.first(StreamType.DEPTH)) {
-                        DepthFrame depth = f.as(Extension.DEPTH_FRAME);
-                        final float deptValue = depth.getDistance(depth.getWidth() / 2, depth.getHeight() / 2);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                TextView textView = findViewById(R.id.distanceTextView);
-                                textView.setText("Distance: " + df.format(deptValue));
                             }
-                        });
-                    }
-                    try (FrameSet processed = frames.applyFilter(mColorizer)) {
-                        mGLSurfaceView.upload(processed);
+                        }
+                        try (Frame f = p.first(StreamType.DEPTH)) {
+                            DepthFrame depth = f.as(Extension.DEPTH_FRAME);
+                            final float deptValue = depth.getDistance(depth.getWidth() / 2, depth.getHeight() / 2);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    TextView textView = findViewById(R.id.distanceTextView);
+                                    textView.setText("Distance: " + df.format(deptValue));
+                                }
+                            });
+                        }
+                        //try (FrameSet processed = frames.applyFilter(mColorizer)) {}
+                        mGLSurfaceView.upload(p);
                     }
                 }
                 mHandler.post(mStreaming);
