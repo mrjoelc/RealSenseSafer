@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 
 import android.Manifest;
 import android.content.Context;
@@ -11,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
@@ -19,6 +21,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,8 +69,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Context mAppContext;
     private TextView mBackGroundText;
-    private GLRsSurfaceView mGLSurfaceView;
-    private GLRsSurfaceView mGLSurfaceViewDepth;
+    //private GLRsSurfaceView mGLSurfaceView;
+    //private GLRsSurfaceView mGLSurfaceViewDepth;
     private boolean mIsStreaming = false;
     private final Handler mHandler = new Handler();
 
@@ -74,11 +78,14 @@ public class MainActivity extends AppCompatActivity {
     private Colorizer mColorizer;
     private RsContext mRsContext;
 
-    private Bitmap realsenseBM;
-
     private Align mAlign = new Align(StreamType.COLOR);
 
+    private Bitmap realsenseBM;
+
+    private MySurfaceView mySurfaceView;
+
     GraphicOverlay graphicOverlay;
+
 
 
     @Override
@@ -90,14 +97,12 @@ public class MainActivity extends AppCompatActivity {
 
         mAppContext = getApplicationContext();
         mBackGroundText = findViewById(R.id.connectCameraText);
-        mGLSurfaceView = findViewById(R.id.glSurfaceView);
-        mGLSurfaceView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 
+        mySurfaceView = new MySurfaceView(this);
+        mySurfaceView.setAspectRatio(640, 480);
+        Bitmap mBitmap = Bitmap.createBitmap(640, 480, Bitmap.Config.ARGB_8888);
+        mySurfaceView.setBitmap(mBitmap);
+        mySurfaceView.run();
 
         // Android 9 also requires camera permissions
         if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.O &&
@@ -122,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mGLSurfaceView.close();
+        //mGLSurfaceView.close();
     }
 
     @Override
@@ -186,98 +191,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    /*Runnable mStreaming = new Runnable() {
-        final DecimalFormat df = new DecimalFormat("#.##");
-        @Override
-        public void run() {
-            try {
-                try (FrameSet frames = mPipeline.waitForFrames()) {
-                    try (FrameSet p = frames.applyFilter(mAlign)) {
-                        try (Frame d = p.first(StreamType.DEPTH)) {
-                            DepthFrame depth = d.as(Extension.DEPTH_FRAME);
-                            //do something with depth
-                            final float deptValue = depth.getDistance(depth.getWidth() / 2, depth.getHeight() / 2);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    TextView textView = findViewById(R.id.distanceTextView);
-                                    textView.setText("Distance: " + df.format(deptValue));
-                                }
-                            });
-                        }
-                        try (Frame c = p.first(StreamType.COLOR)) {
-                            VideoFrame color = c.as(Extension.VIDEO_FRAME);
-                            //do something with color
-                            int c_size = color.getDataSize();
-                            int c_height = color.getHeight();
-                            int c_width = color.getWidth();
-                            byte[] c_data = new byte[c_size];
-                            color.getData(c_data);
-                            final int len = c_data.length;
-                            if (c_data.length != 0) {
-                                realsenseBM = rgb2Bitmap(c_data, c_width, c_height);
-                                LocalModel localModel =
-                                        new LocalModel.Builder()
-                                                .setAssetFilePath("model.tflite")
-                                                .build();
-                                InputImage image = InputImage.fromBitmap(realsenseBM, 0);
-                                // saveBitmap(realsenseBM,"realsense.png");
-                                CustomObjectDetectorOptions customObjectDetectorOptions =
-                                        new CustomObjectDetectorOptions.Builder(localModel)
-                                                .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
-                                                .enableClassification()
-                                                .setClassificationConfidenceThreshold(0.5f)
-                                                .setMaxPerObjectLabelCount(3)
-                                                .build();
 
-                                ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
-                                objectDetector
-                                        .process(image)
-                                        .addOnSuccessListener(
-                                                new OnSuccessListener<List<DetectedObject>>() {
-                                                    @Override
-                                                    public void onSuccess(List<DetectedObject> detectedObjects) {
-                                                        for (DetectedObject detectedObject : detectedObjects) {
-                                                            Rect boundingBox = detectedObject.getBoundingBox();
-                                                            Integer trackingId = detectedObject.getTrackingId();
-                                                            for (DetectedObject.Label label : detectedObject.getLabels()) {
-                                                                String text = label.getText();
-                                                                TextView textView = findViewById(R.id.labelTextView);
-                                                                textView.setText(text);
-
-
-                                                            }
-                                                        }
-
-                                                    }
-                                                })
-                                        .addOnFailureListener(
-                                                new OnFailureListener() {
-                                                    @Override
-                                                    public void onFailure(@NonNull Exception e) {
-                                                        TextView textView = findViewById(R.id.labelTextView);
-                                                        textView.setText(e.getMessage());
-                                                    }
-                                                });
-
-
-                                //mySurfaceView.setBitmap(realsenseBM);
-                                //  detectedObject.getLabels().get(0).getText()
-
-                                Log.d(TAG, "onCaptureData: " + c_data.length);
-                                Log.d(TAG, "transform byte to bitmap successfully\n");
-                            }
-                        }
-                    }
-                    try (FrameSet processed = frames.applyFilter(mColorizer)) {
-                        mGLSurfaceView.upload(processed);
-                    }
-                }
-                mHandler.post(mStreaming);
-                } catch (Exception e) {
-                    Log.e(TAG, "streaming, error: " + e.getMessage());
-                }
-            };*/
     Runnable mStreaming = new Runnable() {
         final DecimalFormat df = new DecimalFormat("#.##");
         @Override
@@ -295,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
                             final int len = c_data.length;
                             if (c_data.length != 0) {
                                 realsenseBM = rgb2Bitmap(c_data, c_width, c_height);
+                                mySurfaceView.setBitmap(realsenseBM);
                                 LocalModel localModel =
                                         new LocalModel.Builder()
                                                 .setAssetFilePath("model.tflite")
@@ -356,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
                             });
                         }
                         //try (FrameSet processed = frames.applyFilter(mColorizer)) {}
-                        mGLSurfaceView.upload(p);
+                        //mGLSurfaceView.upload(p);
                     }
                 }
                 mHandler.post(mStreaming);
@@ -366,7 +281,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-
 
     private void configAndStart() throws Exception {
         try(Config config  = new Config())
@@ -383,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         try{
             Log.d(TAG, "try start streaming");
-            mGLSurfaceView.clear();
+            //mGLSurfaceView.clear();
             configAndStart();
             mIsStreaming = true;
             mHandler.post(mStreaming);
@@ -401,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
             mIsStreaming = false;
             mHandler.removeCallbacks(mStreaming);
             mPipeline.stop();
-            mGLSurfaceView.clear();
+           // mGLSurfaceView.clear();
             Log.d(TAG, "streaming stopped successfully");
         } catch (Exception e) {
             Log.d(TAG, "failed to stop streaming");

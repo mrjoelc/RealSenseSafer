@@ -28,13 +28,13 @@ public class RectOverlay extends  GraphicOverlay.Graphic {
 
     @Override
     public void draw(Canvas canvas) {
-        RectF rectF = new RectF(rect);
+        /*RectF rectF = new RectF(rect);
         rectF.left = translateX(rectF.left);
         rectF.top = translateX(rectF.top);
         rectF.right = translateX(rectF.right);
-        rectF.bottom = translateX(rectF.bottom);
+        rectF.bottom = translateX(rectF.bottom);*/
 
-        canvas.drawRect(rectF, mRectPaint);
+        canvas.drawRect(rect, mRectPaint);
 
     }
 }

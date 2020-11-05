@@ -7,15 +7,16 @@
     android:orientation="horizontal">
 
 
-    <com.intel.realsense.librealsense.GLRsSurfaceView
+    <SurfaceView
+        android:id="@+id/screen_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/glSurfaceView" />
+        android:layout_height="match_parent" />
 
     <com.example.testrealsense.Helper.GraphicOverlay
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:id="@+id/graphicOverlay"
-        android:layout_height="match_parent"/>
+        />
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/buttonPanel"
