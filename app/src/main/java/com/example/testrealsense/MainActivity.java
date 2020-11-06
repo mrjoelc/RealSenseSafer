@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -62,6 +63,7 @@ import static com.example.testrealsense.ImageUtils.*;
 
 
 import java.text.DecimalFormat;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -91,12 +93,19 @@ public class MainActivity extends AppCompatActivity {
 
     LocalModel localModel;
 
+/*
+    long currentTime;
+    long previousTime;
+    long deltaTime;
+    long aproxFps;*/
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //previousTime = 0;
 
         graphicOverlay = findViewById(R.id.graphicOverlay);
 
@@ -209,7 +218,9 @@ public class MainActivity extends AppCompatActivity {
     };
 
     Runnable mStreaming = new Runnable() {
+        int count = 0;
         final DecimalFormat df = new DecimalFormat("#.##");
+
         @Override
         public void run() {
             try {
@@ -217,6 +228,16 @@ public class MainActivity extends AppCompatActivity {
                     try (FrameSet p = frames.applyFilter(mAlign)) {
                         try (Frame f = p.first(StreamType.COLOR)) {
                             VideoFrame color = f.as(Extension.VIDEO_FRAME);
+
+                            /*
+                            currentTime = SystemClock.elapsedRealtime();
+                            deltaTime = currentTime - previousTime;
+                            aproxFps = 1000 / deltaTime;
+                            previousTime = currentTime;
+
+                            TextView textView = findViewById(R.id.labelTextView);
+                            textView.setText((int)aproxFps); */
+
                             int c_size = color.getDataSize();
                             int c_height = color.getHeight();
                             int c_width = color.getWidth();
@@ -234,56 +255,59 @@ public class MainActivity extends AppCompatActivity {
                                                 .setClassificationConfidenceThreshold(0.5f)
                                                 .setMaxPerObjectLabelCount(3)
                                                 .build();
+                                if (count%3 == 0) {
+                                    ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
+                                    objectDetector
+                                            .process(image)
+                                            .addOnSuccessListener(
+                                                    new OnSuccessListener<List<DetectedObject>>() {
+                                                        @Override
+                                                        public void onSuccess(List<DetectedObject> detectedObjects) {
+                                                            graphicOverlay.clear();
+                                                            if (detectedObjects.size() > 0) {
+                                                                for (DetectedObject detectedObject : detectedObjects) {
+                                                                    //Determina punti traslati BoundingBox
 
-                                ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
-                                objectDetector
-                                        .process(image)
-                                        .addOnSuccessListener(
-                                                new OnSuccessListener<List<DetectedObject>>() {
-                                                    @Override
-                                                    public void onSuccess(List<DetectedObject> detectedObjects) {
-                                                        graphicOverlay.clear();
-                                                        if(detectedObjects.size()>0) {
-                                                            for (DetectedObject detectedObject : detectedObjects) {
-                                                                //Determina punti traslati BoundingBox
-
-                                                                float scaleX = (float) graphicOverlay.getHeight() / image.getWidth();
-                                                                float scaleY = (float) graphicOverlay.getWidth() / image.getHeight();
-                                                                float offsetX = detectedObject.getBoundingBox().width() / 2.1f;
-                                                                float offsetY = detectedObject.getBoundingBox().height() / 2.1f;
-                                                                float pre_left = translateX(detectedObject.getBoundingBox().left, scaleX, offsetX);
-                                                                float pre_top = translateY(detectedObject.getBoundingBox().top, scaleY, offsetY);
-                                                                float pre_right = translateX(detectedObject.getBoundingBox().right, scaleX, offsetX);
-                                                                float pre_bottom = translateY(detectedObject.getBoundingBox().bottom, scaleY, offsetY);
+                                                                    float scaleX = (float) graphicOverlay.getHeight() / image.getWidth();
+                                                                    float scaleY = (float) graphicOverlay.getWidth() / image.getHeight();
+                                                                    float offsetX = detectedObject.getBoundingBox().width() / 2.1f;
+                                                                    float offsetY = detectedObject.getBoundingBox().height() / 2.1f;
+                                                                    float pre_left = translateX(detectedObject.getBoundingBox().left, scaleX, offsetX);
+                                                                    float pre_top = translateY(detectedObject.getBoundingBox().top, scaleY, offsetY);
+                                                                    float pre_right = translateX(detectedObject.getBoundingBox().right, scaleX, offsetX);
+                                                                    float pre_bottom = translateY(detectedObject.getBoundingBox().bottom, scaleY, offsetY);
 
 
+                                                                    RectF boundingBox = new RectF(pre_left, pre_top, pre_right, pre_bottom);
 
-                                                                RectF boundingBox = new RectF(pre_left,pre_top,pre_right,pre_bottom);
+                                                                    //Integer trackingId = detectedObject.getTrackingId();
+                                                                    RectOverlay rectOverlay = new RectOverlay(graphicOverlay, boundingBox);
+                                                                    graphicOverlay.add(rectOverlay);
 
-                                                                //Integer trackingId = detectedObject.getTrackingId();
-                                                                RectOverlay rectOverlay = new RectOverlay(graphicOverlay, boundingBox);
-                                                                mySurfaceView.setBitmap(realsenseBM);
-                                                                graphicOverlay.add(rectOverlay);
 
-                                                                for(DetectedObject.Label l : detectedObject.getLabels()) {
-                                                                    String objectName  = l.getText();
-                                                                    System.out.println("----Oggetto riconosciuto: " + objectName + "----");
-                                                                    TextOverlay textOverlay = new TextOverlay(graphicOverlay, objectName, pre_left, pre_bottom);
-                                                                    graphicOverlay.add(textOverlay);
+                                                                    /** DA SISTEMARE **/
+                                                                    for (DetectedObject.Label l : detectedObject.getLabels()) {
+                                                                        String objectName = l.getText();
+                                                                        System.out.println("----Oggetto riconosciuto: " + objectName + "----");
+                                                                        TextOverlay textOverlay = new TextOverlay(graphicOverlay, objectName, pre_left, pre_bottom);
+                                                                        graphicOverlay.add(textOverlay);
+                                                                    }
                                                                 }
                                                             }
                                                         }
-                                                    }
-                                                })
-                                        .addOnFailureListener(
-                                                new OnFailureListener() {
-                                                    @Override
-                                                    public void onFailure(@NonNull Exception e) {
-                                                        TextView textView = findViewById(R.id.labelTextView);
-                                                        textView.setText(e.getMessage());
-                                                    }
-                                                });
+                                                    })
+                                            .addOnFailureListener(
+                                                    new OnFailureListener() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Exception e) {
+                                                            TextView textView = findViewById(R.id.labelTextView);
+                                                            textView.setText(e.getMessage());
+                                                        }
+                                                    });
+                                }
 
+                                mySurfaceView.setBitmap(realsenseBM);
+                                count ++;
                             }
                         }
                         try (Frame f = p.first(StreamType.DEPTH)) {
@@ -311,7 +335,7 @@ public class MainActivity extends AppCompatActivity {
         try(Config config  = new Config())
         {
             config.enableStream(StreamType.DEPTH,640, 480);
-            config.enableStream(StreamType.COLOR,640, 480, StreamFormat.YUYV);
+            config.enableStream(StreamType.COLOR,640, 480);
             // try statement needed here to release resources allocated by the Pipeline:start() method
             try(PipelineProfile pp = mPipeline.start(config)){}
         }
