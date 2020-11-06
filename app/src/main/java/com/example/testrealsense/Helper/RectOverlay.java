@@ -11,9 +11,9 @@ public class RectOverlay extends  GraphicOverlay.Graphic {
     private float mStrokeWidth = 4.0f;
     private Paint mRectPaint;
     private GraphicOverlay graphicOverlay;
-    private Rect rect;
+    private RectF rect;
 
-    public RectOverlay(GraphicOverlay graphicOverlay, Rect rect) {
+    public RectOverlay(GraphicOverlay graphicOverlay, RectF rect) {
         super(graphicOverlay);
         mRectPaint = new Paint();
         mRectPaint.setColor(mRectColor);

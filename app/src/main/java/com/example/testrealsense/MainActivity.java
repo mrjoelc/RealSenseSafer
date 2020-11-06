@@ -15,6 +15,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,8 +28,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+
 import com.example.testrealsense.Helper.GraphicOverlay;
 import com.example.testrealsense.Helper.RectOverlay;
+import com.example.testrealsense.Helper.TextOverlay;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.mlkit.common.model.LocalModel;
@@ -86,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
 
     GraphicOverlay graphicOverlay;
 
+    LocalModel localModel;
+
 
 
     @Override
@@ -112,6 +117,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mPermissionsGranted = true;
+
+        localModel = new LocalModel.Builder()
+                        .setAssetFilePath("model.tflite")
+                        .build();
 
     }
 
@@ -191,6 +200,13 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private float translateX(float x, float scaleX, float offsetX) {
+        return (x * scaleX) - offsetX;
+    };
+
+    private float translateY(float y, float scaleY, float offsetY) {
+        return (y * scaleY) - offsetY;
+    };
 
     Runnable mStreaming = new Runnable() {
         final DecimalFormat df = new DecimalFormat("#.##");
@@ -209,16 +225,12 @@ public class MainActivity extends AppCompatActivity {
                             final int len = c_data.length;
                             if (c_data.length != 0) {
                                 realsenseBM = rgb2Bitmap(c_data, c_width, c_height);
-                                mySurfaceView.setBitmap(realsenseBM);
-                                LocalModel localModel =
-                                        new LocalModel.Builder()
-                                                .setAssetFilePath("model.tflite")
-                                                .build();
                                 InputImage image = InputImage.fromBitmap(realsenseBM, 0);
 
                                 CustomObjectDetectorOptions customObjectDetectorOptions =
                                         new CustomObjectDetectorOptions.Builder(localModel)
                                                 .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
+                                                .enableMultipleObjects()
                                                 .enableClassification()
                                                 .setClassificationConfidenceThreshold(0.5f)
                                                 .setMaxPerObjectLabelCount(3)
@@ -232,7 +244,43 @@ public class MainActivity extends AppCompatActivity {
                                                     @Override
                                                     public void onSuccess(List<DetectedObject> detectedObjects) {
                                                         graphicOverlay.clear();
-                                                        for (DetectedObject detectedObject : detectedObjects) {
+                                                        if(detectedObjects.size()>0) {
+                                                            for (DetectedObject detectedObject : detectedObjects) {
+
+
+
+                                                                float scaleX = graphicOverlay.getHeight() / image.getWidth();
+                                                                float scaleY = graphicOverlay.getWidth() / image.getHeight();
+                                                                float offsetX = detectedObject.getBoundingBox().width() / 2.1f;
+                                                                float offsetY = detectedObject.getBoundingBox().height() / 2.1f;
+                                                                float pre_left = translateX(detectedObject.getBoundingBox().left, scaleX, offsetX);
+                                                                float pre_top = translateY(detectedObject.getBoundingBox().top, scaleY, offsetY);
+                                                                float pre_right = translateX(detectedObject.getBoundingBox().right, scaleX, offsetX);
+                                                                float pre_bottom = translateY(detectedObject.getBoundingBox().bottom, scaleY, offsetY);
+
+
+                                                                RectF boundingBox = new RectF(pre_left,pre_top,pre_right,pre_bottom);
+
+
+
+                                                                Integer trackingId = detectedObject.getTrackingId();
+                                                                RectOverlay rectOverlay = new RectOverlay(graphicOverlay, boundingBox);
+                                                                mySurfaceView.setBitmap(realsenseBM);
+                                                                graphicOverlay.add(rectOverlay);
+
+                                                                for(DetectedObject.Label l : detectedObject.getLabels()){
+                                                                    System.out.println("----Oggetto: "+ l.getIndex()+ ": "+ l.getText() +"----");
+                                                                    TextOverlay textOverlay = new TextOverlay(graphicOverlay, l.getText(), pre_left, pre_bottom);
+                                                                    graphicOverlay.add(textOverlay);
+
+                                                                    String text = l.getText();
+                                                                    TextView textView = findViewById(R.id.labelTextView);
+                                                                    textView.setText(text);
+                                                                }
+
+                                                            }
+                                                        }
+                                                        /*for (DetectedObject detectedObject : detectedObjects) {
                                                             Rect boundingBox = detectedObject.getBoundingBox();
                                                             Integer trackingId = detectedObject.getTrackingId();
 
@@ -244,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
                                                                 TextView textView = findViewById(R.id.labelTextView);
                                                                 textView.setText(text);
                                                             }
-                                                        }
+                                                        }*/
 
                                                     }
                                                 })
@@ -286,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
         try(Config config  = new Config())
         {
             config.enableStream(StreamType.DEPTH,640, 480);
-            config.enableStream(StreamType.COLOR,640, 480);
+            config.enableStream(StreamType.COLOR,640, 480, StreamFormat.YUYV);
             // try statement needed here to release resources allocated by the Pipeline:start() method
             try(PipelineProfile pp = mPipeline.start(config)){}
         }
