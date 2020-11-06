@@ -210,16 +210,6 @@ public class MainActivity extends AppCompatActivity {
 
     Runnable mStreaming = new Runnable() {
         final DecimalFormat df = new DecimalFormat("#.##");
-        float scaleX ;
-        float scaleY ;
-        float offsetX ;
-        float offsetY ;
-        float pre_left ;
-        float textX ;
-        float textY ;
-        float pre_bottom;
-        String objectName;
-
         @Override
         public void run() {
             try {
@@ -257,32 +247,30 @@ public class MainActivity extends AppCompatActivity {
                                                             for (DetectedObject detectedObject : detectedObjects) {
                                                                 //Determina punti traslati BoundingBox
 
-                                                               /* scaleX = (float) graphicOverlay.getHeight() / image.getWidth();
-                                                                scaleY = (float) graphicOverlay.getWidth() / image.getHeight();
-                                                                offsetX = detectedObject.getBoundingBox().width() / 2.1f;
-                                                                offsetY = detectedObject.getBoundingBox().height() / 2.1f;
+                                                                float scaleX = (float) graphicOverlay.getHeight() / image.getWidth();
+                                                                float scaleY = (float) graphicOverlay.getWidth() / image.getHeight();
+                                                                float offsetX = detectedObject.getBoundingBox().width() / 2.1f;
+                                                                float offsetY = detectedObject.getBoundingBox().height() / 2.1f;
+                                                                float pre_left = translateX(detectedObject.getBoundingBox().left, scaleX, offsetX);
+                                                                float pre_top = translateY(detectedObject.getBoundingBox().top, scaleY, offsetY);
+                                                                float pre_right = translateX(detectedObject.getBoundingBox().right, scaleX, offsetX);
+                                                                float pre_bottom = translateY(detectedObject.getBoundingBox().bottom, scaleY, offsetY);
 
-                                                                pre_right = translateX(detectedObject.getBoundingBox().right, scaleX, offsetX);*/
 
 
-
-                                                                //RectF boundingBox = new RectF(pre_left,pre_top,pre_right,pre_bottom);
-                                                                RectF boundingBox =  createTranslatedBoundingBox(graphicOverlay,
-                                                                                                                 detectedObject.getBoundingBox(),
-                                                                                                                 image.getWidth(),
-                                                                                                                 image.getHeight());
+                                                                RectF boundingBox = new RectF(pre_left,pre_top,pre_right,pre_bottom);
 
                                                                 //Integer trackingId = detectedObject.getTrackingId();
                                                                 RectOverlay rectOverlay = new RectOverlay(graphicOverlay, boundingBox);
                                                                 mySurfaceView.setBitmap(realsenseBM);
                                                                 graphicOverlay.add(rectOverlay);
 
-                                                                objectName = detectedObject.getLabels().get(0).getText();
-                                                                System.out.println("----Oggetto riconosciuto: "+ objectName + "----");
-                                                                textX = translateX(detectedObject.getBoundingBox().left, scaleX, offsetX);
-                                                                textY = translateY(detectedObject.getBoundingBox().top, scaleY, offsetY);
-                                                                TextOverlay textOverlay = new TextOverlay(graphicOverlay, objectName, pre_left, pre_bottom);
-                                                                graphicOverlay.add(textOverlay);
+                                                                for(DetectedObject.Label l : detectedObject.getLabels()) {
+                                                                    String objectName  = l.getText();
+                                                                    System.out.println("----Oggetto riconosciuto: " + objectName + "----");
+                                                                    TextOverlay textOverlay = new TextOverlay(graphicOverlay, objectName, pre_left, pre_bottom);
+                                                                    graphicOverlay.add(textOverlay);
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -318,18 +306,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-
-    private RectF createTranslatedBoundingBox(GraphicOverlay graphicOverlay, Rect boundingBox, int width, int height) {
-        float scaleX = (float) graphicOverlay.getHeight() / width;
-        float scaleY = (float) graphicOverlay.getWidth() / height;
-        float offsetX = boundingBox.width() / 2.1f;
-        float offsetY = boundingBox.height() / 2.1f;
-        float pre_left = translateX(boundingBox.left, scaleX, offsetX);
-        float pre_top = translateY(boundingBox.top, scaleY, offsetY);
-        float pre_right = translateX(boundingBox.right, scaleX, offsetX);
-        float pre_bottom = translateY(boundingBox.bottom, scaleY, offsetY);
-        return new RectF(pre_left,pre_top,pre_right,pre_bottom);
-    }
 
     private void configAndStart() throws Exception {
         try(Config config  = new Config())
