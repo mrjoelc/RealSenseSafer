@@ -353,7 +353,7 @@ public class MainActivity extends AppCompatActivity {
                                                                         for (DetectedObject.Label l : detectedObject.getLabels()) {
                                                                             String objectName = l.getText();
                                                                             System.out.println("----Oggetto riconosciuto: " + objectName + "----");
-                                                                            TextOverlay textOverlay = new TextOverlay(graphicOverlay, objectName, pre_left, pre_bottom);
+                                                                            TextOverlay textOverlay = new TextOverlay(graphicOverlay, objectName, right, bottom);
                                                                             graphicOverlay.add(textOverlay);
                                                                         }
                                                                     }
