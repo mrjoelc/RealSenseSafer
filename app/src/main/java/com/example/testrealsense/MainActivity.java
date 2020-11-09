@@ -11,21 +11,16 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Size;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
-
+import com.example.testrealsense.Helper.ObjectGraphics;
 import com.example.testrealsense.Helper.GraphicOverlay;
-import com.example.testrealsense.Helper.RectOverlay;
-import com.example.testrealsense.Helper.TextOverlay;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.mlkit.common.model.LocalModel;
@@ -225,6 +220,7 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
+
     private void runWithoutCamera(){
         Bitmap bitmap = loadBitmapFromAssets();
         if( bitmap.getWidth() == 640 && bitmap.getHeight() == 480 ){
@@ -248,30 +244,8 @@ public class MainActivity extends AppCompatActivity {
                                     graphicOverlay.clear();
                                     if (detectedObjects.size() > 0) {
                                         for (DetectedObject detectedObject : detectedObjects) {
-
-                                            float scaleFactor = (float) graphicOverlay.getWidth() / image.getWidth();
-                                            System.out.println("scaleFactor: " + scaleFactor);
-
-                                            float left = detectedObject.getBoundingBox().right * scaleFactor ;
-                                            float top = detectedObject.getBoundingBox().top * scaleFactor;
-                                            float right = detectedObject.getBoundingBox().left * scaleFactor;
-                                            float bottom = detectedObject.getBoundingBox().bottom * scaleFactor;
-
-                                            //originale
-                                            RectF boundingBox = new RectF(left,top,right,bottom);
-
-
-                                            RectOverlay rectOverlay = new RectOverlay(graphicOverlay, boundingBox);
-                                            graphicOverlay.add(rectOverlay);
-
-                                            /** DA SISTEMARE **/
-                                            for (DetectedObject.Label l : detectedObject.getLabels()) {
-                                                String objectName = l.getText();
-                                                System.out.println("----Oggetto riconosciuto: " + objectName + "----");
-                                                TextOverlay textOverlay = new TextOverlay(graphicOverlay, objectName, right, bottom);
-                                                graphicOverlay.add(textOverlay);
-                                            }
-                                        }
+                                            ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth());
+                                            drawBoundingBoxLabel.drawBoundingBoxAndLabel();                                        }
                                     }
                                 }
                             })
@@ -321,7 +295,7 @@ public class MainActivity extends AppCompatActivity {
                                                     .enableMultipleObjects()
                                                     .enableClassification()
                                                     .setClassificationConfidenceThreshold(0.5f)
-                                                    .setMaxPerObjectLabelCount(3)
+                                                    .setMaxPerObjectLabelCount(1)
                                                     .build();
                                     if (count % 3 == 0) {
                                         List<Rect> objectsPositions = new ArrayList<Rect>();
@@ -336,26 +310,9 @@ public class MainActivity extends AppCompatActivity {
                                                                 graphicOverlay.clear();
                                                                 if (detectedObjects.size() > 0) {
                                                                     for (DetectedObject detectedObject : detectedObjects) {
-                                                                        float scaleFactor = (float) graphicOverlay.getWidth() / image.getWidth();
-                                                                        System.out.println("scaleFactor: " + scaleFactor);
+                                                                        ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth());
+                                                                        drawBoundingBoxLabel.drawBoundingBoxAndLabel();
 
-                                                                        float left = detectedObject.getBoundingBox().right * scaleFactor ;
-                                                                        float top = detectedObject.getBoundingBox().top * scaleFactor;
-                                                                        float right = detectedObject.getBoundingBox().left * scaleFactor;
-                                                                        float bottom = detectedObject.getBoundingBox().bottom * scaleFactor;
-
-                                                                        RectF boundingBox = new RectF(left,top,right,bottom);
-
-                                                                        RectOverlay rectOverlay = new RectOverlay(graphicOverlay, boundingBox);
-                                                                        graphicOverlay.add(rectOverlay);
-
-                                                                        /** DA SISTEMARE **/
-                                                                        for (DetectedObject.Label l : detectedObject.getLabels()) {
-                                                                            String objectName = l.getText();
-                                                                            System.out.println("----Oggetto riconosciuto: " + objectName + "----");
-                                                                            TextOverlay textOverlay = new TextOverlay(graphicOverlay, objectName, right, bottom);
-                                                                            graphicOverlay.add(textOverlay);
-                                                                        }
                                                                     }
                                                                 }
                                                             }
