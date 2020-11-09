@@ -336,24 +336,18 @@ public class MainActivity extends AppCompatActivity {
                                                                 graphicOverlay.clear();
                                                                 if (detectedObjects.size() > 0) {
                                                                     for (DetectedObject detectedObject : detectedObjects) {
-                                                                        //Determina punti traslati BoundingBox
+                                                                        float scaleFactor = (float) graphicOverlay.getWidth() / image.getWidth();
+                                                                        System.out.println("scaleFactor: " + scaleFactor);
 
-                                                                        float scaleX = (float) graphicOverlay.getHeight() / image.getWidth();
-                                                                        float scaleY = (float) graphicOverlay.getWidth() / image.getHeight();
-                                                                        float offsetX = 0;
-                                                                        float offsetY = 0;
-                                                                        float pre_left = translateX(detectedObject.getBoundingBox().left, scaleX, offsetX);
-                                                                        float pre_top = translateY(detectedObject.getBoundingBox().top, scaleY, offsetY);
-                                                                        float pre_right = translateX(detectedObject.getBoundingBox().right, scaleX, offsetX);
-                                                                        float pre_bottom = translateY(detectedObject.getBoundingBox().bottom, scaleY, offsetY);
+                                                                        float left = detectedObject.getBoundingBox().right * scaleFactor ;
+                                                                        float top = detectedObject.getBoundingBox().top * scaleFactor;
+                                                                        float right = detectedObject.getBoundingBox().left * scaleFactor;
+                                                                        float bottom = detectedObject.getBoundingBox().bottom * scaleFactor;
 
-                                                                        //Rect boundingBox = new Rect(pre_left, pre_top, pre_right, pre_bottom);
+                                                                        RectF boundingBox = new RectF(left,top,right,bottom);
 
-                                                                        //Integer trackingId = detectedObject.getTrackingId();
-                                                                       // RectOverlay rectOverlay = new RectOverlay(graphicOverlay, boundingBox);
-                                                                        //graphicOverlay.add(rectOverlay);
-
-                                                                        objectsPositions.add(detectedObject.getBoundingBox());
+                                                                        RectOverlay rectOverlay = new RectOverlay(graphicOverlay, boundingBox);
+                                                                        graphicOverlay.add(rectOverlay);
 
                                                                         /** DA SISTEMARE **/
                                                                         for (DetectedObject.Label l : detectedObject.getLabels()) {
