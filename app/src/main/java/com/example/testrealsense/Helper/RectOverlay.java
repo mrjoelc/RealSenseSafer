@@ -20,7 +20,7 @@ public class RectOverlay extends  GraphicOverlay.Graphic {
         mRectPaint.setStyle(Paint.Style.STROKE);
         mRectPaint.setStrokeWidth(mStrokeWidth);
 
-        this.graphicOverlay = graphicOverlay;
+        //this.graphicOverlay = graphicOverlay;
         this.rect = rect;
 
         postInvalidate();
