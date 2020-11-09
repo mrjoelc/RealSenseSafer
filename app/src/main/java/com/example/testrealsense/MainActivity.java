@@ -271,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
 
                                             Rect boundingBox = new Rect(left,top,right,bottom);
 
-                                            Rect orgBox = new Rect(0,0, (int) (640*scaleX), (int)(480*scaleY));
+                                            Rect orgBox = new Rect(0,0, (int) (640*scaleX), (int) (480*scaleY));
 
                                             //RectF boundingBox = new RectF(pre_left, pre_top, pre_right, pre_bottom);
 

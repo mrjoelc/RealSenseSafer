@@ -12,6 +12,7 @@ public class RectOverlay extends  GraphicOverlay.Graphic {
     private Paint mRectPaint;
     private GraphicOverlay graphicOverlay;
     private Rect rect;
+    private RectF rectF;
 
     public RectOverlay(GraphicOverlay graphicOverlay, Rect rect) {
         super(graphicOverlay);
@@ -26,6 +27,19 @@ public class RectOverlay extends  GraphicOverlay.Graphic {
         postInvalidate();
     }
 
+    public RectOverlay(GraphicOverlay graphicOverlay, RectF rectf) {
+        super(graphicOverlay);
+        mRectPaint = new Paint();
+        mRectPaint.setColor(mRectColor);
+        mRectPaint.setStyle(Paint.Style.STROKE);
+        mRectPaint.setStrokeWidth(mStrokeWidth);
+
+        //this.graphicOverlay = graphicOverlay;
+        this.rectF = rectf;
+
+        postInvalidate();
+    }
+
     @Override
     public void draw(Canvas canvas) {
         /*RectF rectF = new RectF(rect);
@@ -33,8 +47,10 @@ public class RectOverlay extends  GraphicOverlay.Graphic {
         rectF.top = translateX(rectF.top);
         rectF.right = translateX(rectF.right);
         rectF.bottom = translateX(rectF.bottom);*/
-
-        canvas.drawRect(rect, mRectPaint);
+        if(rect==null)
+            canvas.drawRect(rectF, mRectPaint);
+        else
+            canvas.drawRect(rect, mRectPaint);
 
     }
 }
