@@ -4,27 +4,19 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Matrix;
-import android.graphics.Paint;
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.os.SystemClock;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,21 +42,19 @@ import com.intel.realsense.librealsense.DeviceListener;
 import com.intel.realsense.librealsense.Extension;
 import com.intel.realsense.librealsense.Frame;
 import com.intel.realsense.librealsense.FrameSet;
-import com.intel.realsense.librealsense.GLRsSurfaceView;
 import com.intel.realsense.librealsense.Pipeline;
 import com.intel.realsense.librealsense.PipelineProfile;
 import com.intel.realsense.librealsense.RsContext;
-import com.intel.realsense.librealsense.StreamFormat;
 import com.intel.realsense.librealsense.StreamType;
 import com.intel.realsense.librealsense.VideoFrame;
 
 import static com.example.testrealsense.ImageUtils.*;
 
 
-
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -184,6 +174,8 @@ public class MainActivity extends AppCompatActivity {
             if(dl.getDeviceCount() > 0) {
                 showConnectLabel(false);
                 start();
+            }else {
+                runWithoutCamera();
             }
         }
     }
@@ -217,6 +209,110 @@ public class MainActivity extends AppCompatActivity {
     private float translateY(float y, float scaleY, float offsetY) {
         return (y * scaleY) - offsetY;
     };
+
+    private Bitmap loadBitmapFromAssets() {
+        showConnectLabel(false);
+        InputStream bitmap = null;
+        try {
+            bitmap=getAssets().open("img2.jpg");
+            Bitmap bit= BitmapFactory.decodeStream(bitmap);
+            return bit;
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        return null;
+    }
+
+    private void runWithoutCamera(){
+        Bitmap bitmap = loadBitmapFromAssets();
+        if( bitmap.getWidth() == 640 && bitmap.getHeight() == 480 ){
+            Toast.makeText(this, "bitmap with right dimensions: " + bitmap.getWidth() + "x" + bitmap.getHeight(), Toast.LENGTH_SHORT).show();
+            InputImage image = InputImage.fromBitmap(bitmap, 0);
+            CustomObjectDetectorOptions customObjectDetectorOptions =
+                    new CustomObjectDetectorOptions.Builder(localModel)
+                            .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
+                            .enableMultipleObjects()
+                            .enableClassification()
+                            .setClassificationConfidenceThreshold(0.5f)
+                            .setMaxPerObjectLabelCount(3)
+                            .build();
+            ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
+            objectDetector
+                    .process(image)
+                    .addOnSuccessListener(
+                            new OnSuccessListener<List<DetectedObject>>() {
+                                @Override
+                                public void onSuccess(List<DetectedObject> detectedObjects) {
+                                    graphicOverlay.clear();
+                                    if (detectedObjects.size() > 0) {
+                                        for (DetectedObject detectedObject : detectedObjects) {
+                                            //Determina punti traslati BoundingBox
+                                            System.out.println("Overlay : " + graphicOverlay.getWidth() + "x" + graphicOverlay.getHeight() );
+
+                                            /*float scaleX = (float) graphicOverlay.getHeight() / image.getWidth();
+                                            float scaleY = (float) graphicOverlay.getWidth() / image.getHeight();
+                                            float offsetX = 0;
+                                            float offsetY = 0;
+                                            float pre_left = translateX(detectedObject.getBoundingBox().left, scaleX, offsetX);
+                                            float pre_top = translateY(detectedObject.getBoundingBox().top, scaleY, offsetY);
+                                            float pre_right = translateX(detectedObject.getBoundingBox().right, scaleX, offsetX);
+                                            float pre_bottom = translateY(detectedObject.getBoundingBox().bottom, scaleY, offsetY);*/
+
+                                            int left = detectedObject.getBoundingBox().left;
+                                            int top = detectedObject.getBoundingBox().top;
+                                            int right = detectedObject.getBoundingBox().right;
+                                            int bottom = detectedObject.getBoundingBox().bottom;
+
+                                            float scaleX =  (float) graphicOverlay.getHeight() / image.getWidth();
+                                            float scaleY =  (float) graphicOverlay.getWidth() / image.getHeight();
+                                            System.out.println("ScaleX: " + scaleX + " ScaleY: " + scaleY );
+
+
+                                            Rect boundingBox = new Rect(left,top,right,bottom);
+
+                                            Rect orgBox = new Rect(0,0, (int) (640*scaleX), (int)(480*scaleY));
+
+                                            //RectF boundingBox = new RectF(pre_left, pre_top, pre_right, pre_bottom);
+
+                                            //Integer trackingId = detectedObject.getTrackingId();
+                                            System.out.println(detectedObject.getBoundingBox());
+                                            System.out.println("new bb:" + boundingBox);
+                                            RectOverlay orgbox = new RectOverlay(graphicOverlay, orgBox);
+                                            graphicOverlay.add(orgbox);
+
+                                            RectOverlay rectOverlay = new RectOverlay(graphicOverlay, boundingBox);
+                                            graphicOverlay.add(rectOverlay);
+
+
+
+
+                                            /** DA SISTEMARE **/
+                                            for (DetectedObject.Label l : detectedObject.getLabels()) {
+                                                String objectName = l.getText();
+                                                System.out.println("----Oggetto riconosciuto: " + objectName + "----");
+                                                //TextOverlay textOverlay = new TextOverlay(graphicOverlay, objectName, pre_left, pre_bottom);
+                                               // graphicOverlay.add(textOverlay);
+                                            }
+                                        }
+                                    }
+                                }
+                            })
+                    .addOnFailureListener(
+                            new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    TextView textView = findViewById(R.id.labelTextView);
+                                    textView.setText(e.getMessage());
+                                }
+                            });
+
+        }else
+            Toast.makeText(this, "WRONG INPUT DIMENSIONS", Toast.LENGTH_SHORT).show();
+
+        mySurfaceView.setBitmap(bitmap);
+    }
+
 
     Runnable mStreaming = new Runnable() {
         int count = 0;
@@ -274,11 +370,11 @@ public class MainActivity extends AppCompatActivity {
                                                                         float pre_right = translateX(detectedObject.getBoundingBox().right, scaleX, offsetX);
                                                                         float pre_bottom = translateY(detectedObject.getBoundingBox().bottom, scaleY, offsetY);
 
-                                                                        RectF boundingBox = new RectF(pre_left, pre_top, pre_right, pre_bottom);
+                                                                        //Rect boundingBox = new Rect(pre_left, pre_top, pre_right, pre_bottom);
 
                                                                         //Integer trackingId = detectedObject.getTrackingId();
-                                                                        RectOverlay rectOverlay = new RectOverlay(graphicOverlay, boundingBox);
-                                                                        graphicOverlay.add(rectOverlay);
+                                                                       // RectOverlay rectOverlay = new RectOverlay(graphicOverlay, boundingBox);
+                                                                        //graphicOverlay.add(rectOverlay);
 
                                                                         objectsPositions.add(detectedObject.getBoundingBox());
 

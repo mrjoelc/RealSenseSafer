@@ -10,7 +10,9 @@
     <SurfaceView
         android:id="@+id/screen_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        />
+
 
     <com.example.testrealsense.Helper.GraphicOverlay
         android:layout_width="match_parent"
