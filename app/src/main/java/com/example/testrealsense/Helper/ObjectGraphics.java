@@ -17,12 +17,14 @@ public class ObjectGraphics {
     private int imageWidth;
     static private Map<Integer,Integer> mapID = new HashMap<Integer,Integer>();
     static final int color = generateRandomColor();
+    private float scaleFactor;
+
 
     public ObjectGraphics(DetectedObject detectedObject, GraphicOverlay graphicOverlay, int imageWidth){
         this.detectedObject=detectedObject;
         this.graphicOverlay=graphicOverlay;
         this.imageWidth=imageWidth;
-
+        this.scaleFactor = calculateScaleFactor();
     }
 
     public void drawBoundingBoxAndLabel(){
@@ -49,6 +51,10 @@ public class ObjectGraphics {
 
     private float calculateScaleFactor(){
         return (float) graphicOverlay.getWidth() / imageWidth;
+    }
+
+    public float getScaleFactor() {
+        return scaleFactor;
     }
 
     static private int generateRandomColor() {
