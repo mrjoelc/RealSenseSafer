@@ -6,18 +6,23 @@ import android.graphics.RectF;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.objects.DetectedObject;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class ObjectGraphics {
-    final private Random mRandom = new Random(System.currentTimeMillis());
+    final static private Random mRandom = new Random(System.currentTimeMillis());
     private DetectedObject detectedObject;
     private GraphicOverlay graphicOverlay;
     private int imageWidth;
+    static private Map<Integer,Integer> mapID = new HashMap<Integer,Integer>();
+    static final int color = generateRandomColor();
 
     public ObjectGraphics(DetectedObject detectedObject, GraphicOverlay graphicOverlay, int imageWidth){
         this.detectedObject=detectedObject;
         this.graphicOverlay=graphicOverlay;
         this.imageWidth=imageWidth;
+
     }
 
     public void drawBoundingBoxAndLabel(){
@@ -30,7 +35,7 @@ public class ObjectGraphics {
         float bottom = detectedObject.getBoundingBox().bottom * scaleFactor;
 
         RectF boundingBox = new RectF(left,top,right,bottom);
-        int color = generateRandomColor();
+
 
         RectOverlay rectOverlay = new RectOverlay(graphicOverlay, boundingBox, color) ;
         graphicOverlay.add(rectOverlay);
@@ -46,7 +51,7 @@ public class ObjectGraphics {
         return (float) graphicOverlay.getWidth() / imageWidth;
     }
 
-    private int generateRandomColor() {
+    static private int generateRandomColor() {
         // This is the base color which will be mixed with the generated one
         final int baseColor = Color.WHITE;
 
