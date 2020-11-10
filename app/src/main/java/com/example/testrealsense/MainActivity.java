@@ -245,7 +245,8 @@ public class MainActivity extends AppCompatActivity {
                                     if (detectedObjects.size() > 0) {
                                         for (DetectedObject detectedObject : detectedObjects) {
                                             ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth());
-                                            drawBoundingBoxLabel.drawBoundingBoxAndLabel();                                        }
+                                            drawBoundingBoxLabel.drawBoundingBoxAndLabel();
+                                        }
                                     }
                                 }
                             })
@@ -310,8 +311,10 @@ public class MainActivity extends AppCompatActivity {
                                                                 graphicOverlay.clear();
                                                                 if (detectedObjects.size() > 0) {
                                                                     for (DetectedObject detectedObject : detectedObjects) {
+
                                                                         ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth());
                                                                         drawBoundingBoxLabel.drawBoundingBoxAndLabel();
+
 
                                                                     }
                                                                 }
