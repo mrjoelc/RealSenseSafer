@@ -1,10 +1,13 @@
 package com.example.testrealsense.Helper;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.RectF;
+import android.widget.Toast;
 
-import com.google.mlkit.vision.common.InputImage;
+import com.example.testrealsense.MainActivity;
 import com.google.mlkit.vision.objects.DetectedObject;
+import com.intel.realsense.librealsense.DepthFrame;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,19 +21,19 @@ public class ObjectGraphics {
     static private Map<Integer,Integer> mapID = new HashMap<Integer,Integer>();
     static final int color = generateRandomColor();
     private float scaleFactor;
+    private float objectDepth;
 
 
-    public ObjectGraphics(DetectedObject detectedObject, GraphicOverlay graphicOverlay, int imageWidth){
+    public ObjectGraphics(DetectedObject detectedObject, GraphicOverlay graphicOverlay, int imageWidth, float objectDepth){
         this.detectedObject=detectedObject;
         this.graphicOverlay=graphicOverlay;
         this.imageWidth=imageWidth;
         this.scaleFactor = calculateScaleFactor();
+        this.objectDepth = objectDepth;
     }
 
     public void drawBoundingBoxAndLabel(){
-        float scaleFactor = calculateScaleFactor();
         System.out.println("scaleFactor: " + scaleFactor);
-
         float left = detectedObject.getBoundingBox().right * scaleFactor ;
         float top = detectedObject.getBoundingBox().top * scaleFactor;
         float right = detectedObject.getBoundingBox().left * scaleFactor;
@@ -45,8 +48,14 @@ public class ObjectGraphics {
         String objectLabel;
         if(detectedObject.getLabels().size()>0) objectLabel = detectedObject.getLabels().get(0).getText();
         else objectLabel = "Unknown";
-        TextOverlay textOverlay = new TextOverlay(graphicOverlay, objectLabel, right, bottom,color);
-        graphicOverlay.add(textOverlay);
+
+        TextOverlay labelOverlay = new TextOverlay(graphicOverlay, objectLabel, right, bottom,color);
+        graphicOverlay.add(labelOverlay);
+
+        TextOverlay depthOverlay = new TextOverlay(graphicOverlay, String.valueOf(objectDepth), right, bottom - 45, color);
+        graphicOverlay.add(depthOverlay);
+
+
     }
 
     private float calculateScaleFactor(){

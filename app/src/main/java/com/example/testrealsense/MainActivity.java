@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -47,6 +48,9 @@ import com.intel.realsense.librealsense.VideoFrame;
 import static com.example.testrealsense.ImageUtils.*;
 
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
@@ -70,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
     private Colorizer mColorizer;
     private RsContext mRsContext;
 
+    private static final int PERMISSIONS_REQUEST_WRITE = 1;
+
     private Align mAlign = new Align(StreamType.COLOR);
 
     private Bitmap realsenseBM;
@@ -92,8 +98,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //previousTime = 0;
-
         graphicOverlay = findViewById(R.id.graphicOverlay);
 
         mAppContext = getApplicationContext();
@@ -112,6 +116,11 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+            return;
+        }
+
         mPermissionsGranted = true;
 
         localModel = new LocalModel.Builder()
@@ -126,6 +135,12 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST_CAMERA);
             return;
         }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+            return;
+        }
+
         mPermissionsGranted = true;
     }
 
@@ -171,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
                 showConnectLabel(false);
                 start();
             }else {
-                runWithoutCamera();
+                //runWithoutCamera();
             }
         }
     }
@@ -220,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
-
+/*
     private void runWithoutCamera(){
         Bitmap bitmap = loadBitmapFromAssets();
         if( bitmap.getWidth() == 640 && bitmap.getHeight() == 480 ){
@@ -245,7 +260,6 @@ public class MainActivity extends AppCompatActivity {
                                     if (detectedObjects.size() > 0) {
                                         for (DetectedObject detectedObject : detectedObjects) {
                                             ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth());
-                                            drawBoundingBoxLabel.drawBoundingBoxAndLabel();
                                         }
                                     }
                                 }
@@ -263,6 +277,37 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "WRONG INPUT DIMENSIONS", Toast.LENGTH_SHORT).show();
 
         mySurfaceView.setBitmap(bitmap);
+    }*/
+
+    public void appendLog(String text)
+    {
+        String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/realSense.txt";
+        File logFile = new File(fullPath);
+        if (!logFile.exists())
+        {
+            try
+            {
+                logFile.createNewFile();
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        try
+        {
+            //BufferedWriter for performance, true to set append to file flag
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            buf.append(text);
+            buf.newLine();
+            buf.close();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
 
@@ -311,11 +356,15 @@ public class MainActivity extends AppCompatActivity {
                                                                 graphicOverlay.clear();
                                                                 if (detectedObjects.size() > 0) {
                                                                     for (DetectedObject detectedObject : detectedObjects) {
+                                                                        float deptValue = 0;
+                                                                        try{
+                                                                            deptValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
 
-                                                                        ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth());
+                                                                        }catch (Exception e) {
+                                                                            /** Errore di "x" non valido. - da verificare - **/
+                                                                        }
+                                                                        ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), deptValue);
                                                                         drawBoundingBoxLabel.drawBoundingBoxAndLabel();
-
-
                                                                     }
                                                                 }
                                                             }
@@ -329,9 +378,7 @@ public class MainActivity extends AppCompatActivity {
                                                             }
                                                         });
 
-                                        float deptValue2 = depth.getDistance(depth.getWidth() / 2, depth.getHeight() / 2);
-                                        TextView textView = findViewById(R.id.distanceTextView);
-                                        textView.setText("Distance: " + df.format(deptValue2));
+
                                         /*if (objectsPositions.size() >0) {
                                             Toast.makeText(getApplicationContext(), "CIAO", Toast.LENGTH_LONG).show();
                                             for (Rect rect : objectsPositions) {
