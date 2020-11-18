@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.example.testrealsense.Helper.ObjectGraphics;
 import com.example.testrealsense.Helper.GraphicOverlay;
+import com.example.testrealsense.Helper.TextOverlay;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.mlkit.common.model.LocalModel;
@@ -83,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
     private MySurfaceView mySurfaceView;
 
     GraphicOverlay graphicOverlay;
+    TextView distanceView;
 
     LocalModel localModel;
 
@@ -99,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         graphicOverlay = findViewById(R.id.graphicOverlay);
+
+        distanceView = findViewById(R.id.distanceTextView);
 
         mAppContext = getApplicationContext();
         mBackGroundText = findViewById(R.id.connectCameraText);
@@ -279,38 +283,6 @@ public class MainActivity extends AppCompatActivity {
         mySurfaceView.setBitmap(bitmap);
     }*/
 
-    public void appendLog(String text)
-    {
-        String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/realSense.txt";
-        File logFile = new File(fullPath);
-        if (!logFile.exists())
-        {
-            try
-            {
-                logFile.createNewFile();
-            }
-            catch (IOException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        try
-        {
-            //BufferedWriter for performance, true to set append to file flag
-            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-            buf.append(text);
-            buf.newLine();
-            buf.close();
-        }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-
     Runnable mStreaming = new Runnable() {
         int count = 0;
         final DecimalFormat df = new DecimalFormat("#.##");
@@ -344,8 +316,6 @@ public class MainActivity extends AppCompatActivity {
                                                     .setMaxPerObjectLabelCount(1)
                                                     .build();
                                     if (count % 3 == 0) {
-                                        List<Rect> objectsPositions = new ArrayList<Rect>();
-
                                         ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
                                         objectDetector
                                                 .process(image)
@@ -378,24 +348,12 @@ public class MainActivity extends AppCompatActivity {
                                                             }
                                                         });
 
-
-                                        /*if (objectsPositions.size() >0) {
-                                            Toast.makeText(getApplicationContext(), "CIAO", Toast.LENGTH_LONG).show();
-                                            for (Rect rect : objectsPositions) {
-                                                float scaleX = (float) graphicOverlay.getHeight() / image.getWidth();
-                                                float scaleY = (float) graphicOverlay.getWidth() / image.getHeight();
-                                                float offsetX = rect.width() ;
-                                                float offsetY = rect.height() / 2.1f;
-                                                float pre_left = translateX(rect.centerX(), scaleX, offsetX);
-                                                float pre_top = translateY(rect.centerY(), scaleY, offsetY);
-
-                                                float deptValue = depth.getDistance((int)pre_left, (int)pre_top);
-                                                TextOverlay depthOverlay = new TextOverlay(graphicOverlay, df.format(deptValue), pre_left, pre_top);
-                                                graphicOverlay.add(depthOverlay);
-
-                                            }
-
-                                        }*/
+                                        try {
+                                            float depthValue2 = depth.getDistance(depth.getWidth() / 2, depth.getHeight() / 2);
+                                            distanceView.setText("distance: " + String.valueOf(depthValue2));
+                                        } catch (Exception e) {
+                                            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
                                     }
 
                                     mySurfaceView.setBitmap(realsenseBM);
