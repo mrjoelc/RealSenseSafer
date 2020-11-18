@@ -4,14 +4,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
-    android:orientation="horizontal">
+    android:orientation="vertical">
 
 
-    <SurfaceView
+
+    <ImageView
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
         android:id="@+id/screen_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         />
+
+    <ImageView
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:alpha="0.5"
+        android:id="@+id/screenD_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+
 
 
     <com.example.testrealsense.Helper.GraphicOverlay
@@ -42,26 +55,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:paddingBottom="50dp"
-        android:id="@+id/linearLayout">
-        <TextView
-            android:id="@+id/distanceTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:background="@color/black"
-            android:textSize="20dp"
-            android:textColor="#ffffff"
-            android:text="Distance"
-            android:textAlignment="center"/>
-
-    </androidx.appcompat.widget.LinearLayoutCompat>
-
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:paddingBottom="25dp">
+        android:paddingBottom="25dp"
+        android:orientation="vertical">
         <TextView
             android:id="@+id/labelTextView"
             android:layout_width="match_parent"
@@ -71,6 +66,16 @@
             android:textSize="20dp"
             android:textColor="#ffffff"
             android:text="Label"
+            android:textAlignment="center"/>
+        <TextView
+            android:id="@+id/distanceTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:background="@color/black"
+            android:textSize="20dp"
+            android:textColor="#ffffff"
+            android:text="Distance"
             android:textAlignment="center"/>
 
     </androidx.appcompat.widget.LinearLayoutCompat>

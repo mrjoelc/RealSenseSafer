@@ -22,9 +22,9 @@ public class MySurfaceView implements Runnable, SurfaceHolder.Callback{
     private Bitmap mBitmap;
     private Activity activity;
 
-    public MySurfaceView(Activity activity) {
+    public MySurfaceView(Activity activity, SurfaceView view) {
         this.activity = activity;
-        SurfaceView surfaceView = activity.findViewById(R.id.screen_view);
+        SurfaceView surfaceView = view;
         this.mHolder = surfaceView.getHolder(); // 获得SurfaceHolder对象
         this.mHolder.addCallback(this); // 为SurfaceView添加状态监听
         this.mCanvas = new Canvas();

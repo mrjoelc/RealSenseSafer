@@ -16,6 +16,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -80,8 +81,10 @@ public class MainActivity extends AppCompatActivity {
     private Align mAlign = new Align(StreamType.COLOR);
 
     private Bitmap realsenseBM;
+    private Bitmap realsenseBMD;
 
     private MySurfaceView mySurfaceView;
+    private MySurfaceView mySurfaceViewDepth;
 
     GraphicOverlay graphicOverlay;
     TextView distanceView;
@@ -107,11 +110,16 @@ public class MainActivity extends AppCompatActivity {
         mAppContext = getApplicationContext();
         mBackGroundText = findViewById(R.id.connectCameraText);
 
-        mySurfaceView = new MySurfaceView(this);
+       /* mySurfaceView = new MySurfaceView(this, findViewById(R.id.screen_view));
         mySurfaceView.setAspectRatio(640, 480);
         Bitmap mBitmap = Bitmap.createBitmap(640, 480, Bitmap.Config.ARGB_8888);
         mySurfaceView.setBitmap(mBitmap);
         mySurfaceView.run();
+
+        mySurfaceViewDepth = new MySurfaceView(this, findViewById(R.id.screenD_view));
+        mySurfaceViewDepth.setAspectRatio(640, 480);
+        mySurfaceViewDepth.setBitmap(mBitmap);
+        mySurfaceViewDepth.run();*/
 
         // Android 9 also requires camera permissions
         if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.O &&
@@ -291,12 +299,13 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             try {
                 try (FrameSet frames = mPipeline.waitForFrames()) {
-                    try (FrameSet processed = frames.applyFilter(mAlign)) {
+                    try (FrameSet processed = frames.applyFilter(mAlign)) { // align qua
                         try (Frame depthFrame = processed.first(StreamType.DEPTH)) {
                             try (Frame colorFrame = processed.first(StreamType.COLOR)) {
 
                                 VideoFrame videoFrame = colorFrame.as(Extension.VIDEO_FRAME);
                                 DepthFrame depth = depthFrame.as(Extension.DEPTH_FRAME);
+                                DepthFrame depthColorized = depthFrame.applyFilter(mColorizer).as(Extension.DEPTH_FRAME); // colorizer qua
 
                                 int c_size = videoFrame.getDataSize();
                                 int c_height = videoFrame.getHeight();
@@ -304,7 +313,18 @@ public class MainActivity extends AppCompatActivity {
                                 byte[] c_data = new byte[c_size];
                                 videoFrame.getData(c_data);
 
-                                if (c_data.length != 0) {
+                                int d_size = depthColorized.getDataSize();
+                                int d_height = depthColorized.getHeight();
+                                int d_width = depthColorized.getWidth();
+                                byte[] d_data = new byte[d_size];
+                                depthColorized.getData(d_data);
+
+                                ImageView img1 = findViewById(R.id.screen_view);
+                                ImageView img2 = findViewById(R.id.screenD_view);
+
+                                if (c_data.length != 0 && d_data.length != 0 ) {
+                                    realsenseBMD = rgb2Bitmap(d_data, d_width, d_height);
+                                    //Bitmap realsenseBMD = loadBitmapFromAssets();
                                     realsenseBM = rgb2Bitmap(c_data, c_width, c_height);
                                     InputImage image = InputImage.fromBitmap(realsenseBM, 0);
                                     CustomObjectDetectorOptions customObjectDetectorOptions =
@@ -326,14 +346,13 @@ public class MainActivity extends AppCompatActivity {
                                                                 graphicOverlay.clear();
                                                                 if (detectedObjects.size() > 0) {
                                                                     for (DetectedObject detectedObject : detectedObjects) {
-                                                                        float deptValue = 0;
-                                                                        try{
-                                                                            deptValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
+                                                                        float depthValue = 0;
+                                                                        try  {
+                                                                            depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
 
                                                                         }catch (Exception e) {
-                                                                            /** Errore di "x" non valido. - da verificare - **/
                                                                         }
-                                                                        ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), deptValue);
+                                                                        ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue);
                                                                         drawBoundingBoxLabel.drawBoundingBoxAndLabel();
                                                                     }
                                                                 }
@@ -356,7 +375,11 @@ public class MainActivity extends AppCompatActivity {
                                         }
                                     }
 
-                                    mySurfaceView.setBitmap(realsenseBM);
+                                    //mySurfaceView.setBitmap(realsenseBM);
+                                    //mySurfaceViewDepth.setBitmap(realsenseBMD);
+
+                                    img1.setImageBitmap(realsenseBM);
+                                    img2.setImageBitmap(realsenseBMD);
                                     count++;
                                 }
                             }
