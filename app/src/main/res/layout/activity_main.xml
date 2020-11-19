@@ -16,14 +16,14 @@
         android:layout_height="wrap_content"
         />
 
-    <ImageView
+<!--    <ImageView
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
         android:alpha="0.5"
         android:id="@+id/screenD_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        />
+        />-->
 
 
 

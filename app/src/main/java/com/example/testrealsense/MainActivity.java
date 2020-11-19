@@ -59,11 +59,28 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+interface Callback {
+
+    void myResponseCallback(List<DetectedObject> detectedObjects);
+
+
+}
+/*
+class CallbackImpl implements Callback {
+    @Override
+    public void myResponseCallback(List<DetectedObject> detectedObjects) {
+
+    }
+}*/
+
+
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "librs capture example";
     private static final int PERMISSIONS_REQUEST_CAMERA = 0;
 
     private boolean mPermissionsGranted = false;
+    //MyCallBack callBack;
 
     private Context mAppContext;
     private TextView mBackGroundText;
@@ -91,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
 
     LocalModel localModel;
 
+    ImageView img1;
 /*
     long currentTime;
     long previousTime;
@@ -102,6 +120,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        img1 = findViewById(R.id.screen_view);
 
         graphicOverlay = findViewById(R.id.graphicOverlay);
 
@@ -225,14 +245,6 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private float translateX(float x, float scaleX, float offsetX) {
-        return (x * scaleX) - offsetX;
-    };
-
-    private float translateY(float y, float scaleY, float offsetY) {
-        return (y * scaleY) - offsetY;
-    };
-
     private Bitmap loadBitmapFromAssets() {
         showConnectLabel(false);
         InputStream bitmap = null;
@@ -291,6 +303,10 @@ public class MainActivity extends AppCompatActivity {
         mySurfaceView.setBitmap(bitmap);
     }*/
 
+    public void getDepth(final Callback callBack) {
+    }
+
+
     Runnable mStreaming = new Runnable() {
         int count = 0;
         final DecimalFormat df = new DecimalFormat("#.##");
@@ -305,7 +321,10 @@ public class MainActivity extends AppCompatActivity {
 
                                 VideoFrame videoFrame = colorFrame.as(Extension.VIDEO_FRAME);
                                 DepthFrame depth = depthFrame.as(Extension.DEPTH_FRAME);
-                                DepthFrame depthColorized = depthFrame.applyFilter(mColorizer).as(Extension.DEPTH_FRAME); // colorizer qua
+                                DepthFrame depthColorized = depthFrame.as(Extension.DEPTH_FRAME); // colorizer qua
+
+                                /** CALLBACK **/
+                                //callback.myResponseCallback(depth);
 
                                 int c_size = videoFrame.getDataSize();
                                 int c_height = videoFrame.getHeight();
@@ -313,17 +332,15 @@ public class MainActivity extends AppCompatActivity {
                                 byte[] c_data = new byte[c_size];
                                 videoFrame.getData(c_data);
 
-                                int d_size = depthColorized.getDataSize();
+                                /*int d_size = depthColorized.getDataSize();
                                 int d_height = depthColorized.getHeight();
                                 int d_width = depthColorized.getWidth();
                                 byte[] d_data = new byte[d_size];
-                                depthColorized.getData(d_data);
+                                depthColorized.getData(d_data);*/
+                                //ImageView img2 = findViewById(R.id.screenD_view);
 
-                                ImageView img1 = findViewById(R.id.screen_view);
-                                ImageView img2 = findViewById(R.id.screenD_view);
 
-                                if (c_data.length != 0 && d_data.length != 0 ) {
-                                    realsenseBMD = rgb2Bitmap(d_data, d_width, d_height);
+                                if (c_data.length != 0 ) {
                                     //Bitmap realsenseBMD = loadBitmapFromAssets();
                                     realsenseBM = rgb2Bitmap(c_data, c_width, c_height);
                                     InputImage image = InputImage.fromBitmap(realsenseBM, 0);
@@ -335,7 +352,27 @@ public class MainActivity extends AppCompatActivity {
                                                     .setClassificationConfidenceThreshold(0.5f)
                                                     .setMaxPerObjectLabelCount(1)
                                                     .build();
+
+
+
+                                    Callback callback = new Callback() {
+                                        @Override
+                                        public void myResponseCallback(List<DetectedObject> detectedObjects) {
+                                            float depthValue = 0;
+                                            for (DetectedObject detectedObject : detectedObjects) {
+                                                try  {
+                                                    depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
+
+                                                }catch (Exception e) {
+                                                }
+                                                ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue);
+                                                drawBoundingBoxLabel.drawBoundingBoxAndLabel();
+                                            }
+                                        }
+                                    };
+
                                     if (count % 3 == 0) {
+
                                         ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
                                         objectDetector
                                                 .process(image)
@@ -345,7 +382,9 @@ public class MainActivity extends AppCompatActivity {
                                                             public void onSuccess(List<DetectedObject> detectedObjects) {
                                                                 graphicOverlay.clear();
                                                                 if (detectedObjects.size() > 0) {
-                                                                    for (DetectedObject detectedObject : detectedObjects) {
+
+                                                                    callback.myResponseCallback(detectedObjects);
+                                                                    /*for (DetectedObject detectedObject : detectedObjects) {
                                                                         float depthValue = 0;
                                                                         try  {
                                                                             depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
@@ -354,7 +393,7 @@ public class MainActivity extends AppCompatActivity {
                                                                         }
                                                                         ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue);
                                                                         drawBoundingBoxLabel.drawBoundingBoxAndLabel();
-                                                                    }
+                                                                    }*/
                                                                 }
                                                             }
                                                         })
@@ -370,16 +409,27 @@ public class MainActivity extends AppCompatActivity {
                                         try {
                                             float depthValue2 = depth.getDistance(depth.getWidth() / 2, depth.getHeight() / 2);
                                             distanceView.setText("distance: " + String.valueOf(depthValue2));
+
                                         } catch (Exception e) {
                                             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                                         }
+
+                                        //getDepth(callback);
+
+                                        /*if (depth.getDataSize() != 0) {
+                                            Toast.makeText(getApplicationContext(), depth.getDataSize(), Toast.LENGTH_SHORT).show();
+                                        }
+                                        else {
+                                            Toast.makeText(getApplicationContext(), "null", Toast.LENGTH_SHORT).show();
+                                        }*/
+
                                     }
 
                                     //mySurfaceView.setBitmap(realsenseBM);
                                     //mySurfaceViewDepth.setBitmap(realsenseBMD);
 
                                     img1.setImageBitmap(realsenseBM);
-                                    img2.setImageBitmap(realsenseBMD);
+                                    //img2.setImageBitmap(realsenseBMD);
                                     count++;
                                 }
                             }
