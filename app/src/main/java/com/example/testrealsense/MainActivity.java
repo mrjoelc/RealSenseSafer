@@ -23,7 +23,7 @@ import android.widget.Toast;
 
 import com.example.testrealsense.Helper.ObjectGraphics;
 import com.example.testrealsense.Helper.GraphicOverlay;
-import com.example.testrealsense.Helper.TextOverlay;
+import com.example.testrealsense.Helper.*;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.mlkit.common.model.LocalModel;
@@ -121,6 +121,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        WriteLogcat log = new WriteLogcat();
+
         img1 = findViewById(R.id.screen_view);
 
         graphicOverlay = findViewById(R.id.graphicOverlay);
@@ -159,7 +161,11 @@ public class MainActivity extends AppCompatActivity {
                         .setAssetFilePath("model.tflite")
                         .build();
 
+
+
     }
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
@@ -218,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
                 showConnectLabel(false);
                 start();
             }else {
-                //runWithoutCamera();
+                runWithoutCamera();
             }
         }
     }
@@ -245,11 +251,11 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private Bitmap loadBitmapFromAssets() {
+    private Bitmap loadBitmapFromAssets(String path) {
         showConnectLabel(false);
         InputStream bitmap = null;
         try {
-            bitmap=getAssets().open("multi2.jpg");
+            bitmap=getAssets().open(path);
             Bitmap bit= BitmapFactory.decodeStream(bitmap);
             return bit;
         } catch (IOException e1) {
@@ -259,9 +265,10 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
-/*
+
     private void runWithoutCamera(){
-        Bitmap bitmap = loadBitmapFromAssets();
+        Bitmap bitmap = loadBitmapFromAssets("multi2.jpg");
+
         if( bitmap.getWidth() == 640 && bitmap.getHeight() == 480 ){
             Toast.makeText(this, "bitmap with right dimensions: " + bitmap.getWidth() + "x" + bitmap.getHeight(), Toast.LENGTH_SHORT).show();
             InputImage image = InputImage.fromBitmap(bitmap, 0);
@@ -282,8 +289,9 @@ public class MainActivity extends AppCompatActivity {
                                 public void onSuccess(List<DetectedObject> detectedObjects) {
                                     graphicOverlay.clear();
                                     if (detectedObjects.size() > 0) {
+
                                         for (DetectedObject detectedObject : detectedObjects) {
-                                            ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth());
+                                            ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(),0);
                                         }
                                     }
                                 }
@@ -300,8 +308,9 @@ public class MainActivity extends AppCompatActivity {
         }else
             Toast.makeText(this, "WRONG INPUT DIMENSIONS", Toast.LENGTH_SHORT).show();
 
-        mySurfaceView.setBitmap(bitmap);
-    }*/
+        //mySurfaceView.setBitmap(bitmap);
+        img1.setImageBitmap(bitmap);
+    }
 
     public void getDepth(final Callback callBack) {
     }
