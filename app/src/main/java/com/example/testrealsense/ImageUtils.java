@@ -32,9 +32,6 @@ public class ImageUtils {
         }
     }
 
-    /**
-     * @方法描述 将RGB字节数组转换成Bitmap，
-     */
     public static Bitmap rgb2Bitmap(byte[] data, int width, int height) {
         int[] colors = convertByteToColor(data);    //取RGB值转换为int数组
         if (colors == null) {
@@ -46,8 +43,6 @@ public class ImageUtils {
         return bmp;
     }
 
-    // 将一个byte数转成int
-    // 实现这个函数的目的是为了将byte数当成无符号的变量去转化成int
     public static int convertByteToInt(byte data) {
 
         int heightBit = (int) ((data >> 4) & 0x0F);
@@ -55,7 +50,7 @@ public class ImageUtils {
         return heightBit * 16 + lowBit;
     }
 
-    // 将纯RGB数据数组转化成int像素数组
+
     public static int[] convertByteToColor(byte[] data) {
         int size = data.length;
         if (size == 0) {
@@ -67,8 +62,6 @@ public class ImageUtils {
             arg = 1;
         }
 
-        // 一般RGB字节数组的长度应该是3的倍数，
-        // 不排除有特殊情况，多余的RGB数据用黑色0XFF000000填充
         int[] color = new int[size / 3 + arg];
         int red, green, blue;
         int colorLen = color.length;

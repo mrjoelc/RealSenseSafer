@@ -33,7 +33,7 @@ public class ObjectGraphics {
     }
 
     public void drawBoundingBoxAndLabel(){
-        System.out.println("scaleFactor: " + scaleFactor);
+        //System.out.println("scaleFactor: " + scaleFactor);
         float left = detectedObject.getBoundingBox().right * scaleFactor ;
         float top = detectedObject.getBoundingBox().top * scaleFactor;
         float right = detectedObject.getBoundingBox().left * scaleFactor;
