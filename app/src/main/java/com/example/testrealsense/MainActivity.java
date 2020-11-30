@@ -53,7 +53,7 @@ import java.util.Calendar;
 import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements  OnSuccessListener<List<DetectedObject>> {
     private static final String TAG = "librs capture example";
     private static final int PERMISSIONS_REQUEST_CAMERA = 0;
 
@@ -263,6 +263,25 @@ public class MainActivity extends AppCompatActivity {
         img1.setImageBitmap(bitmap);
     }
 
+    @Override
+    public void onSuccess(List<DetectedObject> detectedObjects) {
+        /*graphicOverlay.clear();
+        if (detectedObjects.size() > 0) {
+            System.out.println("Depth Listener: " + depth.getDataSize());
+            for (DetectedObject detectedObject : detectedObjects) {
+                float depthValue = 0;
+                try  {
+                    depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
+
+                }catch (Exception e) {
+                }
+                ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue);
+                drawBoundingBoxLabel.drawBoundingBoxAndLabel();
+            }
+            //printFPS();
+        }*/
+    }
+
     Runnable mStreaming = new Runnable() {
         int count = 0;
         final DecimalFormat df = new DecimalFormat("#.##");
@@ -281,6 +300,8 @@ public class MainActivity extends AppCompatActivity {
             previousTime = currentTime;
             fps.setText("FPS detection: " + String.valueOf(aproxFps));
         }
+
+
 
 
         @Override
@@ -320,34 +341,13 @@ public class MainActivity extends AppCompatActivity {
                                                     .setMaxPerObjectLabelCount(1)
                                                     .build();
 
-
                                     if (count % 2 == 0) {
                                         DepthFrame depth = depthFrame.as(Extension.DEPTH_FRAME);
                                         System.out.println("Depth: " +depth.getDataSize());
                                         ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
                                         objectDetector
                                                 .process(image)
-                                                .addOnSuccessListener(
-                                                        new OnSuccessListener<List<DetectedObject>>() {
-                                                            @Override
-                                                            public void onSuccess(List<DetectedObject> detectedObjects) {
-                                                                graphicOverlay.clear();
-                                                                if (detectedObjects.size() > 0) {
-                                                                    System.out.println("Depth Listener: " + depth.getDataSize());
-                                                                    for (DetectedObject detectedObject : detectedObjects) {
-                                                                        float depthValue = 0;
-                                                                        try  {
-                                                                            depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
-
-                                                                        }catch (Exception e) {
-                                                                        }
-                                                                        ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue);
-                                                                        drawBoundingBoxLabel.drawBoundingBoxAndLabel();
-                                                                    }
-                                                                    printFPS();
-                                                                }
-                                                            }
-                                                        })
+                                                .addOnSuccessListener(MainActivity.this::onSuccess)
                                                 .addOnFailureListener(
                                                         new OnFailureListener() {
                                                             @Override
