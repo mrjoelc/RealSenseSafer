@@ -1,11 +1,14 @@
 package com.example.testrealsense;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class ImageUtils {
 
@@ -31,6 +34,19 @@ public class ImageUtils {
             Log.e("Bitmap", "Save Bitmap Excetion!");
         }
     }
+
+    /*private Bitmap loadBitmapFromAssets(String path) {
+        InputStream bitmap = null;
+        try {
+            bitmap=getAssets().open(path);
+            Bitmap bit= BitmapFactory.decodeStream(bitmap);
+            return bit;
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        return null;
+    }*/
 
     public static Bitmap rgb2Bitmap(byte[] data, int width, int height) {
         int[] colors = convertByteToColor(data);    //取RGB值转换为int数组
