@@ -1,17 +1,17 @@
 package com.example.testrealsense;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.testrealsense.Helper.GraphicOverlay;
 import com.example.testrealsense.Helper.ObjectGraphics;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.mlkit.common.model.LocalModel;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.objects.DetectedObject;
@@ -22,8 +22,6 @@ import com.intel.realsense.librealsense.Align;
 import com.intel.realsense.librealsense.Colorizer;
 import com.intel.realsense.librealsense.Config;
 import com.intel.realsense.librealsense.DepthFrame;
-import com.intel.realsense.librealsense.DeviceList;
-import com.intel.realsense.librealsense.DeviceListener;
 import com.intel.realsense.librealsense.Extension;
 import com.intel.realsense.librealsense.Frame;
 import com.intel.realsense.librealsense.FrameSet;
@@ -40,6 +38,9 @@ import java.util.List;
 import androidx.annotation.NonNull;
 
 import static com.example.testrealsense.ImageUtils.rgb2Bitmap;
+
+
+
 
 public class MyRunnable extends Thread implements OnSuccessListener<List<DetectedObject>> {
     private static final String TAG = "librs capture example";
@@ -60,9 +61,9 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
     private ImageView img1;
     InputImage image;
     DepthFrame depth;
+    Frame prova;
 
     private TextView distanceView;
-
     GraphicOverlay graphicOverlay;
     TextView fps;
 
@@ -71,13 +72,21 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
     long deltaTime = 0;
     long aproxFps = 0;
 
-
-
+    CustomObjectDetectorOptions customObjectDetectorOptions;
 
     public MyRunnable(ImageView img1, GraphicOverlay graphicOverlay, TextView distanceView, TextView fps ){
         localModel = new LocalModel.Builder()
                 .setAssetFilePath("lite-model_object_detection_mobile_object_labeler_v1_1.tflite")
                 .build();
+        customObjectDetectorOptions =
+                new CustomObjectDetectorOptions.Builder(localModel)
+                        .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
+                        .enableMultipleObjects()
+                        .enableClassification()
+                        .setClassificationConfidenceThreshold(0.5f)
+                        .setMaxPerObjectLabelCount(1)
+                        .build();
+
         this.img1 = img1;
         this.graphicOverlay = graphicOverlay;
         this.distanceView = distanceView;
@@ -86,8 +95,6 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
         mPipeline = new Pipeline();
         mColorizer = new Colorizer();
     }
-
-
 
     @Override
     public void onSuccess(List<DetectedObject> detectedObjects) {
@@ -104,8 +111,10 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
                 ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue);
                 drawBoundingBoxLabel.drawBoundingBoxAndLabel();
             }
+            //System.out.println("PROVA: " + prova + " DEPTH: " + depth);
             printFPS();
         }
+        prova.close();
     }
 
     @Override
@@ -116,6 +125,8 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
                 try (FrameSet processed = frames.applyFilter(mAlign)) { // align qua
                     try (Frame depthFrame = processed.first(StreamType.DEPTH)) {
                         try (Frame colorFrame = processed.first(StreamType.COLOR)) {
+                            //depth = depthFrame.as(Extension.DEPTH_FRAME);
+                            //prova = (DepthFrame) depth.clone().as(Extension.DEPTH_FRAME);
 
                             VideoFrame videoFrame = colorFrame.as(Extension.VIDEO_FRAME);
 
@@ -136,18 +147,11 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
                                 //Bitmap realsenseBMD = loadBitmapFromAssets();
                                 realsenseBM = rgb2Bitmap(c_data, c_width, c_height);
                                 image = InputImage.fromBitmap(realsenseBM, 0);
-                                CustomObjectDetectorOptions customObjectDetectorOptions =
-                                        new CustomObjectDetectorOptions.Builder(localModel)
-                                                .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
-                                                .enableMultipleObjects()
-                                                .enableClassification()
-                                                .setClassificationConfidenceThreshold(0.5f)
-                                                .setMaxPerObjectLabelCount(1)
-                                                .build();
 
-                                if (count % 2 == 0) {
-                                    depth = depthFrame.as(Extension.DEPTH_FRAME);
-                                    System.out.println("Depth: " +depth.getDataSize());
+                                if (count % 3 == 0) {
+                                    prova = depthFrame.clone();
+                                    depth = prova.as(Extension.DEPTH_FRAME);
+                                    System.out.println("Depth: " + prova.getDataSize());
                                     ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
                                     objectDetector
                                             .process(image)
@@ -156,9 +160,11 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
                                                     new OnFailureListener() {
                                                         @Override
                                                         public void onFailure(@NonNull Exception e) {
-                                                            System.out.println(e.getMessage());
+                                                            System.out.println("ON FAILURE "+ e.getMessage());
+                                                            prova.close();
                                                         }
                                                     });
+
 
                                     try {
                                         float depthValue2 = depth.getDistance(depth.getWidth() / 2, depth.getHeight() / 2);
@@ -167,7 +173,6 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
                                     } catch (Exception e) {
                                         //Toast.makeText(, e.getMessage(), Toast.LENGTH_SHORT).show();
                                     }
-
 
                                 }
                                 img1.setImageBitmap(realsenseBM);

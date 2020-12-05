@@ -126,8 +126,9 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onResume() {
         super.onResume();
-        if(mPermissionsGranted)
+        if(mPermissionsGranted) {
             init();
+        }
         else
             Log.e(TAG, "missing permissions");
     }
@@ -158,6 +159,8 @@ public class MainActivity extends AppCompatActivity{
             }
         }
     }
+
+
 
     private void showConnectLabel(final boolean state){
         runOnUiThread(new Runnable() {
