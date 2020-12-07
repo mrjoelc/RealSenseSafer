@@ -61,7 +61,7 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
     private ImageView img1;
     InputImage image;
     DepthFrame depth;
-    Frame prova;
+    Frame depthFrame_clone;
 
     private TextView distanceView;
     GraphicOverlay graphicOverlay;
@@ -114,7 +114,7 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
             //System.out.println("PROVA: " + prova + " DEPTH: " + depth);
             printFPS();
         }
-        prova.close();
+        depthFrame_clone.close();
     }
 
     @Override
@@ -149,9 +149,11 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
                                 image = InputImage.fromBitmap(realsenseBM, 0);
 
                                 if (count % 3 == 0) {
-                                    prova = depthFrame.clone();
-                                    depth = prova.as(Extension.DEPTH_FRAME);
-                                    System.out.println("Depth: " + prova.getDataSize());
+                                    depthFrame_clone = depthFrame.clone();
+                                    depth = depthFrame_clone.as(Extension.DEPTH_FRAME);
+
+
+                                    System.out.println("Depth: " + depthFrame_clone.getDataSize());
                                     ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
                                     objectDetector
                                             .process(image)
@@ -161,10 +163,9 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
                                                         @Override
                                                         public void onFailure(@NonNull Exception e) {
                                                             System.out.println("ON FAILURE "+ e.getMessage());
-                                                            prova.close();
+                                                            depthFrame_clone.close();
                                                         }
                                                     });
-
 
                                     try {
                                         float depthValue2 = depth.getDistance(depth.getWidth() / 2, depth.getHeight() / 2);
