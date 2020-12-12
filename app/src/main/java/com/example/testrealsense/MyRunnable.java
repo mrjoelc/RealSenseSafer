@@ -39,7 +39,21 @@ import androidx.annotation.NonNull;
 
 import static com.example.testrealsense.ImageUtils.rgb2Bitmap;
 
+class DepthHandle {
+    DepthFrame depth;
 
+    DepthHandle(Frame depthFrame) {
+        depth = depthFrame.as(Extension.DEPTH_FRAME);
+    }
+
+    public float getDistance (int x, int y) {
+        return depth.getDistance(x, y);
+    }
+
+    public void close() {
+        depth.close();
+    }
+}
 
 
 public class MyRunnable extends Thread implements OnSuccessListener<List<DetectedObject>> {
@@ -60,17 +74,22 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
     private Bitmap realsenseBM;
     private ImageView img1;
     InputImage image;
-    DepthFrame depth;
+    //DepthFrame depth;
     Frame depthFrame_clone;
 
     private TextView distanceView;
     GraphicOverlay graphicOverlay;
     TextView fps;
 
+    //DepthHandle depth;
+    DepthFrame depth;
+
     long currentTime;
     long previousTime = 0;
     long deltaTime = 0;
     long aproxFps = 0;
+
+    private Object mutex = new Object();
 
     CustomObjectDetectorOptions customObjectDetectorOptions;
 
@@ -100,7 +119,7 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
     public void onSuccess(List<DetectedObject> detectedObjects) {
         graphicOverlay.clear();
         if (detectedObjects.size() > 0) {
-            System.out.println("Depth Listener: " + depth.getDataSize());
+            //System.out.println("Depth Listener: " + depth.getDataSize());
             for (DetectedObject detectedObject : detectedObjects) {
                 float depthValue = 0;
                 try  {
@@ -113,8 +132,8 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
             }
             //System.out.println("PROVA: " + prova + " DEPTH: " + depth);
             printFPS();
+            depth.close();
         }
-        depthFrame_clone.close();
     }
 
     @Override
@@ -123,7 +142,7 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
         try {
             try (FrameSet frames = mPipeline.waitForFrames()) {
                 try (FrameSet processed = frames.applyFilter(mAlign)) { // align qua
-                    try (Frame depthFrame = processed.first(StreamType.DEPTH)) {
+                    try ( Frame depthFrame = processed.first(StreamType.DEPTH)) {
                         try (Frame colorFrame = processed.first(StreamType.COLOR)) {
                             //depth = depthFrame.as(Extension.DEPTH_FRAME);
                             //prova = (DepthFrame) depth.clone().as(Extension.DEPTH_FRAME);
@@ -148,12 +167,15 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
                                 realsenseBM = rgb2Bitmap(c_data, c_width, c_height);
                                 image = InputImage.fromBitmap(realsenseBM, 0);
 
-                                if (count % 3 == 0) {
-                                    depthFrame_clone = depthFrame.clone();
-                                    depth = depthFrame_clone.as(Extension.DEPTH_FRAME);
+                                synchronized (mutex) {
+                                    if (count % 3 == 0) {
+                                    //depthFrame_clone = depthFrame.clone();
+                                    depth = depthFrame.clone().as(Extension.DEPTH_FRAME);
 
+                                    //depth = depthFrame.clone().as(Extension.DEPTH_FRAME);
+                                    //depth.close();
 
-                                    System.out.println("Depth: " + depthFrame_clone.getDataSize());
+                                    //System.out.println("Depth: " + depth.getDataSize());
                                     ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
                                     objectDetector
                                             .process(image)
@@ -162,19 +184,19 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
                                                     new OnFailureListener() {
                                                         @Override
                                                         public void onFailure(@NonNull Exception e) {
-                                                            System.out.println("ON FAILURE "+ e.getMessage());
-                                                            depthFrame_clone.close();
+                                                            System.out.println("ON FAILURE " + e.getMessage());
                                                         }
                                                     });
 
                                     try {
-                                        float depthValue2 = depth.getDistance(depth.getWidth() / 2, depth.getHeight() / 2);
-                                        distanceView.setText("distance from center: " + String.valueOf(depthValue2));
+                                        //float depthValue2 = depth.getDistance(depth.getWidth() / 2, depth.getHeight() / 2);
+                                        //distanceView.setText("distance from center: " + String.valueOf(depthValue2));
 
                                     } catch (Exception e) {
                                         //Toast.makeText(, e.getMessage(), Toast.LENGTH_SHORT).show();
                                     }
 
+                                    }
                                 }
                                 img1.setImageBitmap(realsenseBM);
                                 //img2.setImageBitmap(realsenseBMD);
