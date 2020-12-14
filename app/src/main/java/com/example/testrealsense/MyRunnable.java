@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.testrealsense.Helper.GraphicOverlay;
 import com.example.testrealsense.Helper.ObjectGraphics;
@@ -39,15 +40,37 @@ import androidx.annotation.NonNull;
 
 import static com.example.testrealsense.ImageUtils.rgb2Bitmap;
 
-class DepthHandle {
+class DepthHandle{
     DepthFrame depth;
 
-    DepthHandle(Frame depthFrame) {
-        depth = depthFrame.as(Extension.DEPTH_FRAME);
+    // Create monitor
+    volatile Object lock = new Object();
+    // Create signal for resource sharing
+    volatile Boolean readyToPrint = false;
+
+
+    public DepthHandle(Frame depthFrame) {
+        synchronized(lock) {
+            depth = depthFrame.as(Extension.DEPTH_FRAME);
+            System.out.println("insideLock DepthDataSize: " + depth.getDataSize());
+            readyToPrint=true;
+            //depthFrame.close();
+            lock.notify();
+        }
     }
 
-    public float getDistance (int x, int y) {
-        return depth.getDistance(x, y);
+    // Waits for a wordToPrint to be set
+    public float getDistance(int x, int y) throws InterruptedException {
+        synchronized(lock) {
+            while(!readyToPrint) {
+                lock.wait();
+            }
+            System.out.println("The DepthSize" + depth.getDistance(x, y));
+            readyToPrint=false;
+            float depthDistance = depth.getDistance(x, y);
+            //depth.close();
+            return depthDistance;
+        }
     }
 
     public void close() {
@@ -81,8 +104,13 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
     GraphicOverlay graphicOverlay;
     TextView fps;
 
-    //DepthHandle depth;
+    DepthHandle dh;
     DepthFrame depth;
+
+    // Create monitor
+    volatile Object lock = new Object();
+    // Create signal for resource sharing
+    volatile Boolean ready = true;
 
     long currentTime;
     long previousTime = 0;
@@ -120,19 +148,35 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
         graphicOverlay.clear();
         if (detectedObjects.size() > 0) {
             //System.out.println("Depth Listener: " + depth.getDataSize());
-            for (DetectedObject detectedObject : detectedObjects) {
-                float depthValue = 0;
-                try  {
-                    depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
 
-                }catch (Exception e) {
+            synchronized(lock) {
+                while(ready) {
+                    try {
+                        lock.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-                ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue);
-                drawBoundingBoxLabel.drawBoundingBoxAndLabel();
+                for (DetectedObject detectedObject : detectedObjects) {
+                    float depthValue = 0;
+                    //depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
+                    try {
+                        System.out.println("insideListener DepthDataSize: " + depth.getDataSize());
+                        depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
+                    } catch (Exception e) {
+
+                    }
+
+                    ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue);
+                    drawBoundingBoxLabel.drawBoundingBoxAndLabel();
+                }
+                ready=true;
+                depth.close();
+                lock.notify();
+
             }
             //System.out.println("PROVA: " + prova + " DEPTH: " + depth);
             printFPS();
-            depth.close();
         }
     }
 
@@ -167,37 +211,40 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
                                 realsenseBM = rgb2Bitmap(c_data, c_width, c_height);
                                 image = InputImage.fromBitmap(realsenseBM, 0);
 
-                                synchronized (mutex) {
-                                    if (count % 3 == 0) {
-                                    //depthFrame_clone = depthFrame.clone();
-                                    depth = depthFrame.clone().as(Extension.DEPTH_FRAME);
+                                depth = depthFrame.as(Extension.DEPTH_FRAME);
+                                System.out.println("insideLock DepthDataSize: " + depth.getDataSize());
 
-                                    //depth = depthFrame.clone().as(Extension.DEPTH_FRAME);
-                                    //depth.close();
+                                //System.out.println("Depth: " + depth.getDataSize());
+                                ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
 
-                                    //System.out.println("Depth: " + depth.getDataSize());
-                                    ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
-                                    objectDetector
-                                            .process(image)
-                                            .addOnSuccessListener(this)
-                                            .addOnFailureListener(
-                                                    new OnFailureListener() {
-                                                        @Override
-                                                        public void onFailure(@NonNull Exception e) {
-                                                            System.out.println("ON FAILURE " + e.getMessage());
-                                                        }
-                                                    });
+                                Task<List<DetectedObject>> task = objectDetector.process(image);
 
-                                    try {
-                                        //float depthValue2 = depth.getDistance(depth.getWidth() / 2, depth.getHeight() / 2);
-                                        //distanceView.setText("distance from center: " + String.valueOf(depthValue2));
+                                synchronized(lock) {
+                                    while (!task.isComplete()) {
+                                        System.out.println("detection...");
+                                    }
+                                    graphicOverlay.clear();
+                                    List<DetectedObject> detectedObjects = task.getResult();
+                                    for (DetectedObject detectedObject : detectedObjects) {
+                                        float depthValue = 0;
+                                        depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
 
-                                    } catch (Exception e) {
-                                        //Toast.makeText(, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                        ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue);
+                                        drawBoundingBoxLabel.drawBoundingBoxAndLabel();
                                     }
 
-                                    }
+                                    printFPS();
                                 }
+
+                                /*
+                                try {
+                                    float depthValue2 = depth.getDistance(depth.getWidth() / 2, depth.getHeight() / 2);
+                                    distanceView.setText("distance from center: " + String.valueOf(depthValue2));
+
+                                } catch (Exception e) {
+                                    //Toast.makeText(, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }*/
+
                                 img1.setImageBitmap(realsenseBM);
                                 //img2.setImageBitmap(realsenseBMD);
                                 count++;
