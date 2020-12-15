@@ -40,46 +40,7 @@ import androidx.annotation.NonNull;
 
 import static com.example.testrealsense.ImageUtils.rgb2Bitmap;
 
-class DepthHandle{
-    DepthFrame depth;
-
-    // Create monitor
-    volatile Object lock = new Object();
-    // Create signal for resource sharing
-    volatile Boolean readyToPrint = false;
-
-
-    public DepthHandle(Frame depthFrame) {
-        synchronized(lock) {
-            depth = depthFrame.as(Extension.DEPTH_FRAME);
-            System.out.println("insideLock DepthDataSize: " + depth.getDataSize());
-            readyToPrint=true;
-            //depthFrame.close();
-            lock.notify();
-        }
-    }
-
-    // Waits for a wordToPrint to be set
-    public float getDistance(int x, int y) throws InterruptedException {
-        synchronized(lock) {
-            while(!readyToPrint) {
-                lock.wait();
-            }
-            System.out.println("The DepthSize" + depth.getDistance(x, y));
-            readyToPrint=false;
-            float depthDistance = depth.getDistance(x, y);
-            //depth.close();
-            return depthDistance;
-        }
-    }
-
-    public void close() {
-        depth.close();
-    }
-}
-
-
-public class MyRunnable extends Thread implements OnSuccessListener<List<DetectedObject>> {
+public class MyRunnable extends Thread{
     private static final String TAG = "librs capture example";
     private int count = 0;
     private final DecimalFormat df = new DecimalFormat("#.##");
@@ -93,31 +54,35 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
     private Align mAlign = new Align(StreamType.COLOR);
 
     private LocalModel localModel;
+    ObjectDetector objectDetector;
 
     private Bitmap realsenseBM;
     private ImageView img1;
     InputImage image;
-    //DepthFrame depth;
-    Frame depthFrame_clone;
 
     private TextView distanceView;
     GraphicOverlay graphicOverlay;
+    ObjectGraphics drawBoundingBoxLabel;
     TextView fps;
 
-    DepthHandle dh;
     DepthFrame depth;
+    float depthValue;
+    VideoFrame videoFrame;
+
+    int c_size;
+    int c_height;
+    int c_width;
+    byte[] c_data;
+
+
 
     // Create monitor
     volatile Object lock = new Object();
-    // Create signal for resource sharing
-    volatile Boolean ready = true;
 
     long currentTime;
     long previousTime = 0;
     long deltaTime = 0;
     long aproxFps = 0;
-
-    private Object mutex = new Object();
 
     CustomObjectDetectorOptions customObjectDetectorOptions;
 
@@ -144,43 +109,6 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
     }
 
     @Override
-    public void onSuccess(List<DetectedObject> detectedObjects) {
-        graphicOverlay.clear();
-        if (detectedObjects.size() > 0) {
-            //System.out.println("Depth Listener: " + depth.getDataSize());
-
-            synchronized(lock) {
-                while(ready) {
-                    try {
-                        lock.wait();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                for (DetectedObject detectedObject : detectedObjects) {
-                    float depthValue = 0;
-                    //depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
-                    try {
-                        System.out.println("insideListener DepthDataSize: " + depth.getDataSize());
-                        depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
-                    } catch (Exception e) {
-
-                    }
-
-                    ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue);
-                    drawBoundingBoxLabel.drawBoundingBoxAndLabel();
-                }
-                ready=true;
-                depth.close();
-                lock.notify();
-
-            }
-            //System.out.println("PROVA: " + prova + " DEPTH: " + depth);
-            printFPS();
-        }
-    }
-
-    @Override
     public void run() {
         super.run();
         try {
@@ -188,23 +116,15 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
                 try (FrameSet processed = frames.applyFilter(mAlign)) { // align qua
                     try ( Frame depthFrame = processed.first(StreamType.DEPTH)) {
                         try (Frame colorFrame = processed.first(StreamType.COLOR)) {
-                            //depth = depthFrame.as(Extension.DEPTH_FRAME);
-                            //prova = (DepthFrame) depth.clone().as(Extension.DEPTH_FRAME);
 
-                            VideoFrame videoFrame = colorFrame.as(Extension.VIDEO_FRAME);
+                            videoFrame = colorFrame.as(Extension.VIDEO_FRAME);
 
-                            int c_size = videoFrame.getDataSize();
-                            int c_height = videoFrame.getHeight();
-                            int c_width = videoFrame.getWidth();
-                            byte[] c_data = new byte[c_size];
+                            c_size = videoFrame.getDataSize();
+                            c_height = videoFrame.getHeight();
+                            c_width = videoFrame.getWidth();
+                            c_data = new byte[c_size];
                             videoFrame.getData(c_data);
 
-                                /*int d_size = depthColorized.getDataSize();
-                                int d_height = depthColorized.getHeight();
-                                int d_width = depthColorized.getWidth();
-                                byte[] d_data = new byte[d_size];
-                                depthColorized.getData(d_data);*/
-                            //ImageView img2 = findViewById(R.id.screenD_view);
 
                             if (c_data.length != 0 ) {
                                 //Bitmap realsenseBMD = loadBitmapFromAssets();
@@ -212,10 +132,8 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
                                 image = InputImage.fromBitmap(realsenseBM, 0);
 
                                 depth = depthFrame.as(Extension.DEPTH_FRAME);
-                                System.out.println("insideLock DepthDataSize: " + depth.getDataSize());
 
-                                //System.out.println("Depth: " + depth.getDataSize());
-                                ObjectDetector objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
+                                objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
 
                                 Task<List<DetectedObject>> task = objectDetector.process(image);
 
@@ -226,24 +144,13 @@ public class MyRunnable extends Thread implements OnSuccessListener<List<Detecte
                                     graphicOverlay.clear();
                                     List<DetectedObject> detectedObjects = task.getResult();
                                     for (DetectedObject detectedObject : detectedObjects) {
-                                        float depthValue = 0;
+                                        depthValue = 0;
                                         depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
-
-                                        ObjectGraphics drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue);
+                                        drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue);
                                         drawBoundingBoxLabel.drawBoundingBoxAndLabel();
                                     }
-
                                     printFPS();
                                 }
-
-                                /*
-                                try {
-                                    float depthValue2 = depth.getDistance(depth.getWidth() / 2, depth.getHeight() / 2);
-                                    distanceView.setText("distance from center: " + String.valueOf(depthValue2));
-
-                                } catch (Exception e) {
-                                    //Toast.makeText(, e.getMessage(), Toast.LENGTH_SHORT).show();
-                                }*/
 
                                 img1.setImageBitmap(realsenseBM);
                                 //img2.setImageBitmap(realsenseBMD);
