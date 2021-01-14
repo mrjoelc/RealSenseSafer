@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import com.example.testrealsense.Helper.ObjectGraphics;
 import com.example.testrealsense.Helper.GraphicOverlay;
+import com.example.testrealsense.Helper.TextOverlay;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.mlkit.common.model.LocalModel;
@@ -44,12 +46,15 @@ import com.intel.realsense.librealsense.RsContext;
 import com.intel.realsense.librealsense.StreamType;
 import com.intel.realsense.librealsense.VideoFrame;
 
-import static com.example.testrealsense.ImageUtils.*;
+import org.json.JSONException;
+
+import static com.example.testrealsense.Utils.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -72,7 +77,11 @@ public class MainActivity extends AppCompatActivity{
 
     ImageView img1;
 
-    MyRunnable runnable;
+    StreamDetection stream_detection;
+
+    HashMap<String, Float> objectDict;
+
+    boolean jsonAvaiable = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +96,18 @@ public class MainActivity extends AppCompatActivity{
         mAppContext = getApplicationContext();
         mBackGroundText = findViewById(R.id.connectCameraText);
 
-        runnable = new MyRunnable(img1,graphicOverlay,distanceView,fps);
+        try {
+            objectDict = Utils.jsonToMap(this);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            jsonAvaiable = false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            jsonAvaiable = false;
+        }
+
+
+        stream_detection = new StreamDetection(img1,graphicOverlay,distanceView,fps, this, objectDict);
 
         /*ANDROID 9 PERMISSIONS*/
         if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.O && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -138,7 +158,7 @@ public class MainActivity extends AppCompatActivity{
         super.onPause();
         if(mRsContext != null)
             mRsContext.close();
-        runnable.stop2();
+        stream_detection.stop2();
         //mColorizer.close();
         //mPipeline.close();
     }
@@ -155,7 +175,12 @@ public class MainActivity extends AppCompatActivity{
         try(DeviceList dl = mRsContext.queryDevices()){
             if(dl.getDeviceCount() > 0) {
                 showConnectLabel(false);
-                runnable.start();
+                if (jsonAvaiable) {
+                    stream_detection.start();
+                }
+                else {
+                    Toast.makeText(this, "json not found", Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }
@@ -181,7 +206,7 @@ public class MainActivity extends AppCompatActivity{
         @Override
         public void onDeviceDetach() {
             showConnectLabel(true);
-            runnable.stop2();
+            stream_detection.stop2();
         }
     };
 

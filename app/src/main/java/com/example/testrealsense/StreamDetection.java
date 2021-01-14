@@ -1,6 +1,10 @@
 package com.example.testrealsense;
 
+import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.ImageView;
@@ -32,15 +36,21 @@ import com.intel.realsense.librealsense.RsContext;
 import com.intel.realsense.librealsense.StreamType;
 import com.intel.realsense.librealsense.VideoFrame;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 
-import static com.example.testrealsense.ImageUtils.rgb2Bitmap;
+import static com.example.testrealsense.Utils.rgb2Bitmap;
 
-public class MyRunnable extends Thread{
+
+public class StreamDetection extends Thread{
     private static final String TAG = "librs capture example";
     private int count = 0;
     private final DecimalFormat df = new DecimalFormat("#.##");
@@ -74,19 +84,22 @@ public class MyRunnable extends Thread{
     int c_width;
     byte[] c_data;
 
-
-
-    // Create monitor
-    volatile Object lock = new Object();
-
     long currentTime;
     long previousTime = 0;
     long deltaTime = 0;
     long aproxFps = 0;
 
+    static Context context;
+
+    final MediaPlayer mp;
+
+    HashMap<String, Float> objectDict;
+
     CustomObjectDetectorOptions customObjectDetectorOptions;
 
-    public MyRunnable(ImageView img1, GraphicOverlay graphicOverlay, TextView distanceView, TextView fps ){
+
+
+    public StreamDetection(ImageView img1, GraphicOverlay graphicOverlay, TextView distanceView, TextView fps, Context context, HashMap<String, Float> objectDict) {
         localModel = new LocalModel.Builder()
                 .setAssetFilePath("lite-model_object_detection_mobile_object_labeler_v1_1.tflite")
                 .build();
@@ -103,9 +116,18 @@ public class MyRunnable extends Thread{
         this.graphicOverlay = graphicOverlay;
         this.distanceView = distanceView;
         this.fps = fps;
+        this.context = context;
+        this.objectDict = objectDict;
 
         mPipeline = new Pipeline();
         mColorizer = new Colorizer();
+
+
+        //objectDict = new HashMap<String, Float>();
+        //objectDict.put("Person", (float) 0.7);
+
+
+        mp = MediaPlayer.create( context, R.raw.alert_attention);
     }
 
     @Override
@@ -113,7 +135,7 @@ public class MyRunnable extends Thread{
         super.run();
         try {
             try (FrameSet frames = mPipeline.waitForFrames()) {
-                try (FrameSet processed = frames.applyFilter(mAlign)) { // align qua
+                try (FrameSet processed = frames.applyFilter(mAlign)) {
                     try ( Frame depthFrame = processed.first(StreamType.DEPTH)) {
                         try (Frame colorFrame = processed.first(StreamType.COLOR)) {
 
@@ -131,36 +153,43 @@ public class MyRunnable extends Thread{
                                 realsenseBM = rgb2Bitmap(c_data, c_width, c_height);
                                 image = InputImage.fromBitmap(realsenseBM, 0);
 
-                                depth = depthFrame.as(Extension.DEPTH_FRAME);
-
                                 objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
+                                depth = depthFrame.clone().as(Extension.DEPTH_FRAME);
 
-                                Task<List<DetectedObject>> task = objectDetector.process(image);
+                                objectDetector.process(image).addOnCompleteListener(new OnCompleteListener<List<DetectedObject>>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<List<DetectedObject>> task) {
+                                        graphicOverlay.clear();
+                                        List<DetectedObject> detectedObjects = task.getResult();
+                                        for (DetectedObject detectedObject : detectedObjects) {
 
-                                synchronized(lock) {
-                                    while (!task.isComplete()) {
-                                        System.out.println("detection...");
+
+                                            if (detectedObject.getLabels().size() > 0  && objectDict.containsKey(detectedObject.getLabels().get(0).getText())) {
+                                                depthValue = -1;
+                                                boolean alarm = false;
+                                                depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
+                                                if (depthValue < objectDict.get(detectedObject.getLabels().get(0).getText())) {
+                                                    System.out.println("SOUNA NOTIFICA");
+                                                    mp.start();
+                                                    alarm = true;
+                                                }
+                                                drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue, alarm);
+                                                drawBoundingBoxLabel.drawBoundingBoxAndLabel();
+                                            }
+
+                                        }
+                                        depth.close();
+                                        printFPS();
+                                        img1.setImageBitmap(realsenseBM);
+                                        depthFrame.close();
+                                        mHandler.post(StreamDetection.this::run);
                                     }
-                                    graphicOverlay.clear();
-                                    List<DetectedObject> detectedObjects = task.getResult();
-                                    for (DetectedObject detectedObject : detectedObjects) {
-                                        depthValue = 0;
-                                        depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
-                                        drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue);
-                                        drawBoundingBoxLabel.drawBoundingBoxAndLabel();
-                                    }
-                                    printFPS();
-                                }
-
-                                img1.setImageBitmap(realsenseBM);
-                                //img2.setImageBitmap(realsenseBMD);
-                                count++;
+                                });
                             }
                         }
                     }
                 }
             }
-            mHandler.post(this);
         }
         catch (Exception e) {
             Log.e(TAG, "streaming, error: " + e.getMessage());

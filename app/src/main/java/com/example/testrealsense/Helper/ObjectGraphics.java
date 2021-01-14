@@ -19,17 +19,19 @@ public class ObjectGraphics {
     private GraphicOverlay graphicOverlay;
     private int imageWidth;
     static private Map<Integer,Integer> mapID = new HashMap<Integer,Integer>();
-    static final int color = generateRandomColor();
+    private int color;
     private float scaleFactor;
     private float objectDepth;
+    private static boolean alarm;
 
 
-    public ObjectGraphics(DetectedObject detectedObject, GraphicOverlay graphicOverlay, int imageWidth, float objectDepth){
+    public ObjectGraphics(DetectedObject detectedObject, GraphicOverlay graphicOverlay, int imageWidth, float objectDepth, boolean alarm){
         this.detectedObject=detectedObject;
         this.graphicOverlay=graphicOverlay;
         this.imageWidth=imageWidth;
         this.scaleFactor = calculateScaleFactor();
         this.objectDepth = objectDepth;
+        this.alarm = alarm;
     }
 
     public void drawBoundingBoxAndLabel(){
@@ -41,6 +43,7 @@ public class ObjectGraphics {
 
         RectF boundingBox = new RectF(left,top,right,bottom);
 
+        color = generateColor();
 
         RectOverlay rectOverlay = new RectOverlay(graphicOverlay, boundingBox, color) ;
         graphicOverlay.add(rectOverlay);
@@ -66,7 +69,7 @@ public class ObjectGraphics {
         return scaleFactor;
     }
 
-    static private int generateRandomColor() {
+    static private int generateColor() {
         // This is the base color which will be mixed with the generated one
         final int baseColor = Color.WHITE;
 
@@ -74,11 +77,16 @@ public class ObjectGraphics {
         final int baseGreen = Color.green(baseColor);
         final int baseBlue = Color.blue(baseColor);
 
-        final int red = (baseRed + mRandom.nextInt(256)) / 2;
+        /*final int red = (baseRed + mRandom.nextInt(256)) / 2;
         final int green = (baseGreen + mRandom.nextInt(256)) / 2;
-        final int blue = (baseBlue + mRandom.nextInt(256)) / 2;
+        final int blue = (baseBlue + mRandom.nextInt(256)) / 2;*/
 
-        return Color.rgb(red, green, blue);
+        if (alarm) {
+            return Color.rgb(baseRed, 0, 0);
+        }
+        else {
+            return Color.rgb(0, baseGreen, 0);
+        }
     }
 
 

@@ -1,16 +1,22 @@
 package com.example.testrealsense;
 
+import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Iterator;
 
-public class ImageUtils {
+public class Utils {
 
     public static void saveBitmap(final Bitmap bitmap, final String filename) {
         final String ROOT =
@@ -102,6 +108,32 @@ public class ImageUtils {
         }
 
         return color;
+    }
+
+    public static HashMap jsonToMap(Context context) throws JSONException, IOException {
+        AssetManager manager = context.getAssets();
+        InputStream file = manager.open("dict/dict.json");
+        byte[] formArray = new byte[file.available()];
+        file.read(formArray);
+        file.close();
+
+        String t = new String(formArray);
+
+        HashMap<String, Float> map = new HashMap<String, Float>();
+        JSONObject jObject = new JSONObject(t);
+        Iterator<?> keys = jObject.keys();
+
+        while( keys.hasNext() ){
+            String key = (String)keys.next();
+            Float value = Float.parseFloat(jObject.getString(key));
+            map.put(key, value);
+
+        }
+
+        System.out.println("json : "+ jObject);
+        System.out.println("map : "+ map);
+
+        return map;
     }
 
 
