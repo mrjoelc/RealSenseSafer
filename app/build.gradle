@@ -39,7 +39,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-
     implementation 'com.intel.realsense:librealsense:2.+@aar'
     implementation 'com.google.mlkit:object-detection-custom:16.0.0'
 
@@ -47,6 +46,6 @@ dependencies {
 
 repositories {
     maven{
-        url "https://dl.bintray.com/intel-realsense/librealsense"
+        url "https://egiintel.jfrog.io/artifactory/librealsense"
     }
 }
