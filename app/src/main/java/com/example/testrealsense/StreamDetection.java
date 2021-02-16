@@ -17,6 +17,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.mlkit.common.model.LocalModel;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.objects.DetectedObject;
@@ -52,6 +54,7 @@ import static com.example.testrealsense.Utils.rgb2Bitmap;
 
 public class StreamDetection extends Thread{
     private static final String TAG = "librs capture example";
+    private FirebaseAuth mAuth;
     private int count = 0;
     private final DecimalFormat df = new DecimalFormat("#.##");
 
@@ -65,6 +68,7 @@ public class StreamDetection extends Thread{
 
     private LocalModel localModel;
     ObjectDetector objectDetector;
+    DatabaseUtils databaseUtils;
 
     private Bitmap realsenseBM;
     private ImageView img1;
@@ -99,7 +103,7 @@ public class StreamDetection extends Thread{
 
 
 
-    public StreamDetection(ImageView img1, GraphicOverlay graphicOverlay, TextView distanceView, TextView fps, Context context, HashMap<String, Float> objectDict) {
+    public StreamDetection(ImageView img1, GraphicOverlay graphicOverlay, TextView distanceView, TextView fps, Context context, HashMap<String, Float> objectDict, DatabaseUtils databaseUtils) {
         localModel = new LocalModel.Builder()
                 .setAssetFilePath("lite-model_object_detection_mobile_object_labeler_v1_1.tflite")
                 .build();
@@ -118,14 +122,13 @@ public class StreamDetection extends Thread{
         this.fps = fps;
         this.context = context;
         this.objectDict = objectDict;
+        this.databaseUtils = databaseUtils;
 
         mPipeline = new Pipeline();
         mColorizer = new Colorizer();
 
-
         //objectDict = new HashMap<String, Float>();
         //objectDict.put("Person", (float) 0.7);
-
 
         mp = MediaPlayer.create( context, R.raw.alert_attention);
     }
@@ -169,9 +172,11 @@ public class StreamDetection extends Thread{
                                                 boolean alarm = false;
                                                 depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
                                                 if (depthValue < objectDict.get(detectedObject.getLabels().get(0).getText())) {
+                                                    databaseUtils.writeTooCloseDistanceLog(depthValue, detectedObject.getLabels().get(0).getText());
                                                     System.out.println("SOUNA NOTIFICA");
                                                     mp.start();
                                                     alarm = true;
+
                                                 }
                                                 drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue, alarm);
                                                 drawBoundingBoxLabel.drawBoundingBoxAndLabel();

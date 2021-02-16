@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "480325856724",
+    "firebase_url": "https://rsdepth-bb5f1.firebaseio.com",
+    "project_id": "rsdepth-bb5f1",
+    "storage_bucket": "rsdepth-bb5f1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:480325856724:android:6cc5f46e2ab8bb8713ba41",
+        "android_client_info": {
+          "package_name": "com.example.testrealsense"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "480325856724-14rjld4s23occqkmlbm13fi6bj4gdis2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFqszYmH3jtruwutQlSOsArtBXtrudBq4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "480325856724-14rjld4s23occqkmlbm13fi6bj4gdis2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:480325856724:android:8891ec61ac403e7913ba41",
+        "android_client_info": {
+          "package_name": "com.google.firebase.mlkit.codelab.objectdetection"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "480325856724-14rjld4s23occqkmlbm13fi6bj4gdis2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFqszYmH3jtruwutQlSOsArtBXtrudBq4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "480325856724-14rjld4s23occqkmlbm13fi6bj4gdis2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:480325856724:android:2f0ea6eb96ec1a4f13ba41",
+        "android_client_info": {
+          "package_name": "com.google.mlkit.vision.automl.demo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "480325856724-14rjld4s23occqkmlbm13fi6bj4gdis2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFqszYmH3jtruwutQlSOsArtBXtrudBq4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "480325856724-14rjld4s23occqkmlbm13fi6bj4gdis2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

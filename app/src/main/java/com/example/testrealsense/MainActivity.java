@@ -23,8 +23,13 @@ import android.widget.Toast;
 import com.example.testrealsense.Helper.ObjectGraphics;
 import com.example.testrealsense.Helper.GraphicOverlay;
 import com.example.testrealsense.Helper.TextOverlay;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.mlkit.common.model.LocalModel;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.objects.DetectedObject;
@@ -49,8 +54,14 @@ import com.intel.realsense.librealsense.VideoFrame;
 import org.json.JSONException;
 
 import static com.example.testrealsense.Utils.*;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -83,6 +94,8 @@ public class MainActivity extends AppCompatActivity{
 
     boolean jsonAvaiable = true;
 
+    DatabaseUtils databaseUtils;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,8 +119,9 @@ public class MainActivity extends AppCompatActivity{
             jsonAvaiable = false;
         }
 
+        databaseUtils = new DatabaseUtils(this);
 
-        stream_detection = new StreamDetection(img1,graphicOverlay,distanceView,fps, this, objectDict);
+        stream_detection = new StreamDetection(img1,graphicOverlay,distanceView,fps, this, objectDict, databaseUtils);
 
         /*ANDROID 9 PERMISSIONS*/
         if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.O && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -192,6 +206,7 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void run() {
                 mBackGroundText.setVisibility(state ? View.VISIBLE : View.GONE);
+
             }
         });
     }
