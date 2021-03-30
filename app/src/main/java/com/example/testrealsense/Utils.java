@@ -14,10 +14,26 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
 public class Utils {
+
+    public static String[] getCurrentDay(){
+        SimpleDateFormat year = new SimpleDateFormat("yyyy");
+        SimpleDateFormat month = new SimpleDateFormat("MM");
+        SimpleDateFormat day = new SimpleDateFormat("dd");
+
+        // String millisInString  = dateFormat.format(new Date());
+        String yearInString  = year.format(new Date());
+        String monthInString  = month.format(new Date());
+        String dayInString  = day.format(new Date());
+
+        String[] date = new String[]{yearInString, monthInString, dayInString};
+        return date;
+    }
 
     public static void saveBitmap(final Bitmap bitmap, final String filename) {
         final String ROOT =

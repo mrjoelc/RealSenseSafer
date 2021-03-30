@@ -277,9 +277,8 @@ public class MainActivity extends AppCompatActivity{
         //Register to notifications regarding RealSense devices attach/detach events via the DeviceListener.
         mRsContext = new RsContext();
         mRsContext.setDevicesChangedCallback(mListener);
-        Boolean noCamera = true;
         try(DeviceList dl = mRsContext.queryDevices()){
-            if(dl.getDeviceCount() > 0 || noCamera) {
+            if(dl.getDeviceCount() > 0) {
                 showConnectLabel(false);
                 if (jsonAvaiable) {
                     stream_detection.start();
