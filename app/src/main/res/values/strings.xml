@@ -1,3 +1,28 @@
 <resources>
-    <string name="app_name">RS Capture</string>
+    <string name="app_name">SAFER </string>
+
+    <string-array name="models" translatable="false">
+        <item>Modello1</item>
+        <item>Modello2</item>
+        <item>Modello3</item>
+    </string-array>
+
+
+    <string-array name="distances" translatable="false">
+        <item>media</item>
+        <item>minimo</item>
+        <item>clustering</item>
+    </string-array>
+
+    <string-array name="Computation" translatable="false">
+        <item>locale</item>
+        <item>remota</item>
+    </string-array>
+
+    <string-array name="Log" translatable="false">
+        <item>User</item>
+        <item>Globale</item>
+    </string-array>
+
+
 </resources>

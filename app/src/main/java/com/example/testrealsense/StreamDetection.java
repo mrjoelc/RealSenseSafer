@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -78,6 +79,7 @@ public class StreamDetection extends Thread{
     GraphicOverlay graphicOverlay;
     ObjectGraphics drawBoundingBoxLabel;
     TextView fps;
+    TextView msDetection;
 
     DepthFrame depth;
     float depthValue;
@@ -103,14 +105,14 @@ public class StreamDetection extends Thread{
 
 
 
-    public StreamDetection(ImageView img1, GraphicOverlay graphicOverlay, TextView distanceView, TextView fps, Context context, HashMap<String, Float> objectDict, DatabaseUtils databaseUtils) {
+    public StreamDetection(ImageView img1, GraphicOverlay graphicOverlay, TextView distanceView, TextView fps,TextView msDetection, Context context, HashMap<String, Float> objectDict, DatabaseUtils databaseUtils) {
         localModel = new LocalModel.Builder()
                 .setAssetFilePath("lite-model_object_detection_mobile_object_labeler_v1_1.tflite")
                 .build();
         customObjectDetectorOptions =
                 new CustomObjectDetectorOptions.Builder(localModel)
                         .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
-                        .enableMultipleObjects()
+                        //.enableMultipleObjects()
                         .enableClassification()
                         .setClassificationConfidenceThreshold(0.5f)
                         .setMaxPerObjectLabelCount(1)
@@ -120,6 +122,7 @@ public class StreamDetection extends Thread{
         this.graphicOverlay = graphicOverlay;
         this.distanceView = distanceView;
         this.fps = fps;
+        this.msDetection = msDetection;
         this.context = context;
         this.objectDict = objectDict;
         this.databaseUtils = databaseUtils;
@@ -137,6 +140,7 @@ public class StreamDetection extends Thread{
     public void run() {
         super.run();
         try {
+            /** Configurazione frames di streaming **/
             try (FrameSet frames = mPipeline.waitForFrames()) {
                 try (FrameSet processed = frames.applyFilter(mAlign)) {
                     try ( Frame depthFrame = processed.first(StreamType.DEPTH)) {
@@ -159,25 +163,34 @@ public class StreamDetection extends Thread{
                                 objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
                                 depth = depthFrame.clone().as(Extension.DEPTH_FRAME);
 
+                                /**detection su immagine RGB**/
+                                long startTime = System.currentTimeMillis();
                                 objectDetector.process(image).addOnCompleteListener(new OnCompleteListener<List<DetectedObject>>() {
                                     @Override
                                     public void onComplete(@NonNull Task<List<DetectedObject>> task) {
                                         graphicOverlay.clear();
+                                        long time = (System.currentTimeMillis() - startTime) / 100000;
+                                        msDetection.setText(String.valueOf(time));
+
                                         List<DetectedObject> detectedObjects = task.getResult();
                                         for (DetectedObject detectedObject : detectedObjects) {
 
-
+                                            /** Controllo della presenza dell'ggetto identificato nella lista di oggetti critici **/
                                             if (detectedObject.getLabels().size() > 0  && objectDict.containsKey(detectedObject.getLabels().get(0).getText())) {
+                                                String label = detectedObject.getLabels().get(0).getText();
                                                 depthValue = -1;
                                                 boolean alarm = false;
+                                                /** prelievo della distanza dal depth frame **/
                                                 depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
-                                                if (depthValue < objectDict.get(detectedObject.getLabels().get(0).getText())) {
-                                                    databaseUtils.writeTooCloseDistanceLog(depthValue, detectedObject.getLabels().get(0).getText());
+                                                /** se la distanza è inferiore a quella critica, riproduci notifica e scrivi sul database **/
+                                                if (depthValue < objectDict.get(label)) {
+                                                    databaseUtils.writeTooCloseDistanceLog(depthValue, label);
                                                     System.out.println("SOUNA NOTIFICA");
                                                     mp.start();
                                                     alarm = true;
 
                                                 }
+                                                /** disegna il boundingbox con un colore opportuno in funzione della distanza **/
                                                 drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue, alarm);
                                                 drawBoundingBoxLabel.drawBoundingBoxAndLabel();
                                             }

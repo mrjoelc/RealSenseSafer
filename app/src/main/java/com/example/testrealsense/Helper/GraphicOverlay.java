@@ -46,7 +46,7 @@ public class GraphicOverlay extends View {
     }
 
     /**
-     * Removes all graphics from the overlay.
+     * Rimuove tutta la grafica dall'overlay
      */
     public void clear() {
         synchronized (mLock) {
@@ -56,7 +56,7 @@ public class GraphicOverlay extends View {
     }
 
     /**
-     * Adds a graphic to the overlay.
+     * Aggiunge grafica all'overlay.
      */
     public void add(Graphic graphic) {
         synchronized (mLock) {
@@ -66,7 +66,7 @@ public class GraphicOverlay extends View {
     }
 
     /**
-     * Removes a graphic from the overlay.
+     * Rimuove una grafica dall'overlay.
      */
     public void remove(Graphic graphic) {
         synchronized (mLock) {
@@ -78,7 +78,7 @@ public class GraphicOverlay extends View {
 
 
     /**
-     * Draws the overlay with its associated graphic objects.
+     * Disegna la grafica con gli oggetti associati
      */
     @Override
     protected void onDraw(Canvas canvas) {

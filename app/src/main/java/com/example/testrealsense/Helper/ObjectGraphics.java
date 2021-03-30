@@ -24,7 +24,6 @@ public class ObjectGraphics {
     private float objectDepth;
     private static boolean alarm;
 
-
     public ObjectGraphics(DetectedObject detectedObject, GraphicOverlay graphicOverlay, int imageWidth, float objectDepth, boolean alarm){
         this.detectedObject=detectedObject;
         this.graphicOverlay=graphicOverlay;

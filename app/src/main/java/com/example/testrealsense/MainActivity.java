@@ -7,15 +7,20 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,10 +28,12 @@ import android.widget.Toast;
 import com.example.testrealsense.Helper.ObjectGraphics;
 import com.example.testrealsense.Helper.GraphicOverlay;
 import com.example.testrealsense.Helper.TextOverlay;
+import com.example.testrealsense.Helper.WriteLogcat;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -73,7 +80,15 @@ public class MainActivity extends AppCompatActivity{
     private static final String TAG = "librs capture example";
     private static final int PERMISSIONS_REQUEST_CAMERA = 0;
 
+    //bottomsheet
+    private BottomSheetBehavior<LinearLayout> sheetBehavior;
+    private LinearLayout bottomSheetLayout;
+    protected ImageView bottomSheetArrowImageView;
+    private LinearLayout gestureLayout;
+
     private boolean mPermissionsGranted = false;
+
+    Button barChartButton;
 
     private Context mAppContext;
     private TextView mBackGroundText;
@@ -85,6 +100,7 @@ public class MainActivity extends AppCompatActivity{
     GraphicOverlay graphicOverlay;
     TextView distanceView;
     TextView fps;
+    TextView msDetection;
 
     ImageView img1;
 
@@ -101,14 +117,25 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        barChartButton = findViewById(R.id.barchartButton);
         img1 = findViewById(R.id.screen_view);
         graphicOverlay = findViewById(R.id.graphicOverlay);
-        distanceView = findViewById(R.id.distanceTextView);
+        //distanceView = findViewById(R.id.distanceTextView);
         fps = findViewById(R.id.fpsTextView);
+        msDetection = findViewById(R.id.msTextView);
+
+        //bottomsheet
+        gestureLayout = findViewById(R.id.gesture_layout);
+        bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
+        sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
+        bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
 
         mAppContext = getApplicationContext();
         mBackGroundText = findViewById(R.id.connectCameraText);
 
+        //WriteLogcat wl = new WriteLogcat();
+
+        /** prelievo  oggetti e distanze critiche da file json **/
         try {
             objectDict = Utils.jsonToMap(this);
         } catch (JSONException e) {
@@ -121,7 +148,7 @@ public class MainActivity extends AppCompatActivity{
 
         databaseUtils = new DatabaseUtils(this);
 
-        stream_detection = new StreamDetection(img1,graphicOverlay,distanceView,fps, this, objectDict, databaseUtils);
+        stream_detection = new StreamDetection(img1,graphicOverlay,distanceView,fps, msDetection, this, objectDict, databaseUtils);
 
         /*ANDROID 9 PERMISSIONS*/
         if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.O && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -134,6 +161,62 @@ public class MainActivity extends AppCompatActivity{
         }
 
         mPermissionsGranted = true;
+
+
+        //bottomsheet
+        ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                            gestureLayout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                        } else {
+                            gestureLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        }
+                        //                int width = bottomSheetLayout.getMeasuredWidth();
+                        int height = gestureLayout.getMeasuredHeight();
+
+                        sheetBehavior.setPeekHeight(height);
+                    }
+                });
+        sheetBehavior.setHideable(false);
+
+        sheetBehavior.setBottomSheetCallback(
+                new BottomSheetBehavior.BottomSheetCallback() {
+                    @Override
+                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                        switch (newState) {
+                            case BottomSheetBehavior.STATE_HIDDEN:
+                                break;
+                            case BottomSheetBehavior.STATE_EXPANDED:
+                            {
+                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_down);
+                            }
+                            break;
+                            case BottomSheetBehavior.STATE_COLLAPSED:
+                            {
+                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
+                            }
+                            break;
+                            case BottomSheetBehavior.STATE_DRAGGING:
+                                break;
+                            case BottomSheetBehavior.STATE_SETTLING:
+                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
+                });
+
+        barChartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), BarChartActivity.class));
+            }
+        });
 
     }
 
@@ -199,8 +282,7 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 
-
-
+    /** se la camera non è connessa, mostra il messaggio di richiesta collegamento **/
     private void showConnectLabel(final boolean state){
         runOnUiThread(new Runnable() {
             @Override
@@ -211,6 +293,8 @@ public class MainActivity extends AppCompatActivity{
         });
     }
 
+
+    /** listener collegamento device **/
     private DeviceListener mListener = new DeviceListener() {
         @Override
         public void onDeviceAttach() {

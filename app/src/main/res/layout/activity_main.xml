@@ -1,114 +1,142 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
-    android:orientation="vertical">
 
+    android:background="#00000000">
 
-
-    <ImageView
-        android:adjustViewBounds="true"
-        android:scaleType="fitCenter"
-        android:id="@+id/screen_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
-
-<!--    <ImageView
-        android:adjustViewBounds="true"
-        android:scaleType="fitCenter"
-        android:alpha="0.5"
-        android:id="@+id/screenD_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />-->
-
-
-
-    <com.example.testrealsense.Helper.GraphicOverlay
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/graphicOverlay"
-        />
+        android:background="@color/black"
+        android:orientation="vertical">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:id="@+id/buttonPanel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true">
 
-        <TextView
-            android:id="@+id/connectCameraText"
+
+        <ImageView
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:id="@+id/screen_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+    <!--    <ImageView
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:alpha="0.5"
+            android:id="@+id/screenD_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />-->
+
+
+
+        <com.example.testrealsense.Helper.GraphicOverlay
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/graphicOverlay"
+            />
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/buttonPanel"
+            android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:background="@color/black"
-            android:textSize="20dp"
-            android:text="Connect a RealSense camera"
-            android:textColor="#ffffff"/>
-    </androidx.appcompat.widget.LinearLayoutCompat>
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true">
 
-    <TableLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true">
-        <TableRow>
             <TextView
-                android:id="@+id/distanceTextView"
+                android:id="@+id/connectCameraText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:background="@color/black"
+                android:textSize="20dp"
+                android:text="Connect a RealSense camera"
+                android:textColor="#ffffff"/>
+
+            <Button
+                android:id="@+id/barchartButton"
+                android:layout_marginTop="25dp"
+                android:text="Go to log"
+                android:layout_width="250dp"
+                android:layout_height="75dp"
+                android:gravity="center"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+
+
+     <!--   <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true">
+            <TableRow>
+                <TextView
+                    android:id="@+id/distanceTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/black"
+                    android:textSize="20dp"
+                    android:textColor="#ffffff"
+                    android:text="Distance"
+                    android:textAlignment="textStart"
+                    android:layout_column="1"/>
+
+            </TableRow>
+            <TableRow>
+                <TextView
+                    android:id="@+id/fpsTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/black"
+                    android:textSize="20dp"
+                    android:textColor="#ffffff"
+                    android:text="FPS"
+                    android:textAlignment="textStart"
+                    android:layout_column="1"/>
+            </TableRow>
+        </TableLayout>-->
+
+        <!--<androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:paddingBottom="25dp"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/labelTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:background="@color/black"
+                android:textSize="20dp"
+                android:textColor="#ffffff"
+                android:text="Label"
+                android:textAlignment="center"/>
+            <TextView
+                android:id="@+id/distanceTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|center_horizontal"
                 android:background="@color/black"
                 android:textSize="20dp"
                 android:textColor="#ffffff"
                 android:text="Distance"
-                android:textAlignment="textStart"
-                android:layout_column="1"/>
+                android:textAlignment="center"/>
 
-        </TableRow>
-        <TableRow>
-            <TextView
-                android:id="@+id/fpsTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@color/black"
-                android:textSize="20dp"
-                android:textColor="#ffffff"
-                android:text="FPS"
-                android:textAlignment="textStart"
-                android:layout_column="1"/>
-        </TableRow>
-    </TableLayout>
+        </androidx.appcompat.widget.LinearLayoutCompat>-->
 
-    <!--<androidx.appcompat.widget.LinearLayoutCompat
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:paddingBottom="25dp"
-        android:orientation="vertical">
-        <TextView
-            android:id="@+id/labelTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:background="@color/black"
-            android:textSize="20dp"
-            android:textColor="#ffffff"
-            android:text="Label"
-            android:textAlignment="center"/>
-        <TextView
-            android:id="@+id/distanceTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:background="@color/black"
-            android:textSize="20dp"
-            android:textColor="#ffffff"
-            android:text="Distance"
-            android:textAlignment="center"/>
+    </RelativeLayout>
 
-    </androidx.appcompat.widget.LinearLayoutCompat>-->
+    <include
+        android:id="@+id/bottom_sheet_layout"
+        layout="@layout/layout_bottom_sheet"
+        />
 
-</RelativeLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
