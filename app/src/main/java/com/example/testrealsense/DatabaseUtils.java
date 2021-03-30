@@ -43,12 +43,27 @@ public class DatabaseUtils {
     }
 
     public void writeTooCloseDistanceLog(float distance, String object){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String millisInString  = dateFormat.format(new Date());
+       // SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat year = new SimpleDateFormat("yyyy");
+        SimpleDateFormat month = new SimpleDateFormat("MM");
+        SimpleDateFormat day = new SimpleDateFormat("dd");
+        SimpleDateFormat hour = new SimpleDateFormat("HH:mm:ss");
+
+       // String millisInString  = dateFormat.format(new Date());
+        String yearInString  = year.format(new Date());
+        String monthInString  = month.format(new Date());
+        String dayInString  = day.format(new Date());
+        String hourInString  = hour.format(new Date());
+
         Map<String, String> map = new HashMap<String,String>();
         map.put("distance", String.valueOf(distance));
         map.put("object", object);
-        mDatabase.child("users").child(getUserUID()).child(millisInString).setValue(map);
+        mDatabase.child("users").child(getUserUID())
+                                .child(yearInString)
+                                .child(monthInString)
+                                .child(dayInString)
+                                .child(hourInString)
+                                .setValue(map);
     }
 
     private void signInAnonymous(){
