@@ -134,7 +134,16 @@ public class StreamDetection extends Thread{
         //objectDict.put("Person", (float) 0.7);
 
         mp = MediaPlayer.create( context, R.raw.alert_attention);
+
+        /*try {
+            System.out.println("QUI!!!!!!!!!!");
+            img1.setImageBitmap(Utils.loadBitmapFromAssets(context,"img/cantieri-edili-2.jpg" ));
+
+        } catch (Exception e) {
+            Log.e(TAG, "streaming, error: " + e.getMessage());
+        }*/
     }
+
 
     @Override
     public void run() {

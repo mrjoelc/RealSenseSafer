@@ -3,6 +3,7 @@ package com.example.testrealsense;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.util.Log;
 
@@ -41,18 +42,18 @@ public class Utils {
         }
     }
 
-    /*private Bitmap loadBitmapFromAssets(String path) {
+    public static Bitmap loadBitmapFromAssets(Context context, String path) {
         InputStream bitmap = null;
         try {
-            bitmap=getAssets().open(path);
-            Bitmap bit= BitmapFactory.decodeStream(bitmap);
+            bitmap= context.getAssets().open(path);
+            Bitmap bit = BitmapFactory.decodeStream(bitmap);
             return bit;
         } catch (IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
         return null;
-    }*/
+    }
 
     public static Bitmap rgb2Bitmap(byte[] data, int width, int height) {
         int[] colors = convertByteToColor(data);    //取RGB值转换为int数组

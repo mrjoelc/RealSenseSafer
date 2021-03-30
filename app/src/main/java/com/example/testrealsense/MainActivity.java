@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity{
     private boolean mPermissionsGranted = false;
 
     Button barChartButton;
+    Button sendLogToFirebaseButton;
 
     private Context mAppContext;
     private TextView mBackGroundText;
@@ -118,6 +119,7 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
 
         barChartButton = findViewById(R.id.barchartButton);
+        sendLogToFirebaseButton = findViewById(R.id.sendLogToFirebase);
         img1 = findViewById(R.id.screen_view);
         graphicOverlay = findViewById(R.id.graphicOverlay);
         //distanceView = findViewById(R.id.distanceTextView);
@@ -218,6 +220,13 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
+        sendLogToFirebaseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                databaseUtils.writeTooCloseDistanceLog((float) 0.3,"OggettoPROVA");
+            }
+        });
+
     }
 
     @Override
@@ -268,9 +277,9 @@ public class MainActivity extends AppCompatActivity{
         //Register to notifications regarding RealSense devices attach/detach events via the DeviceListener.
         mRsContext = new RsContext();
         mRsContext.setDevicesChangedCallback(mListener);
-
+        Boolean noCamera = true;
         try(DeviceList dl = mRsContext.queryDevices()){
-            if(dl.getDeviceCount() > 0) {
+            if(dl.getDeviceCount() > 0 || noCamera) {
                 showConnectLabel(false);
                 if (jsonAvaiable) {
                     stream_detection.start();
