@@ -216,7 +216,8 @@ public class MainActivity extends AppCompatActivity{
         barChartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), BarChartActivity.class));
+                Intent i=new Intent(MainActivity.this,BarChartActivity.class);
+                startActivity(i);
             }
         });
 

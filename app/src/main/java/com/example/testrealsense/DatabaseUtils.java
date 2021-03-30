@@ -51,9 +51,8 @@ public class DatabaseUtils {
 
 
 
-    public static void getCurrentMonthDataCount(CallbackFirebaseData callbackFirebaseData){
-        String[] d = Utils.getCurrentDay();
-        String path = "users/" + userUID + "/" + d[0] + "/" + d[1] ;
+    public static void getDataLogFromFirebaseYM(String year, String month, CallbackFirebaseData callbackFirebaseData){
+        String path = "users/" + userUID + "/" + year + "/" + month ;
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
         ref.addValueEventListener(new ValueEventListener() {
             @Override
