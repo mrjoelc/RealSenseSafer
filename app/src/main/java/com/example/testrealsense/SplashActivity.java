@@ -15,23 +15,22 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
 
-        try {
+        /*try {
             Thread.sleep(2000L);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        Intent homeIntent = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(homeIntent);
-        finish();
+        */
 
-        /*new Handler().postDelayed(new Runnable() {
+        new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                c
+                Intent homeIntent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(homeIntent);
+                finish();
             }
-        }, SPLASH_TIME_OUT);*/
+        }, SPLASH_TIME_OUT);
     }
 }
