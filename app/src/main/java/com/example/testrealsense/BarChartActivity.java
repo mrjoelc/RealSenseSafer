@@ -151,6 +151,7 @@ public class BarChartActivity extends AppCompatActivity {
                                                             String.valueOf(child.child("object").getValue())));
                         }
                         i.putExtra("LIST", (Serializable) simpleLogList);
+                        i.putExtra("DAY", String.valueOf(x));
                         startActivity(i);
                     }
 
