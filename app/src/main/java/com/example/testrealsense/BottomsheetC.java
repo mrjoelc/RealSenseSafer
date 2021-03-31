@@ -23,10 +23,10 @@ public class BottomsheetC {
     TextView msDetection;
     TextView depthResolution;
     TextView rgbResolution;
+
     Spinner modelML_spinner;
     Spinner distance_spinner;
     Spinner computation_spinner;
-    
 
     public BottomsheetC(BottomSheetBehavior<LinearLayout> sheetBehavior, LinearLayout bottomSheetLayout, ImageView bottomSheetArrowImageView, LinearLayout gestureLayout) {
         this.sheetBehavior = sheetBehavior;
@@ -34,7 +34,96 @@ public class BottomsheetC {
         this.bottomSheetArrowImageView = bottomSheetArrowImageView;
         this.gestureLayout = gestureLayout;
         bottomSheetBehavior();
+
     }
+
+    public void setContentBottomSheet(TextView fps,
+                                      TextView msDetection,
+                                      TextView depthResolution,
+                                      TextView rgbResolution,
+                                      Spinner modelML_spinner,
+                                      Spinner distance_spinner,
+                                      Spinner computation_spinner){
+        this.fps = fps;
+        this.msDetection = msDetection;
+        this.depthResolution = depthResolution;
+        this.rgbResolution  = rgbResolution;
+        this.modelML_spinner = modelML_spinner;
+        this.distance_spinner = distance_spinner;
+        this.computation_spinner = computation_spinner;
+    }
+
+    public void setDistanceViewText(String s){distanceView.setText(s);}
+    public void fpsText(String s){fps.setText(s);}
+    public void msDetectionText(String s){msDetection.setText(s);}
+    public void depthResolutionText(String s){depthResolution.setText(s);}
+    public void rgbResolutionText(String s){rgbResolution.setText(s);}
+
+
+    public TextView getDistanceView() {
+        return distanceView;
+    }
+
+    public void setDistanceView(TextView distanceView) {
+        this.distanceView = distanceView;
+    }
+
+    public TextView getFps() {
+        return fps;
+    }
+
+    public void setFps(TextView fps) {
+        this.fps = fps;
+    }
+
+    public TextView getMsDetection() {
+        return msDetection;
+    }
+
+    public void setMsDetection(TextView msDetection) {
+        this.msDetection = msDetection;
+    }
+
+    public TextView getDepthResolution() {
+        return depthResolution;
+    }
+
+    public void setDepthResolution(TextView depthResolution) {
+        this.depthResolution = depthResolution;
+    }
+
+    public TextView getRgbResolution() {
+        return rgbResolution;
+    }
+
+    public void setRgbResolution(TextView rgbResolution) {
+        this.rgbResolution = rgbResolution;
+    }
+
+    public Spinner getModelML_spinner() {
+        return modelML_spinner;
+    }
+
+    public void setModelML_spinner(Spinner modelML_spinner) {
+        this.modelML_spinner = modelML_spinner;
+    }
+
+    public Spinner getDistance_spinner() {
+        return distance_spinner;
+    }
+
+    public void setDistance_spinner(Spinner distance_spinner) {
+        this.distance_spinner = distance_spinner;
+    }
+
+    public Spinner getComputation_spinner() {
+        return computation_spinner;
+    }
+
+    public void setComputation_spinner(Spinner computation_spinner) {
+        this.computation_spinner = computation_spinner;
+    }
+
 
     public void bottomSheetBehavior(){
         //bottomsheet

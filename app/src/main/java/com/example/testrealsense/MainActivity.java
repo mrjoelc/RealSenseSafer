@@ -21,6 +21,7 @@ import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -103,6 +104,11 @@ public class MainActivity extends AppCompatActivity{
     TextView distanceView;
     TextView fps;
     TextView msDetection;
+    TextView depthResolution;
+    TextView rgbResolution;
+    Spinner modelML_spinner;
+    Spinner distance_spinner;
+    Spinner computation_spinner;
 
     ImageView img1;
 
@@ -119,34 +125,43 @@ public class MainActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mAppContext = getApplicationContext();
+        mBackGroundText = findViewById(R.id.connectCameraText);
 
         barChartButton = findViewById(R.id.barchartButton);
         sendLogToFirebaseButton = findViewById(R.id.sendLogToFirebase);
         img1 = findViewById(R.id.screen_view);
         graphicOverlay = findViewById(R.id.graphicOverlay);
-        //distanceView = findViewById(R.id.distanceTextView);
-        fps = findViewById(R.id.fpsTextView);
-        msDetection = findViewById(R.id.msTextView);
+
 
         //bottomsheet
         gestureLayout = findViewById(R.id.gesture_layout);
         bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
         sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
         bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
+        //bottomsheetContent
+        fps = findViewById(R.id.fps);
+        msDetection = findViewById(R.id.detectionTime);
+        depthResolution = findViewById(R.id.depthResolution);
+        rgbResolution = findViewById(R.id.rgbResolution);
+        modelML_spinner = findViewById(R.id.modelML_spinner);
+        distance_spinner = findViewById(R.id.distance_spinner);
+        computation_spinner = findViewById(R.id.computation_spinner);
+        //distanceView = findViewById(R.id.distanceTextView);
 
-        mAppContext = getApplicationContext();
-        mBackGroundText = findViewById(R.id.connectCameraText);
+        bs = new BottomsheetC(sheetBehavior, bottomSheetLayout, bottomSheetArrowImageView, gestureLayout);
+        bs.setContentBottomSheet(fps,msDetection,depthResolution,rgbResolution, modelML_spinner, distance_spinner, computation_spinner);
 
         //WriteLogcat wl = new WriteLogcat();
         takeObjectDict();
 
         databaseUtils = new DatabaseUtils(this);
 
-        stream_detection = new StreamDetection(img1,graphicOverlay,distanceView,fps, msDetection, this, objectDict, databaseUtils);
+        //stream_detection = new StreamDetection(img1,graphicOverlay,distanceView,fps, msDetection, this, objectDict, databaseUtils);
+        stream_detection = new StreamDetection(img1,graphicOverlay,bs, this, objectDict, databaseUtils);
 
         checkPermission();
         mPermissionsGranted = true;
-        bs = new BottomsheetC(sheetBehavior, bottomSheetLayout, bottomSheetArrowImageView, gestureLayout);
 
         barChartButtonListener();
         sendLogButtonListener();

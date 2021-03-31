@@ -103,6 +103,8 @@ public class StreamDetection extends Thread{
 
     CustomObjectDetectorOptions customObjectDetectorOptions;
 
+    BottomsheetC bs;
+
 
 
     public StreamDetection(ImageView img1, GraphicOverlay graphicOverlay, TextView distanceView, TextView fps,TextView msDetection, Context context, HashMap<String, Float> objectDict, DatabaseUtils databaseUtils) {
@@ -123,9 +125,46 @@ public class StreamDetection extends Thread{
         this.distanceView = distanceView;
         this.fps = fps;
         this.msDetection = msDetection;
-        this.context = context;
+        StreamDetection.context = context;
         this.objectDict = objectDict;
         this.databaseUtils = databaseUtils;
+
+        mPipeline = new Pipeline();
+        mColorizer = new Colorizer();
+
+        //objectDict = new HashMap<String, Float>();
+        //objectDict.put("Person", (float) 0.7);
+
+        mp = MediaPlayer.create( context, R.raw.alert_attention);
+
+        /*try {
+            System.out.println("QUI!!!!!!!!!!");
+            img1.setImageBitmap(Utils.loadBitmapFromAssets(context,"img/cantieri-edili-2.jpg" ));
+
+        } catch (Exception e) {
+            Log.e(TAG, "streaming, error: " + e.getMessage());
+        }*/
+    }
+
+    public StreamDetection(ImageView img1, GraphicOverlay graphicOverlay, BottomsheetC bs, Context context, HashMap<String, Float> objectDict, DatabaseUtils databaseUtils) {
+        localModel = new LocalModel.Builder()
+                .setAssetFilePath("lite-model_object_detection_mobile_object_labeler_v1_1.tflite")
+                .build();
+        customObjectDetectorOptions =
+                new CustomObjectDetectorOptions.Builder(localModel)
+                        .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
+                        //.enableMultipleObjects()
+                        .enableClassification()
+                        .setClassificationConfidenceThreshold(0.5f)
+                        .setMaxPerObjectLabelCount(1)
+                        .build();
+
+        this.img1 = img1;
+        this.graphicOverlay = graphicOverlay;
+        StreamDetection.context = context;
+        this.objectDict = objectDict;
+        this.databaseUtils = databaseUtils;
+        this.bs = bs;
 
         mPipeline = new Pipeline();
         mColorizer = new Colorizer();
@@ -179,7 +218,8 @@ public class StreamDetection extends Thread{
                                     public void onComplete(@NonNull Task<List<DetectedObject>> task) {
                                         graphicOverlay.clear();
                                         long time = (System.currentTimeMillis() - startTime) / 100000;
-                                        msDetection.setText(String.valueOf(time));
+                                        //msDetection.setText(String.valueOf(time));
+                                        bs.msDetectionText(String.valueOf(time));
 
                                         List<DetectedObject> detectedObjects = task.getResult();
                                         for (DetectedObject detectedObject : detectedObjects) {
@@ -197,7 +237,6 @@ public class StreamDetection extends Thread{
                                                     System.out.println("SOUNA NOTIFICA");
                                                     mp.start();
                                                     alarm = true;
-
                                                 }
                                                 /** disegna il boundingbox con un colore opportuno in funzione della distanza **/
                                                 drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue, alarm);
@@ -227,7 +266,10 @@ public class StreamDetection extends Thread{
         try(Config config  = new Config())
         {
             config.enableStream(StreamType.DEPTH,640, 480);
+            bs.depthResolutionText("640x480");
             config.enableStream(StreamType.COLOR,640, 480);
+            bs.rgbResolutionText("640x480");
+
             // try statement needed here to release resources allocated by the Pipeline:start() method
             try(PipelineProfile pp = mPipeline.start(config)){}
         }
@@ -267,7 +309,8 @@ public class StreamDetection extends Thread{
         deltaTime = currentTime - previousTime;
         aproxFps = 1000/deltaTime;
         previousTime = currentTime;
-        fps.setText("FPS detection: " + String.valueOf(aproxFps));
+        bs.fpsText(String.valueOf(aproxFps));
+        //fps.setText("FPS detection: " + String.valueOf(aproxFps));
     }
 
 
