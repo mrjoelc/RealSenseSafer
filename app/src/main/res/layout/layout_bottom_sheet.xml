@@ -43,7 +43,7 @@
                 android:textColor="@android:color/black" />
 
             <TextView
-                android:id="@+id/fpsTextView"
+                android:id="@+id/fpsValue"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
@@ -221,11 +221,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Modello ML"
+            android:text="Machine Learning Model"
             android:textColor="@android:color/black" />
 
         <Spinner
-            android:id="@+id/model_spinner"
+            android:id="@+id/modelML_spinner"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -243,7 +243,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Distance detecion"
+            android:text="Distance detection type"
             android:textColor="@android:color/black" />
 
         <Spinner
@@ -264,7 +264,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Computazione"
+            android:text="Computation"
             android:textColor="@android:color/black" />
 
         <Spinner

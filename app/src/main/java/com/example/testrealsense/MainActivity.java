@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity{
     private LinearLayout bottomSheetLayout;
     protected ImageView bottomSheetArrowImageView;
     private LinearLayout gestureLayout;
+    BottomsheetC bs;
 
     private boolean mPermissionsGranted = false;
 
@@ -113,6 +114,7 @@ public class MainActivity extends AppCompatActivity{
 
     DatabaseUtils databaseUtils;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -136,7 +138,52 @@ public class MainActivity extends AppCompatActivity{
         mBackGroundText = findViewById(R.id.connectCameraText);
 
         //WriteLogcat wl = new WriteLogcat();
+        takeObjectDict();
 
+        databaseUtils = new DatabaseUtils(this);
+
+        stream_detection = new StreamDetection(img1,graphicOverlay,distanceView,fps, msDetection, this, objectDict, databaseUtils);
+
+        checkPermission();
+        mPermissionsGranted = true;
+        bs = new BottomsheetC(sheetBehavior, bottomSheetLayout, bottomSheetArrowImageView, gestureLayout);
+
+        barChartButtonListener();
+        sendLogButtonListener();
+    }
+
+    void checkPermission(){
+        /*ANDROID 9 PERMISSIONS*/
+        if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.O && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST_CAMERA);
+            return;
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+            return;
+        }
+    }
+
+    void sendLogButtonListener(){
+        sendLogToFirebaseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                databaseUtils.writeTooCloseDistanceLog((float) 0.3,"OggettoPROVA");
+            }
+        });
+    }
+
+    void barChartButtonListener(){
+        barChartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i=new Intent(MainActivity.this,BarChartActivity.class);
+                startActivity(i);
+            }
+        });
+    }
+
+    void takeObjectDict(){
         /** prelievo  oggetti e distanze critiche da file json **/
         try {
             objectDict = Utils.jsonToMap(this);
@@ -147,87 +194,6 @@ public class MainActivity extends AppCompatActivity{
             e.printStackTrace();
             jsonAvaiable = false;
         }
-
-        databaseUtils = new DatabaseUtils(this);
-
-        stream_detection = new StreamDetection(img1,graphicOverlay,distanceView,fps, msDetection, this, objectDict, databaseUtils);
-
-        /*ANDROID 9 PERMISSIONS*/
-        if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.O && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST_CAMERA);
-            return;
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
-            return;
-        }
-
-        mPermissionsGranted = true;
-
-
-        //bottomsheet
-        ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
-        vto.addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                            gestureLayout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                        } else {
-                            gestureLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        }
-                        //                int width = bottomSheetLayout.getMeasuredWidth();
-                        int height = gestureLayout.getMeasuredHeight();
-
-                        sheetBehavior.setPeekHeight(height);
-                    }
-                });
-        sheetBehavior.setHideable(false);
-
-        sheetBehavior.setBottomSheetCallback(
-                new BottomSheetBehavior.BottomSheetCallback() {
-                    @Override
-                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                        switch (newState) {
-                            case BottomSheetBehavior.STATE_HIDDEN:
-                                break;
-                            case BottomSheetBehavior.STATE_EXPANDED:
-                            {
-                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_down);
-                            }
-                            break;
-                            case BottomSheetBehavior.STATE_COLLAPSED:
-                            {
-                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
-                            }
-                            break;
-                            case BottomSheetBehavior.STATE_DRAGGING:
-                                break;
-                            case BottomSheetBehavior.STATE_SETTLING:
-                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
-                                break;
-                        }
-                    }
-
-                    @Override
-                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
-                });
-
-        barChartButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i=new Intent(MainActivity.this,BarChartActivity.class);
-                startActivity(i);
-            }
-        });
-
-        sendLogToFirebaseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                databaseUtils.writeTooCloseDistanceLog((float) 0.3,"OggettoPROVA");
-            }
-        });
-
     }
 
     @Override
