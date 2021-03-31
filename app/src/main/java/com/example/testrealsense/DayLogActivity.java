@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ public class DayLogActivity extends AppCompatActivity {
     List<SimpleLog> list;
     RecyclerView logs;
     LogAdapter logAdapter;
+    TextView title;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,15 +34,19 @@ public class DayLogActivity extends AppCompatActivity {
         setContentView(R.layout.activity_day_log);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        // showing the back button in action bar
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        title = findViewById(R.id.title);
+        logs = findViewById(R.id.logs);
 
         Intent i = getIntent();
         list = (ArrayList<SimpleLog>) i.getSerializableExtra("LIST");
         String day = i.getStringExtra("DAY");
 
-        toolbar.setTitle(day);
-
-        logs = findViewById(R.id.logs);
-
+        title.setText("Log di giorno" + day);
+        
         System.out.println(list.get(0).getDatastamp());
         logAdapter = new LogAdapter(DayLogActivity.this, (ArrayList<SimpleLog>) list);
         logs.setAdapter(logAdapter);
