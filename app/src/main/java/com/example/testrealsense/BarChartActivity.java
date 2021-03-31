@@ -87,7 +87,8 @@ public class BarChartActivity extends AppCompatActivity {
 
         });
 
-        animateCurrentData(cd[0], cd[1], barChart);
+        monthSpinner.setSelection(Integer.parseInt(cd[1])-1);
+        //animateCurrentData(cd[0], cd[1], barChart);
 
 
 
@@ -145,7 +146,9 @@ public class BarChartActivity extends AppCompatActivity {
                         Intent i=new Intent(BarChartActivity.this,DayLogActivity.class);
                         ArrayList<SimpleLog> simpleLogList = new ArrayList<SimpleLog>();
                         for (DataSnapshot child: dataSnapshot.child(String.valueOf(x)).getChildren()) {
-                            simpleLogList.add(new SimpleLog(child.getKey(), String.valueOf(child.child("distance").getValue()), String.valueOf(child.child("object").getValue())));
+                            simpleLogList.add(new SimpleLog(child.getKey(),
+                                                            String.valueOf(child.child("distance").getValue()),
+                                                            String.valueOf(child.child("object").getValue())));
                         }
                         i.putExtra("LIST", (Serializable) simpleLogList);
                         startActivity(i);
