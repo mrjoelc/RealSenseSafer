@@ -63,7 +63,6 @@ public class Utils {
     public static Bitmap loadImageFromStorage(String image){
 
         try {
-            System.out.println(new File("img/"+image).getAbsoluteFile());
 
             File f=new File("img/", image);
             System.out.println(f.canRead());
