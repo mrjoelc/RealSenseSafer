@@ -20,9 +20,11 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -93,7 +95,7 @@ public class MainActivity extends AppCompatActivity{
 
     Button barChartButton;
     Button sendLogToFirebaseButton;
-    Button loadLocalButton;
+    Switch loadLocalSwitch;
 
     private Context mAppContext;
     private TextView mBackGroundText;
@@ -131,7 +133,7 @@ public class MainActivity extends AppCompatActivity{
         mBackGroundText = findViewById(R.id.connectCameraText);
 
         barChartButton = findViewById(R.id.barchartButton);
-        loadLocalButton = findViewById(R.id.localImageButton);
+        loadLocalSwitch = findViewById(R.id.localImageswitch);
         sendLogToFirebaseButton = findViewById(R.id.sendLogToFirebase);
         img1 = findViewById(R.id.screen_view);
         graphicOverlay = findViewById(R.id.graphicOverlay);
@@ -197,13 +199,20 @@ public class MainActivity extends AppCompatActivity{
             return;
         }
     }
-
     void loadLocalImageButtonListener(){
-        loadLocalButton.setOnClickListener(new View.OnClickListener() {
+
+        loadLocalSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View view) {
-                Bitmap imgBM = Utils.loadBitmapFromAssets(MainActivity.this, "img/image1.jpg");
-                img1.setImageBitmap(imgBM);
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked) {
+                    showConnectLabel(false);
+                    Bitmap imgBM = Utils.loadBitmapFromAssets(MainActivity.this, "img/image1.jpg");
+                    img1.setImageBitmap(imgBM);
+                }
+                else {
+                    showConnectLabel(true);
+
+                }
             }
         });
     }
