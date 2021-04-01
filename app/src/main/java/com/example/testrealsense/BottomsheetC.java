@@ -60,6 +60,10 @@ public class BottomsheetC {
     public void rgbResolutionText(String s){rgbResolution.setText(s);}
 
 
+
+
+
+
     public TextView getDistanceView() {
         return distanceView;
     }

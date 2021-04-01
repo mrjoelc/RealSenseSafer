@@ -14,12 +14,14 @@ import android.widget.Spinner;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.google.firebase.database.DataSnapshot;
 
@@ -29,7 +31,10 @@ import java.util.ArrayList;
 public class BarChartActivity extends AppCompatActivity {
     String[] monthItems = {"01","02","03","04","05","06","07","08","09","10","11","12"};
     String[] daysItems = {"01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31"};
-
+    BarChart barChart;
+    BarDataSet set1;
+    BarData data;
+    private static final int MAX_X_VALUE = 31;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,15 +52,17 @@ public class BarChartActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        BarChart barChart = findViewById(R.id.barChart);
+        barChart = findViewById(R.id.barChart);
 
         String[] cd = Utils.getCurrentDay();
+        createChartData(cd[0], cd[1]);
+
 
 
         yearSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                animateCurrentData(cd[0], cd[1], barChart);
+               // animateCurrentData(cd[0], cd[1], barChart);
             }
 
             @Override
@@ -68,8 +75,9 @@ public class BarChartActivity extends AppCompatActivity {
         monthSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                System.out.println(position);
-                animateCurrentData(cd[0],monthItems[position] , barChart);
+                //animateCurrentData(cd[0],monthItems[position] , barChart);
+                createChartData(cd[0],monthItems[position]);
+
             }
 
             @Override
@@ -80,19 +88,101 @@ public class BarChartActivity extends AppCompatActivity {
         });
 
         monthSpinner.setSelection(Integer.parseInt(cd[1])-1);
-        //animateCurrentData(cd[0], cd[1], barChart);
+        createChartData(cd[0],cd[1]);
 
 
 
 
     }
 
-    public BarChart barChartConfig(ArrayList<BarEntry> days, BarChart barChart){
+    private void configureChartAppearance() {
+        barChart.setFitBars(true);
+        barChart.getDescription().setEnabled(true);
+        barChart.getDescription().setText("Minimum distances exceeded");
+        barChart.animateY(300);
+        barChart.setTouchEnabled(true);
+
+        set1.setColors(Color.parseColor("#FFA500"));
+
+        XAxis xAxis = barChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTH_SIDED);
+        xAxis.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return daysItems[(int) value];
+            }
+        });
+
+        YAxis axisLeft = barChart.getAxisLeft();
+        axisLeft.setGranularity(1f);
+        axisLeft.setAxisMinimum(0);
+
+        YAxis axisRight = barChart.getAxisRight();
+        axisRight.setGranularity(1f);
+        axisRight.setAxisMinimum(0);
+    }
+
+    private void createChartData(String year, String month) {
+        ArrayList<BarEntry> values = new ArrayList<>();
+        DatabaseUtils.getDataLogFromFirebaseYM(year, month, new CallbackFirebaseData() {
+            @Override
+            public void onCallback(DataSnapshot monthDS) {
+                for (DataSnapshot dayDS: monthDS.getChildren()){
+                    for (int i = 0; i < MAX_X_VALUE; i++) {
+                        if (dayDS.getKey().equals(daysItems[i])) {
+                            values.add(new BarEntry(i, (int)dayDS.getChildrenCount()));
+                        }else values.add(new BarEntry(i, 0));
+                    }
+                    barChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+                        @Override
+                        public void onValueSelected(Entry e, Highlight h) {
+                            int x= (int) e.getX();
+                            System.out.println("Bin Selezionato: " + x);
+                            Intent i=new Intent(BarChartActivity.this,DayLogActivity.class);
+                            ArrayList<SimpleLog> simpleLogList = new ArrayList<SimpleLog>();
+                            for (DataSnapshot child: monthDS.child(String.valueOf(x)).getChildren()) {
+                                simpleLogList.add(new SimpleLog(child.getKey(),
+                                        String.valueOf(child.child("distance").getValue()),
+                                        String.valueOf(child.child("object").getValue())));
+                            }
+                            i.putExtra("LIST", (Serializable) simpleLogList);
+                            i.putExtra("DAY", String.valueOf(x));
+                            startActivity(i);
+                        }
+
+                        @Override
+                        public void onNothingSelected() {
+
+                        }
+                    });
+                }
+                set1 = new BarDataSet(values, "days");
+
+                ArrayList<IBarDataSet> dataSets = new ArrayList<>();
+                dataSets.add(set1);
+
+                data = new BarData(dataSets);
+                configureChartAppearance();
+                prepareChartData(data);
+
+
+            }
+        });
+    }
+
+
+    private void prepareChartData(BarData data) {
+        data.setValueTextSize(12f);
+        barChart.setData(data);
+        barChart.invalidate();
+    }
+
+   /* public BarChart barChartConfig(ArrayList<BarEntry> days, BarChart barChart){
         BarDataSet barDataSet = new BarDataSet(days, "days");
         barDataSet.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
-                return "" + ((int) value);
+                return "" +  daysItems[(int) value];
             }
         });
 
@@ -106,11 +196,11 @@ public class BarChartActivity extends AppCompatActivity {
         xAxis.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
-                return daysItems[(int) value % daysItems.length];
+                return daysItems[(int) value];
             }
         });
-        xAxis.setGranularityEnabled(true);
-        xAxis.setGranularity(1f); // only intervals of 1 day
+        //xAxis.setGranularityEnabled(true);
+        //xAxis.setGranularity(1f); // only intervals of 1 day
 
         barChart.getLegend().setEnabled(false);
         BarData barData = new BarData(barDataSet);
@@ -157,7 +247,7 @@ public class BarChartActivity extends AppCompatActivity {
             }
         });
 
-    }
+    }*/
 
     @Override
     public void onBackPressed() {
