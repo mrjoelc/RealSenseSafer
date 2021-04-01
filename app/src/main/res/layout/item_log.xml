@@ -1,57 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:background="@drawable/bgitemlog"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="10dp"
-    >
+    android:background="@drawable/bgitemlog"
+    android:orientation="horizontal"
+    android:layout_marginBottom="20dp"
+    android:layout_height="100dp">
+
     <LinearLayout
         android:layout_marginLeft="16dp"
         android:orientation="vertical"
-        android:layout_weight="2"
         android:layout_width="220dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
-        >
-
-        <TextView
-            android:id="@+id/time"
-            android:layout_marginTop="0dp"
-            android:textSize="22dp"
-            android:textColor="#FFF"
-            android:textStyle="bold"
-            android:text="Time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_weight="1"
-        android:layout_marginLeft="16dp"
-        android:orientation="vertical"
-        android:layout_width="220dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp">
+        android:layout_height="match_parent">
 
         <TextView
             android:id="@+id/object"
-            android:textSize="18sp"
-            android:textColor="#FFF"
-            android:text="object"
+            android:layout_marginTop="19dp"
+            android:textSize="22sp"
+            android:textColor="@color/colorAccent"
+            android:text="Object"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
 
         <TextView
             android:id="@+id/distance"
             android:textSize="18sp"
-            android:textColor="#FFF"
-            android:text="distance"
+            android:textColor="#ADADAD"
+            android:layout_marginTop="8dp"
+            android:text="Distance"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_marginTop="30dp"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/time"
+            android:textSize="18sp"
+            android:textColor="@color/colorAccent"
+            android:layout_marginTop="8dp"
+            android:text="Time"
+            android:gravity="right"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
 
 </LinearLayout>
