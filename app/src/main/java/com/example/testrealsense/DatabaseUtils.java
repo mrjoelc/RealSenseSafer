@@ -37,8 +37,9 @@ public class DatabaseUtils {
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mContext = activity;
-        userUID = mAuth.getCurrentUser().getUid();
         signInAnonymous();
+
+
     }
 
     public FirebaseUser getFireBaseUser(){
@@ -93,6 +94,7 @@ public class DatabaseUtils {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
+                            userUID = mAuth.getCurrentUser().getUid();
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInAnonymously:success " + mAuth.getCurrentUser().getUid());
                         } else {
