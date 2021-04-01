@@ -114,9 +114,8 @@
         <item>12</item>
     </string-array>
     <string-array name="models" translatable="false">
-        <item>Modello1</item>
-        <item>Modello2</item>
-        <item>Modello3</item>
+        <item>lite-model_object_detection_mobile_object_labeler_v1_1.tflite</item>
+        <item>Non funziona</item>
     </string-array>
     <string-array name="distances" translatable="false">
         <item>media</item>

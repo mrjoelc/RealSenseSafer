@@ -18,6 +18,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -151,6 +152,21 @@ public class MainActivity extends AppCompatActivity{
 
         bs = new BottomsheetC(sheetBehavior, bottomSheetLayout, bottomSheetArrowImageView, gestureLayout);
         bs.setContentBottomSheet(fps,msDetection,depthResolution,rgbResolution, modelML_spinner, distance_spinner, computation_spinner);
+
+        bs.getModelML_spinner().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                System.out.println(position);
+                mBackGroundText.setText(bs.getModelML_spinner().getSelectedItem().toString());
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
+            }
+
+        });
 
         //WriteLogcat wl = new WriteLogcat();
         takeObjectDict();

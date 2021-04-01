@@ -63,6 +63,7 @@ public class BottomsheetC {
 
 
 
+<<<<<<< Updated upstream
 
     public TextView getDistanceView() {
         return distanceView;

@@ -1,25 +1,18 @@
 package com.example.testrealsense;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.testrealsense.Helper.GraphicOverlay;
 import com.example.testrealsense.Helper.ObjectGraphics;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.mlkit.common.model.LocalModel;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.objects.DetectedObject;
@@ -39,14 +32,10 @@ import com.intel.realsense.librealsense.RsContext;
 import com.intel.realsense.librealsense.StreamType;
 import com.intel.realsense.librealsense.VideoFrame;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import androidx.annotation.NonNull;
 
@@ -109,7 +98,7 @@ public class StreamDetection extends Thread{
 
     public StreamDetection(ImageView img1, GraphicOverlay graphicOverlay, TextView distanceView, TextView fps,TextView msDetection, Context context, HashMap<String, Float> objectDict, DatabaseUtils databaseUtils) {
         localModel = new LocalModel.Builder()
-                .setAssetFilePath("lite-model_object_detection_mobile_object_labeler_v1_1.tflite")
+                .setAssetFilePath("models/lite-model_object_detection_mobile_object_labeler_v1_1.tflite")
                 .build();
         customObjectDetectorOptions =
                 new CustomObjectDetectorOptions.Builder(localModel)
@@ -147,8 +136,18 @@ public class StreamDetection extends Thread{
     }
 
     public StreamDetection(ImageView img1, GraphicOverlay graphicOverlay, BottomsheetC bs, Context context, HashMap<String, Float> objectDict, DatabaseUtils databaseUtils) {
+        this.img1 = img1;
+        this.graphicOverlay = graphicOverlay;
+        StreamDetection.context = context;
+        this.objectDict = objectDict;
+        this.databaseUtils = databaseUtils;
+        this.bs = bs;
+
+        String assetmodel = bs.getModelML_spinner().getSelectedItem().toString();
+
         localModel = new LocalModel.Builder()
-                .setAssetFilePath("lite-model_object_detection_mobile_object_labeler_v1_1.tflite")
+                //.setAssetFilePath("models/lite-model_object_detection_mobile_object_labeler_v1_1.tflite")
+                .setAssetFilePath("models/"+assetmodel)
                 .build();
         customObjectDetectorOptions =
                 new CustomObjectDetectorOptions.Builder(localModel)
@@ -159,12 +158,6 @@ public class StreamDetection extends Thread{
                         .setMaxPerObjectLabelCount(1)
                         .build();
 
-        this.img1 = img1;
-        this.graphicOverlay = graphicOverlay;
-        StreamDetection.context = context;
-        this.objectDict = objectDict;
-        this.databaseUtils = databaseUtils;
-        this.bs = bs;
 
         mPipeline = new Pipeline();
         mColorizer = new Colorizer();
