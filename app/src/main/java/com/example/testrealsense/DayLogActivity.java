@@ -44,10 +44,10 @@ public class DayLogActivity extends AppCompatActivity {
         Intent i = getIntent();
         list = (ArrayList<SimpleLog>) i.getSerializableExtra("LIST");
         String day = i.getStringExtra("DAY");
-
-        title.setText("Log di giorno" + day);
+        String month = i.getStringExtra("MONTH");
+        title.setText("Log day " + day + "-" + month);
         
-        System.out.println(list.get(0).getDatastamp());
+        System.out.println(list.size());
         logAdapter = new LogAdapter(DayLogActivity.this, (ArrayList<SimpleLog>) list);
         logs.setAdapter(logAdapter);
 

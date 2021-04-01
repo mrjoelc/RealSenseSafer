@@ -59,12 +59,6 @@ public class BottomsheetC {
     public void depthResolutionText(String s){depthResolution.setText(s);}
     public void rgbResolutionText(String s){rgbResolution.setText(s);}
 
-
-
-
-
-<<<<<<< Updated upstream
-
     public TextView getDistanceView() {
         return distanceView;
     }

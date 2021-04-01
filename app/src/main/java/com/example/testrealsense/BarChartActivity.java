@@ -136,24 +136,24 @@ public class BarChartActivity extends AppCompatActivity {
                     barChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
                         @Override
                         public void onValueSelected(Entry e, Highlight h) {
-                            int x= (int) e.getX();
+                            String x=  daysItems[(int) e.getX()];
                             System.out.println("Bin Selezionato: " + x);
-                            Intent i=new Intent(BarChartActivity.this,DayLogActivity.class);
                             ArrayList<SimpleLog> simpleLogList = new ArrayList<SimpleLog>();
                             for (DataSnapshot child: monthDS.child(String.valueOf(x)).getChildren()) {
                                 simpleLogList.add(new SimpleLog(child.getKey(),
                                         String.valueOf(child.child("distance").getValue()),
                                         String.valueOf(child.child("object").getValue())));
                             }
+
+                            Intent i=new Intent(BarChartActivity.this,DayLogActivity.class);
                             i.putExtra("LIST", (Serializable) simpleLogList);
-                            i.putExtra("DAY", String.valueOf(x));
+                            i.putExtra("DAY", x);
+                            i.putExtra("MONTH", monthDS.getKey());
                             startActivity(i);
                         }
 
                         @Override
-                        public void onNothingSelected() {
-
-                        }
+                        public void onNothingSelected() {}
                     });
                 }
                 set1 = new BarDataSet(values, "days");
@@ -164,90 +164,15 @@ public class BarChartActivity extends AppCompatActivity {
                 data = new BarData(dataSets);
                 configureChartAppearance();
                 prepareChartData(data);
-
-
             }
         });
     }
-
 
     private void prepareChartData(BarData data) {
         data.setValueTextSize(12f);
         barChart.setData(data);
         barChart.invalidate();
     }
-
-   /* public BarChart barChartConfig(ArrayList<BarEntry> days, BarChart barChart){
-        BarDataSet barDataSet = new BarDataSet(days, "days");
-        barDataSet.setValueFormatter(new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                return "" +  daysItems[(int) value];
-            }
-        });
-
-        barDataSet.setColors(Color.parseColor("#FFA500"));
-        barDataSet.setValueTextColor(Color.BLACK);
-        barDataSet.setValueTextSize(16f);
-
-        XAxis xAxis = barChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTH_SIDED);
-        xAxis.setDrawLabels(true);
-        xAxis.setValueFormatter(new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                return daysItems[(int) value];
-            }
-        });
-        //xAxis.setGranularityEnabled(true);
-        //xAxis.setGranularity(1f); // only intervals of 1 day
-
-        barChart.getLegend().setEnabled(false);
-        BarData barData = new BarData(barDataSet);
-        barChart.setFitBars(true);
-        barChart.setData(barData);
-        barChart.getDescription().setText("Minimum distances exceeded");
-        //barChart.getDescription().setText("bar chart example");
-        barChart.animateY(300);
-        barChart.setTouchEnabled(true);
-        return barChart;
-    }
-
-    public void animateCurrentData(String year, String month, BarChart barChart){
-        ArrayList<BarEntry> days = new ArrayList<>();
-        DatabaseUtils.getDataLogFromFirebaseYM(year, month, new CallbackFirebaseData() {
-            @Override
-            public void onCallback(DataSnapshot dataSnapshot) {
-                dataSnapshot.getChildrenCount();
-                for (DataSnapshot child: dataSnapshot.getChildren()) {
-                    days.add(new BarEntry(Float.parseFloat(child.getKey()), (int)child.getChildrenCount()));
-                }
-                barChartConfig(days, barChart).setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
-                    @Override
-                    public void onValueSelected(Entry e, Highlight h) {
-                        int x= (int) e.getX();
-                        System.out.println("Bin Selezionato: " + x);
-                        Intent i=new Intent(BarChartActivity.this,DayLogActivity.class);
-                        ArrayList<SimpleLog> simpleLogList = new ArrayList<SimpleLog>();
-                        for (DataSnapshot child: dataSnapshot.child(String.valueOf(x)).getChildren()) {
-                            simpleLogList.add(new SimpleLog(child.getKey(),
-                                                            String.valueOf(child.child("distance").getValue()),
-                                                            String.valueOf(child.child("object").getValue())));
-                        }
-                        i.putExtra("LIST", (Serializable) simpleLogList);
-                        i.putExtra("DAY", String.valueOf(x));
-                        startActivity(i);
-                    }
-
-                    @Override
-                    public void onNothingSelected() {
-
-                    }
-                });
-            }
-        });
-
-    }*/
 
     @Override
     public void onBackPressed() {
