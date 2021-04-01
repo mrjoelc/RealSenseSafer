@@ -208,10 +208,14 @@ public class MainActivity extends AppCompatActivity{
                     showConnectLabel(false);
                     Bitmap imgBM = Utils.loadBitmapFromAssets(MainActivity.this, "img/image1.jpg");
                     img1.setImageBitmap(imgBM);
+                    InputImage image = InputImage.fromBitmap(imgBM, 0);
+                    Detector detector = new Detector(MainActivity.this, graphicOverlay, objectDict,bs);
+                    detector.startDetection(image);
+
                 }
                 else {
+                    graphicOverlay.clear();
                     showConnectLabel(true);
-
                 }
             }
         });

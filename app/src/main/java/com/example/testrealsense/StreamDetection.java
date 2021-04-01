@@ -96,7 +96,7 @@ public class StreamDetection extends Thread{
 
 
 
-    public StreamDetection(ImageView img1, GraphicOverlay graphicOverlay, TextView distanceView, TextView fps,TextView msDetection, Context context, HashMap<String, Float> objectDict, DatabaseUtils databaseUtils) {
+    /*public StreamDetection(ImageView img1, GraphicOverlay graphicOverlay, TextView distanceView, TextView fps,TextView msDetection, Context context, HashMap<String, Float> objectDict, DatabaseUtils databaseUtils) {
         localModel = new LocalModel.Builder()
                 .setAssetFilePath("models/lite-model_object_detection_mobile_object_labeler_v1_1.tflite")
                 .build();
@@ -126,14 +126,14 @@ public class StreamDetection extends Thread{
 
         mp = MediaPlayer.create( context, R.raw.alert_attention);
 
-        /*try {
+        try {
             System.out.println("QUI!!!!!!!!!!");
             img1.setImageBitmap(Utils.loadBitmapFromAssets(context,"img/cantieri-edili-2.jpg" ));
 
         } catch (Exception e) {
             Log.e(TAG, "streaming, error: " + e.getMessage());
-        }*/
-    }
+        }
+    }*/
 
     public StreamDetection(ImageView img1, GraphicOverlay graphicOverlay, BottomsheetC bs, Context context, HashMap<String, Float> objectDict, DatabaseUtils databaseUtils) {
         this.img1 = img1;
