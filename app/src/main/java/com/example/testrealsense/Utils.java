@@ -60,27 +60,6 @@ public class Utils {
         }
     }
 
-    public static Bitmap loadImageFromStorage(String image){
-
-        try {
-
-            File f=new File("img/", image);
-            System.out.println(f.canRead());
-
-            Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
-
-            //ImageView img=(ImageView)findViewById(R.id.imgPicker);
-            //img.setImageBitmap(b);
-            return b;
-        }
-        catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
     public static Bitmap loadBitmapFromAssets(Context context, String path) {
         InputStream bitmap = null;
         try {

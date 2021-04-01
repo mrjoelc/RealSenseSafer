@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 System.out.println(position);
-                mBackGroundText.setText(bs.getModelML_spinner().getSelectedItem().toString());
+                //mBackGroundText.setText(bs.getModelML_spinner().getSelectedItem().toString());
 
             }
 
@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity{
         loadLocalButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Bitmap imgBM = Utils.loadImageFromStorage("cantieri-edili-2.jpg");
+                Bitmap imgBM = Utils.loadBitmapFromAssets(MainActivity.this, "img/image1.jpg");
                 img1.setImageBitmap(imgBM);
             }
         });
