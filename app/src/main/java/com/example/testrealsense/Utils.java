@@ -11,6 +11,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,6 +58,28 @@ public class Utils {
         } catch (final Exception e) {
             Log.e("Bitmap", "Save Bitmap Excetion!");
         }
+    }
+
+    public static Bitmap loadImageFromStorage(String image){
+
+        try {
+            System.out.println(new File("img/"+image).getAbsoluteFile());
+
+            File f=new File("img/", image);
+            System.out.println(f.canRead());
+
+            Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
+
+            //ImageView img=(ImageView)findViewById(R.id.imgPicker);
+            //img.setImageBitmap(b);
+            return b;
+        }
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     public static Bitmap loadBitmapFromAssets(Context context, String path) {

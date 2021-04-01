@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity{
 
     Button barChartButton;
     Button sendLogToFirebaseButton;
+    Button loadLocalButton;
 
     private Context mAppContext;
     private TextView mBackGroundText;
@@ -130,6 +131,7 @@ public class MainActivity extends AppCompatActivity{
         mBackGroundText = findViewById(R.id.connectCameraText);
 
         barChartButton = findViewById(R.id.barchartButton);
+        loadLocalButton = findViewById(R.id.localImageButton);
         sendLogToFirebaseButton = findViewById(R.id.sendLogToFirebase);
         img1 = findViewById(R.id.screen_view);
         graphicOverlay = findViewById(R.id.graphicOverlay);
@@ -181,6 +183,7 @@ public class MainActivity extends AppCompatActivity{
 
         barChartButtonListener();
         sendLogButtonListener();
+        loadLocalImageButtonListener();
     }
 
     void checkPermission(){
@@ -193,6 +196,16 @@ public class MainActivity extends AppCompatActivity{
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
             return;
         }
+    }
+
+    void loadLocalImageButtonListener(){
+        loadLocalButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Bitmap imgBM = Utils.loadImageFromStorage("cantieri-edili-2.jpg");
+                img1.setImageBitmap(imgBM);
+            }
+        });
     }
 
     void sendLogButtonListener(){

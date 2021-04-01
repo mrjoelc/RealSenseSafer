@@ -102,6 +102,15 @@ public class BarChartActivity extends AppCompatActivity {
         barChart.animateY(300);
         barChart.setTouchEnabled(true);
 
+        set1.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                if ( (int) value < 1) {
+                    return "";
+                }
+                return "" + (int)value;
+            }
+        });
         set1.setColors(Color.parseColor("#FFA500"));
 
         XAxis xAxis = barChart.getXAxis();
