@@ -53,13 +53,6 @@ public class BottomsheetC {
         this.computation_spinner = computation_spinner;
     }
 
-    public void setDistanceViewText(String s){distanceView.setText(s);}
-    public void fpsText(String s){fps.setText(s);}
-    public void msDetectionText(String s){msDetection.setText(s);}
-    public void depthResolutionText(String s){depthResolution.setText(s);}
-    public void rgbResolutionText(String s){rgbResolution.setText(s);}
-
-
     public TextView getDistanceView() {
         return distanceView;
     }

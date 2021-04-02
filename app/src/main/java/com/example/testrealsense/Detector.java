@@ -1,6 +1,7 @@
 package com.example.testrealsense;
 
 import android.content.Context;
+import android.os.SystemClock;
 
 import com.example.testrealsense.Helper.GraphicOverlay;
 import com.example.testrealsense.Helper.ObjectGraphics;
@@ -13,7 +14,6 @@ import com.google.mlkit.vision.objects.ObjectDetection;
 import com.google.mlkit.vision.objects.ObjectDetector;
 import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions;
 
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -29,13 +29,7 @@ public class Detector {
     GraphicOverlay graphicOverlay;
     ObjectGraphics drawBoundingBoxLabel;
 
-    long currentTime;
-    long previousTime = 0;
-    long deltaTime = 0;
-    long aproxFps = 0;
-
     HashMap<String, Float> objectDict;
-    long startTime;
 
     public Detector(Context context, GraphicOverlay graphicOverlay, HashMap<String, Float> objectDict, BottomsheetC bs) {
         this.context = context;
@@ -61,40 +55,46 @@ public class Detector {
 
     public void startDetection(InputImage image){
         objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
-        startTime = System.currentTimeMillis();
+        long startTime = SystemClock.elapsedRealtime();
+
         objectDetector.process(image).addOnCompleteListener(new OnCompleteListener<List<DetectedObject>>() {
             @Override
             public void onComplete(@NonNull Task<List<DetectedObject>> task) {
                 graphicOverlay.clear();
-                long time = (System.currentTimeMillis() - startTime) / 100000;
-                //msDetection.setText(String.valueOf(time));
-                bs.msDetectionText(String.valueOf(time));
+
+                computeDetectionTime(startTime);
 
                 List<DetectedObject> detectedObjects = task.getResult();
                 for (DetectedObject detectedObject : detectedObjects) {
                     System.out.println(detectedObject.getLabels().get(0).getText());
                     /** Controllo della presenza dell'ggetto identificato nella lista di oggetti critici **/
-                    if (detectedObject.getLabels().size() > 0  && objectDict.containsKey(detectedObject.getLabels().get(0).getText())) {
+                   // if (detectedObject.getLabels().size() > 0  && objectDict.containsKey(detectedObject.getLabels().get(0).getText())) {
                         String label = detectedObject.getLabels().get(0).getText();
 
                         boolean alarm = false;
                         drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), 5, alarm);
                         drawBoundingBoxLabel.drawBoundingBoxAndLabel();
-                    }
+                   // }
 
                 }
-                printFPS();
+
+                computeFPS(startTime);
             }
         });
     }
 
-    void printFPS() {
-        currentTime = Calendar.getInstance().getTimeInMillis();
-        deltaTime = currentTime - previousTime;
-        aproxFps = 10000/deltaTime;
-        previousTime = currentTime;
-        bs.getFps().setText(String.valueOf(aproxFps));
-        //fps.setText("FPS detection: " + String.valueOf(aproxFps));
+
+    void computeFPS(float startTime) {
+        float endTime2 = SystemClock.elapsedRealtime();
+        float elapsedMilliSeconds2 = endTime2 - startTime;
+        float elapsedSeconds2 =  1000 / elapsedMilliSeconds2;
+        bs.getFps().setText(elapsedSeconds2+"fps");
+    }
+
+    void computeDetectionTime(float startTime) {
+        float endTime = SystemClock.elapsedRealtime();
+        float elapsedMilliSeconds = endTime - startTime;
+        bs.getMsDetection().setText(elapsedMilliSeconds+"ms");
     }
 
 

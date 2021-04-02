@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -176,7 +177,8 @@ public class StreamDetection extends Thread{
         }*/
     }
 
-
+    //****************************************PER MIGLIORARE PERFORMANCE PROVARE INPUTIMAGE.FROMBYTE ARRAY***********************************************//
+    // https://stackoverflow.com/questions/57551321/firebase-mlkit-facedetection-slow-for-android
     @Override
     public void run() {
         super.run();
@@ -211,8 +213,7 @@ public class StreamDetection extends Thread{
                                     public void onComplete(@NonNull Task<List<DetectedObject>> task) {
                                         graphicOverlay.clear();
                                         long time = (System.currentTimeMillis() - startTime) / 100000;
-                                        //msDetection.setText(String.valueOf(time));
-                                        bs.msDetectionText(String.valueOf(time));
+                                        bs.getMsDetection().setText(String.valueOf(time));
 
                                         List<DetectedObject> detectedObjects = task.getResult();
                                         for (DetectedObject detectedObject : detectedObjects) {
@@ -259,9 +260,9 @@ public class StreamDetection extends Thread{
         try(Config config  = new Config())
         {
             config.enableStream(StreamType.DEPTH,640, 480);
-            bs.depthResolutionText("640x480");
+            bs.getDepthResolution().setText("640x480");
             config.enableStream(StreamType.COLOR,640, 480);
-            bs.rgbResolutionText("640x480");
+            bs.getRgbResolution().setText("640x480");
 
             // try statement needed here to release resources allocated by the Pipeline:start() method
             try(PipelineProfile pp = mPipeline.start(config)){}
@@ -302,7 +303,7 @@ public class StreamDetection extends Thread{
         deltaTime = currentTime - previousTime;
         aproxFps = 1000/deltaTime;
         previousTime = currentTime;
-        bs.fpsText(String.valueOf(aproxFps));
+        bs.getFps().setText(String.valueOf(aproxFps));
         //fps.setText("FPS detection: " + String.valueOf(aproxFps));
     }
 

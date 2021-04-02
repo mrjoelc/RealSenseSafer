@@ -46,7 +46,7 @@ public class LogAdapter extends RecyclerView.Adapter<LogAdapter.MyViewHolder> {
 
         myViewHolder.time.setText(time);
         myViewHolder.object.setText(object);
-        myViewHolder.distance.setText(distance);
+        myViewHolder.distance.setText(distance +"cm");
 
 
     }
