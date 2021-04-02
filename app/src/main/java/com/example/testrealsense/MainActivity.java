@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity{
         sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
         bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
         //bottomsheetContent
-        fps = findViewById(R.id.fps);
+        fps = findViewById(R.id.fpsValue);
         msDetection = findViewById(R.id.detectionTime);
         depthResolution = findViewById(R.id.depthResolution);
         rgbResolution = findViewById(R.id.rgbResolution);
@@ -209,6 +209,7 @@ public class MainActivity extends AppCompatActivity{
                     Bitmap imgBM = Utils.loadBitmapFromAssets(MainActivity.this, "img/image1.jpg");
                     img1.setImageBitmap(imgBM);
                     InputImage image = InputImage.fromBitmap(imgBM, 0);
+
                     Detector detector = new Detector(MainActivity.this, graphicOverlay, objectDict,bs);
                     detector.startDetection(image);
 

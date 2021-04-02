@@ -22,7 +22,7 @@
 
 
             <TextView
-                android:layout_marginRight="10dp"
+                android:layout_marginRight="20dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="SAFER LOG"
@@ -52,11 +52,12 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             <TextView
-                android:textSize="20dp"
+                android:textSize="18sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="Anno:"
+                android:layout_marginLeft="20dp"
+                android:text="Select Year"
                 android:textColor="@android:color/black" />
 
             <Spinner
@@ -64,7 +65,8 @@
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:textSize="18sp"
                 android:entries="@array/year"
                 />
         </RelativeLayout>
@@ -74,11 +76,12 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             <TextView
-                android:textSize="20dp"
+                android:textSize="18sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="Mese:"
+                android:layout_marginLeft="20dp"
+                android:text="Select Month"
                 android:textColor="@android:color/black" />
 
             <Spinner
@@ -87,6 +90,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_alignParentRight="true"
+                android:textSize="18sp"
                 android:entries="@array/month"
                 />
         </RelativeLayout>

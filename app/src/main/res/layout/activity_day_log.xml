@@ -24,10 +24,10 @@
 
             <TextView
                 android:id="@+id/title"
-                android:layout_marginRight="10dp"
+                android:layout_marginRight="20dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Day X Log"
+                android:text="DAY X LOG"
                 android:textStyle="bold"
                 android:textSize="20dp"
                 android:textColor="#ffffff"/>
@@ -51,7 +51,7 @@
         android:textSize="16dp"
         android:textColor="#9A9A9A"
         android:layout_marginTop="30dp"
-        android:text="Nessun altro log"
+        android:text="No other logs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal" />
