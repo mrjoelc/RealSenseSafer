@@ -6,14 +6,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
 
-    android:background="#00000000">
+    android:background="@color/black">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black"
         android:orientation="vertical">
+
+        <ImageView
+            android:layout_marginTop="-100dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bgmain3"
+            ></ImageView>
 
 
 
@@ -23,7 +29,7 @@
             android:id="@+id/screen_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            />
+            ></ImageView>
 
     <!--    <ImageView
             android:adjustViewBounds="true"
@@ -38,7 +44,7 @@
 
         <com.example.testrealsense.Helper.GraphicOverlay
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:id="@+id/graphicOverlay"
             />
 
@@ -51,62 +57,58 @@
             android:layout_centerHorizontal="true">
 
             <TextView
+                android:layout_marginBottom="50dp"
                 android:id="@+id/connectCameraText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|center_horizontal"
-                android:background="@color/black"
                 android:textSize="20dp"
                 android:text="Connect a RealSense camera"
                 android:textColor="#ffffff"/>
 
             <LinearLayout
+                android:layout_marginLeft="60dp"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <Button
                     android:id="@+id/sendLogToFirebase"
-                    android:layout_marginTop="25dp"
-                    android:text="send Log To Firebase"
+                    android:text="send Log"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:layout_height="50dp"
+                    android:layout_height="60dp"
                     android:layout_width="75dp"/>
 
                 <Button
                     android:id="@+id/barchartButton"
-                    android:layout_marginTop="30dp"
                     android:text="Go to log"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:layout_height="50dp"
+                    android:layout_height="60dp"
                     android:layout_width="75dp"/>
 
                 <LinearLayout
-                    android:layout_marginTop="25dp"
                     android:layout_weight="1"
-                    android:layout_width="wrap_content"
+                    android:layout_marginLeft="25dp"
+                    android:layout_width="150dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     >
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="local image / stream"
-                        android:textColor="#FFF"></TextView>
-
                     <Switch
-
+                        android:text="local image / stream"
                         android:id="@+id/localImageswitch"
                         android:layout_gravity="center"
                         android:layout_height="50dp"
-                        android:layout_width="75dp"/>
+
+                        android:textColor="#FFFF"
+                        android:textStyle="bold"
+                        android:layout_width="wrap_content"/>
                 </LinearLayout>
-
-
             </LinearLayout>
+
+
 
 
         </androidx.appcompat.widget.LinearLayoutCompat>
