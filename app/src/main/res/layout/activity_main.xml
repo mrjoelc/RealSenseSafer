@@ -15,38 +15,45 @@
         android:orientation="vertical">
 
         <ImageView
-            android:layout_marginTop="-100dp"
+
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/bgmain3"
             ></ImageView>
 
-
-
-        <ImageView
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter"
-            android:id="@+id/screen_view"
+        <RelativeLayout
+            android:padding="15dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            ></ImageView>
+            android:orientation="vertical"
+            >
 
-    <!--    <ImageView
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter"
-            android:alpha="0.5"
-            android:id="@+id/screenD_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />-->
+            <ImageView
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:id="@+id/screen_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                ></ImageView>
+
+            <!--    <ImageView
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:alpha="0.5"
+                    android:id="@+id/screenD_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />-->
+
+            <com.example.testrealsense.Helper.GraphicOverlay
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/graphicOverlay"
+                />
+
+        </RelativeLayout>
 
 
-
-        <com.example.testrealsense.Helper.GraphicOverlay
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/graphicOverlay"
-            />
 
         <TextView
             android:layout_centerHorizontal="true"

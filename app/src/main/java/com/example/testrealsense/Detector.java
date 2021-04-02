@@ -66,10 +66,10 @@ public class Detector {
 
                 List<DetectedObject> detectedObjects = task.getResult();
                 for (DetectedObject detectedObject : detectedObjects) {
-                    System.out.println(detectedObject.getLabels().get(0).getText());
+                    //System.out.println(detectedObject.getLabels().get(0).getText());
                     /** Controllo della presenza dell'ggetto identificato nella lista di oggetti critici **/
                    // if (detectedObject.getLabels().size() > 0  && objectDict.containsKey(detectedObject.getLabels().get(0).getText())) {
-                        String label = detectedObject.getLabels().get(0).getText();
+                        //String label = detectedObject.getLabels().get(0).getText();
 
                         boolean alarm = false;
                         drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), 5, alarm);
