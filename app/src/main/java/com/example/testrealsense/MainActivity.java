@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity{
         sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
         bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
         //bottomsheetContent
-        fps = findViewById(R.id.fps);
+        fps = findViewById(R.id.fpsValue);
         msDetection = findViewById(R.id.detectionTime);
         depthResolution = findViewById(R.id.depthResolution);
         rgbResolution = findViewById(R.id.rgbResolution);
@@ -215,6 +215,8 @@ public class MainActivity extends AppCompatActivity{
                 }
                 else {
                     graphicOverlay.clear();
+                    Bitmap img = Utils.loadBitmapFromAssets(MainActivity.this, "img/no_image.png");
+                    img1.setImageBitmap(img);
                     showConnectLabel(true);
                 }
             }
