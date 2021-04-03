@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -115,7 +116,11 @@ public class MainActivity extends AppCompatActivity{
     Spinner computation_spinner;
 
     ImageView img1;
+    Bitmap imgBM;
+    Bitmap img;
+    InputImage image;
 
+    Detector detector;
     StreamDetection stream_detection;
 
     HashMap<String, Float> objectDict;
@@ -205,18 +210,18 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked) {
+                    graphicOverlay.clear();
                     showConnectLabel(false);
-                    Bitmap imgBM = Utils.loadBitmapFromAssets(MainActivity.this, "img/image1.jpg");
+                    imgBM = Utils.loadBitmapFromAssets(MainActivity.this, "img/image1.jpg");
                     img1.setImageBitmap(imgBM);
-                    InputImage image = InputImage.fromBitmap(imgBM, 0);
-
-                    Detector detector = new Detector(MainActivity.this, graphicOverlay, objectDict,bs);
+                    image = InputImage.fromBitmap(imgBM, 0);
+                    detector = new Detector(MainActivity.this, graphicOverlay, objectDict,bs);
                     detector.startDetection(image);
 
                 }
                 else {
                     graphicOverlay.clear();
-                    Bitmap img = Utils.loadBitmapFromAssets(MainActivity.this, "img/no_image.png");
+                    img = Utils.loadBitmapFromAssets(MainActivity.this, "img/no_image.png");
                     img1.setImageBitmap(img);
                     showConnectLabel(true);
                 }

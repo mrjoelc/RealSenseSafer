@@ -7,12 +7,13 @@ import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.util.Log;
 
+import com.example.testrealsense.Helper.GraphicOverlay;
+import com.google.mlkit.vision.objects.DetectedObject;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,6 +72,27 @@ public class Utils {
             e1.printStackTrace();
         }
         return null;
+    }
+
+    public static float[] getScaledBoundingBox(DetectedObject detectedObject, float scaleFactor){
+        float left = detectedObject.getBoundingBox().right * scaleFactor ;
+        float top = detectedObject.getBoundingBox().top * scaleFactor;
+        float right = detectedObject.getBoundingBox().left * scaleFactor;
+        float bottom = detectedObject.getBoundingBox().bottom * scaleFactor;
+        return new float[]{(int) left, (int) top, (int) right, (int) bottom};
+    }
+
+    public static float calculateScaleFactor(GraphicOverlay graphicOverlay, int imageWidth){
+        return (float) graphicOverlay.getWidth() / imageWidth;
+    }
+
+    void pointsInsideRect(float[] points){
+        for(float j=points[1]; j<points[3]; j++){
+            for (float i=points[0]; i<points[2]; i++){
+                //Preleva i valori di distanza e computa qualcosa
+            }
+        }
+        System.out.println("fine");
     }
 
     public static Bitmap rgb2Bitmap(byte[] data, int width, int height) {

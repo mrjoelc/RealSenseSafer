@@ -25,17 +25,23 @@ public class Detector {
     CustomObjectDetectorOptions customObjectDetectorOptions;
     Context context;
     BottomsheetC bs;
+    boolean alarm;
 
     GraphicOverlay graphicOverlay;
     ObjectGraphics drawBoundingBoxLabel;
 
     HashMap<String, Float> objectDict;
 
+    Float scaleFactor;
+    float[] points;
+
     public Detector(Context context, GraphicOverlay graphicOverlay, HashMap<String, Float> objectDict, BottomsheetC bs) {
         this.context = context;
         this.bs=bs;
         this.objectDict = objectDict;
         this.graphicOverlay = graphicOverlay;
+        scaleFactor = Utils.calculateScaleFactor(graphicOverlay, 640);
+
 
         String assetmodel = bs.getModelML_spinner().getSelectedItem().toString();
 
@@ -70,9 +76,13 @@ public class Detector {
                     /** Controllo della presenza dell'ggetto identificato nella lista di oggetti critici **/
                    // if (detectedObject.getLabels().size() > 0  && objectDict.containsKey(detectedObject.getLabels().get(0).getText())) {
                         //String label = detectedObject.getLabels().get(0).getText();
+                        //Utils.calculateScaleFactor(graphicOverlay, image.getWidth());
+                        alarm = false;
+                        points = Utils.getScaledBoundingBox(detectedObject, scaleFactor);
 
-                        boolean alarm = false;
-                        drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), 5, alarm);
+                        //System.out.println(detectedObject.getBoundingBox().toString());
+
+                        drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, scaleFactor, 5, alarm);
                         drawBoundingBoxLabel.drawBoundingBoxAndLabel();
                    // }
 
