@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity{
 
 
         bs = new BottomsheetC(this,sheetBehavior, bottomSheetLayout, bottomSheetArrowImageView, gestureLayout);
-        bs.setContentBottomSheet(fps,msDetection,depthResolution,rgbResolution, modelML_spinner, distance_spinner, computation_spinner);
+        bs.setContentBottomSheet(fps,msDetection,depthResolution,rgbResolution, modelML_spinner, distance_spinner, computation_spinner, detectableObjectButton);
         bs.setModels();
         bs.getModelML_spinner().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

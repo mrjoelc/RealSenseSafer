@@ -64,8 +64,9 @@ public class BottomsheetC {
     }
 
     public void setModels(){
-        String[] arraySpinner = Utils.getFiles();
-        //String[] arraySpinner = {"Red","Blue","White","Yellow","Black", "Green","Purple","Orange","Grey"};
+        //String[] arraySpinner = Utils.getFiles();
+        //Utils.getFiles();
+        String[] arraySpinner = {"Red","Blue","White","Yellow","Black", "Green","Purple","Orange","Grey"};
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(context,
                 android.R.layout.simple_spinner_item, arraySpinner);

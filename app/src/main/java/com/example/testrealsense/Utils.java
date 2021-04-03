@@ -18,9 +18,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 public class Utils {
 
@@ -74,24 +76,20 @@ public class Utils {
         return null;
     }
 
-    public static String[] getFiles() {
+    public static void getFiles() {
 
-        // Creates an array in which we will store the names of files and directories
-        String[] pathNames;
-
-        // Creates a new File instance by converting the given pathname string
-        // into an abstract pathname
-        File f = new File("models/");
-
-        // Populates the array with names of files and directories
-        pathNames = f.list();
-
-        // For each pathname in the pathNames array
-        for (String pathname : pathNames) {
-            // Print the names of files and directories
-            System.out.println(pathname);
+        /*File f = new File("models");
+        f.mkdirs();
+        File[] file = f.listFiles();
+        ArrayList<String> arrayFiles = new ArrayList<String>();
+        if (file.length == 0)
+            System.out.println(false);
+        else {
+            for (int i=0; i<file.length; i++)
+                arrayFiles.add(file[i].getName());
         }
-        return pathNames;
+        System.out.println(arrayFiles);*/
+
     }
 
     public static float[] getScaledBoundingBox(DetectedObject detectedObject, float scaleFactor){
