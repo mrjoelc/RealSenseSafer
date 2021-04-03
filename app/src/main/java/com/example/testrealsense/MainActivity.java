@@ -6,11 +6,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.media.MediaPlayer;
 import android.os.Build;
@@ -19,6 +21,8 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -130,10 +134,15 @@ public class MainActivity extends AppCompatActivity{
     DatabaseUtils databaseUtils;
 
 
+    @SuppressLint("ResourceType")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Window window = this.getWindow();
+        window.setStatusBarColor(Color.parseColor("#ffaa12"));
+
         mAppContext = getApplicationContext();
         mBackGroundText = findViewById(R.id.connectCameraText);
 
