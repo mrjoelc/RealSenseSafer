@@ -74,6 +74,26 @@ public class Utils {
         return null;
     }
 
+    public static String[] getFiles() {
+
+        // Creates an array in which we will store the names of files and directories
+        String[] pathNames;
+
+        // Creates a new File instance by converting the given pathname string
+        // into an abstract pathname
+        File f = new File("models/");
+
+        // Populates the array with names of files and directories
+        pathNames = f.list();
+
+        // For each pathname in the pathNames array
+        for (String pathname : pathNames) {
+            // Print the names of files and directories
+            System.out.println(pathname);
+        }
+        return pathNames;
+    }
+
     public static float[] getScaledBoundingBox(DetectedObject detectedObject, float scaleFactor){
         float left = detectedObject.getBoundingBox().right * scaleFactor ;
         float top = detectedObject.getBoundingBox().top * scaleFactor;
@@ -92,7 +112,6 @@ public class Utils {
                 //Preleva i valori di distanza e computa qualcosa
             }
         }
-        System.out.println("fine");
     }
 
     public static Bitmap rgb2Bitmap(byte[] data, int width, int height) {

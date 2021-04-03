@@ -1,9 +1,11 @@
 package com.example.testrealsense;
 
+import android.content.Context;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -28,15 +30,18 @@ public class BottomsheetC {
     Spinner modelML_spinner;
     Spinner distance_spinner;
     Spinner computation_spinner;
+    Context context;
 
     Button detectableObjectButton;
 
-    public BottomsheetC(BottomSheetBehavior<LinearLayout> sheetBehavior, LinearLayout bottomSheetLayout, ImageView bottomSheetArrowImageView, LinearLayout gestureLayout) {
+    public BottomsheetC(Context context, BottomSheetBehavior<LinearLayout> sheetBehavior, LinearLayout bottomSheetLayout, ImageView bottomSheetArrowImageView, LinearLayout gestureLayout) {
         this.sheetBehavior = sheetBehavior;
         this.bottomSheetLayout = bottomSheetLayout;
         this.bottomSheetArrowImageView = bottomSheetArrowImageView;
         this.gestureLayout = gestureLayout;
+        this.context = context;
         bottomSheetBehavior();
+
 
     }
 
@@ -56,6 +61,16 @@ public class BottomsheetC {
         this.distance_spinner = distance_spinner;
         this.computation_spinner = computation_spinner;
         this.detectableObjectButton = detectableObjectButton;
+    }
+
+    public void setModels(){
+        String[] arraySpinner = Utils.getFiles();
+        //String[] arraySpinner = {"Red","Blue","White","Yellow","Black", "Green","Purple","Orange","Grey"};
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(context,
+                android.R.layout.simple_spinner_item, arraySpinner);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down view
+        modelML_spinner.setAdapter(adapter);
     }
 
     public TextView getDistanceView() {
