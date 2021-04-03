@@ -278,4 +278,11 @@
             android:entries="@array/Computation"
             />
     </RelativeLayout>
+
+    <Button
+        android:id="@+id/detectableobjectButton"
+        android:layout_width="200dp"
+        android:layout_height="60dp"
+        android:text="menage object"></Button>
+
 </LinearLayout>

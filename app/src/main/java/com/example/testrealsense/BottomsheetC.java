@@ -3,6 +3,7 @@ package com.example.testrealsense;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -28,6 +29,8 @@ public class BottomsheetC {
     Spinner distance_spinner;
     Spinner computation_spinner;
 
+    Button detectableObjectButton;
+
     public BottomsheetC(BottomSheetBehavior<LinearLayout> sheetBehavior, LinearLayout bottomSheetLayout, ImageView bottomSheetArrowImageView, LinearLayout gestureLayout) {
         this.sheetBehavior = sheetBehavior;
         this.bottomSheetLayout = bottomSheetLayout;
@@ -43,7 +46,8 @@ public class BottomsheetC {
                                       TextView rgbResolution,
                                       Spinner modelML_spinner,
                                       Spinner distance_spinner,
-                                      Spinner computation_spinner){
+                                      Spinner computation_spinner,
+                                      Button detectableObjectButton){
         this.fps = fps;
         this.msDetection = msDetection;
         this.depthResolution = depthResolution;
@@ -51,6 +55,7 @@ public class BottomsheetC {
         this.modelML_spinner = modelML_spinner;
         this.distance_spinner = distance_spinner;
         this.computation_spinner = computation_spinner;
+        this.detectableObjectButton = detectableObjectButton;
     }
 
     public TextView getDistanceView() {
@@ -168,5 +173,7 @@ public class BottomsheetC {
                 });
     }
 
-
+    public Button getDetectableObjectButton() {
+        return detectableObjectButton;
+    }
 }

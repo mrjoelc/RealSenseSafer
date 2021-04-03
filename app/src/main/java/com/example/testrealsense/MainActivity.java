@@ -118,6 +118,7 @@ public class MainActivity extends AppCompatActivity{
     Spinner modelML_spinner;
     Spinner distance_spinner;
     Spinner computation_spinner;
+    Button detectableObjectButton;
 
     ImageView img1;
     Bitmap imgBM;
@@ -166,10 +167,11 @@ public class MainActivity extends AppCompatActivity{
         modelML_spinner = findViewById(R.id.modelML_spinner);
         distance_spinner = findViewById(R.id.distance_spinner);
         computation_spinner = findViewById(R.id.computation_spinner);
+        detectableObjectButton = findViewById(R.id.detectableobjectButton);
         //distanceView = findViewById(R.id.distanceTextView);
 
         bs = new BottomsheetC(sheetBehavior, bottomSheetLayout, bottomSheetArrowImageView, gestureLayout);
-        bs.setContentBottomSheet(fps,msDetection,depthResolution,rgbResolution, modelML_spinner, distance_spinner, computation_spinner);
+        bs.setContentBottomSheet(fps,msDetection,depthResolution,rgbResolution, modelML_spinner, distance_spinner, computation_spinner, detectableObjectButton);
 
         bs.getModelML_spinner().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -184,6 +186,14 @@ public class MainActivity extends AppCompatActivity{
                 // your code here
             }
 
+        });
+
+        bs.getDetectableObjectButton().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i=new Intent(MainActivity.this,DetectableListActivity.class);
+                startActivity(i);
+            }
         });
 
         //WriteLogcat wl = new WriteLogcat();
