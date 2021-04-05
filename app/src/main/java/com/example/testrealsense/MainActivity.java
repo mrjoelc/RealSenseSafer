@@ -173,7 +173,6 @@ public class MainActivity extends AppCompatActivity{
 
         bs = new BottomsheetC(this,sheetBehavior, bottomSheetLayout, bottomSheetArrowImageView, gestureLayout);
         bs.setContentBottomSheet(fps,msDetection,depthResolution,rgbResolution, modelML_spinner, distance_spinner, computation_spinner, detectableObjectButton);
-        bs.setModels();
         bs.getModelML_spinner().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
@@ -187,14 +186,6 @@ public class MainActivity extends AppCompatActivity{
                 // your code here
             }
 
-        });
-
-        bs.getDetectableObjectButton().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i=new Intent(MainActivity.this,DetectableListActivity.class);
-                startActivity(i);
-            }
         });
 
         //WriteLogcat wl = new WriteLogcat();
@@ -211,19 +202,9 @@ public class MainActivity extends AppCompatActivity{
         barChartButtonListener();
         sendLogButtonListener();
         loadLocalImageButtonListener();
+        detectableObjectButtonListener();
     }
 
-    void checkPermission(){
-        /*ANDROID 9 PERMISSIONS*/
-        if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.O && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST_CAMERA);
-            return;
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
-            return;
-        }
-    }
     void loadLocalImageButtonListener(){
 
         loadLocalSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -268,6 +249,16 @@ public class MainActivity extends AppCompatActivity{
         });
     }
 
+    void detectableObjectButtonListener(){
+        bs.getDetectableObjectButton().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i=new Intent(MainActivity.this,DetectableListActivity.class);
+                startActivity(i);
+            }
+        });
+    }
+
     void takeObjectDict(){
         /** prelievo  oggetti e distanze critiche da file json **/
         try {
@@ -278,6 +269,18 @@ public class MainActivity extends AppCompatActivity{
         } catch (IOException e) {
             e.printStackTrace();
             jsonAvaiable = false;
+        }
+    }
+
+    void checkPermission(){
+        /*ANDROID 9 PERMISSIONS*/
+        if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.O && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST_CAMERA);
+            return;
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+            return;
         }
     }
 

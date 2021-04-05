@@ -26,6 +26,7 @@ public class Detector {
     Context context;
     BottomsheetC bs;
     boolean alarm;
+    String assetmodel;
 
     GraphicOverlay graphicOverlay;
     ObjectGraphics drawBoundingBoxLabel;
@@ -43,7 +44,7 @@ public class Detector {
         scaleFactor = Utils.calculateScaleFactor(graphicOverlay, 640);
 
 
-        String assetmodel = bs.getModelML_spinner().getSelectedItem().toString();
+        assetmodel = bs.getModelML_spinner().getSelectedItem().toString();
 
         localModel = new LocalModel.Builder()
                 //.setAssetFilePath("models/lite-model_object_detection_mobile_object_labeler_v1_1.tflite")
