@@ -27,6 +27,7 @@ public class Detector {
     BottomsheetC bs;
     boolean alarm;
     String assetmodel;
+    static InputImage image;
 
     GraphicOverlay graphicOverlay;
     ObjectGraphics drawBoundingBoxLabel;
@@ -43,7 +44,10 @@ public class Detector {
         this.graphicOverlay = graphicOverlay;
         scaleFactor = Utils.calculateScaleFactor(graphicOverlay, 640);
 
+        setLocalModel();
+    }
 
+    public void setLocalModel(){
         assetmodel = bs.getModelML_spinner().getSelectedItem().toString();
 
         localModel = new LocalModel.Builder()
@@ -60,7 +64,11 @@ public class Detector {
                         .build();
     }
 
-    public void startDetection(InputImage image){
+    public void setImageToDetect(InputImage image){
+        Detector.image = image;
+    }
+
+    public void startDetection(){
         objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
         long startTime = SystemClock.elapsedRealtime();
 

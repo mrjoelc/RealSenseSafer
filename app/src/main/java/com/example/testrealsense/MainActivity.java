@@ -176,8 +176,7 @@ public class MainActivity extends AppCompatActivity{
         bs.getModelML_spinner().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                System.out.println(position);
-                //mBackGroundText.setText(bs.getModelML_spinner().getSelectedItem().toString());
+                System.out.println("Selected Model for detection: " + bs.getModelML_spinner().getSelectedItem().toString());
 
             }
 
@@ -217,7 +216,8 @@ public class MainActivity extends AppCompatActivity{
                     img1.setImageBitmap(imgBM);
                     image = InputImage.fromBitmap(imgBM, 0);
                     detector = new Detector(MainActivity.this, graphicOverlay, objectDict,bs);
-                    detector.startDetection(image);
+                    detector.setImageToDetect(image);
+                    detector.startDetection();
 
                 }
                 else {
