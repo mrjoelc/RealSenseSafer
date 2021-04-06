@@ -53,7 +53,7 @@
         android:background="@android:color/darker_gray" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rw_objects"
+        android:id="@+id/unselected_objects"
         android:background="#F4F4F4"
         android:layout_width="match_parent"
         android:layout_marginTop="10dp"

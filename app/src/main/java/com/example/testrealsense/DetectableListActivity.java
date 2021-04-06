@@ -9,23 +9,28 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.widget.TextView;
 
-import com.example.testrealsense.Helper.DatabaseUtils;
 import com.example.testrealsense.Helper.DetectableObjectsAdapter;
-import com.example.testrealsense.Helper.LogAdapter;
+import com.example.testrealsense.Helper.Utils;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class DetectableListActivity extends AppCompatActivity {
 
-    List<DetectableObject> list;
+    List<DetectableObject> unselected_list;
     List<DetectableObject> selected_list;
-    RecyclerView detectableObjects;
+    RecyclerView unselectedDetectableObjects;
     RecyclerView selectedDetectableObjects;
     DetectableObjectsAdapter detectableObjectsAdapter;
-    DatabaseUtils databaseUtils;
+    HashMap<String, Float> objectDictSelected;
+    HashMap<String, Float> objectDictUnselected;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,29 +42,49 @@ public class DetectableListActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        detectableObjects = findViewById(R.id.rw_objects);
+        unselectedDetectableObjects = findViewById(R.id.unselected_objects);
         selectedDetectableObjects = findViewById(R.id.selected_objects);
 
-        list = new ArrayList();
-        selected_list = new ArrayList();
+        unselected_list = new ArrayList<>();
+        selected_list = new ArrayList<>();
 
-        for (int i=0; i<6; i++) {
+
+        Intent intent = getIntent();
+        objectDictSelected = (HashMap<String, Float>) intent.getSerializableExtra("DICT");
+
+        for (HashMap.Entry<String, Float> obj : objectDictSelected.entrySet()) {
             DetectableObject d_o;
-            d_o = new DetectableObject(0, false, "Object"+i);
-            list.add(d_o);
+            d_o = new DetectableObject(obj.getKey(), obj.getValue(),true);
+            selected_list.add(d_o);
+        }
+
+        takeObjectDict(false);
+        for (HashMap.Entry<String, Float> obj : objectDictUnselected.entrySet()) {
+            DetectableObject d_o;
+            d_o = new DetectableObject(obj.getKey(), obj.getValue(),false);
+            unselected_list.add(d_o);
         }
 
 
-        detectableObjectsAdapter = new DetectableObjectsAdapter(DetectableListActivity.this, (ArrayList<DetectableObject>) list);
-        detectableObjects.setAdapter(detectableObjectsAdapter);
-        detectableObjects.setLayoutManager(new LinearLayoutManager(this));
 
+        detectableObjectsAdapter = new DetectableObjectsAdapter(DetectableListActivity.this, (ArrayList<DetectableObject>) unselected_list);
+        unselectedDetectableObjects.setAdapter(detectableObjectsAdapter);
+        unselectedDetectableObjects.setLayoutManager(new LinearLayoutManager(this));
 
 
         detectableObjectsAdapter = new DetectableObjectsAdapter(DetectableListActivity.this, (ArrayList<DetectableObject>) selected_list);
         selectedDetectableObjects.setAdapter(detectableObjectsAdapter);
         selectedDetectableObjects.setLayoutManager(new LinearLayoutManager(this));
 
+    }
+
+    void takeObjectDict(Boolean b){
+        /** prelievo  oggetti e distanze critiche da file json **/
+        try {
+            objectDictUnselected = Utils.jsonToMap(this, b);
+        } catch (JSONException | IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

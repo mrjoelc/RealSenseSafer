@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.util.Log;
 
-import com.example.testrealsense.Helper.GraphicOverlay;
 import com.google.mlkit.vision.objects.DetectedObject;
 
 import org.json.JSONException;
@@ -18,11 +17,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 public class Utils {
 
@@ -168,9 +165,11 @@ public class Utils {
         return color;
     }
 
-    public static HashMap jsonToMap(Context context) throws JSONException, IOException {
+    public static HashMap jsonToMap(Context context, boolean b) throws JSONException, IOException {
         AssetManager manager = context.getAssets();
-        InputStream file = manager.open("dict/dict.json");
+        InputStream file;
+        if (b) file = manager.open("dict/dictSelected.json");
+        else file = manager.open("dict/dict.json");
         byte[] formArray = new byte[file.available()];
         file.read(formArray);
         file.close();

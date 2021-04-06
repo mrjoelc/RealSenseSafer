@@ -7,7 +7,7 @@ public class DetectableObject implements Serializable {
     private boolean status;
     private String name;
 
-    public DetectableObject(int distance, boolean status, String name) {
+    public DetectableObject(String name, float distance, boolean status) {
         this.distance = distance;
         this.status = status;
         this.name = name;
@@ -21,7 +21,7 @@ public class DetectableObject implements Serializable {
         this.distance = distance;
     }
 
-    public boolean getStatus(boolean b) {
+    public boolean getStatus() {
         return status;
     }
 

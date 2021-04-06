@@ -211,6 +211,7 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onClick(View v) {
                 Intent i=new Intent(MainActivity.this,DetectableListActivity.class);
+                i.putExtra("DICT", objectDict);
                 startActivity(i);
             }
         });
@@ -219,7 +220,7 @@ public class MainActivity extends AppCompatActivity{
     void takeObjectDict(){
         /** prelievo  oggetti e distanze critiche da file json **/
         try {
-            objectDict = Utils.jsonToMap(this);
+            objectDict = Utils.jsonToMap(this, true);
         } catch (JSONException e) {
             e.printStackTrace();
             jsonAvaiable = false;

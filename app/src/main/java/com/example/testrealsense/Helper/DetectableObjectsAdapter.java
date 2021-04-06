@@ -63,16 +63,21 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
         else
             myViewHolder.distance_counter.setVisibility(View.GONE);
 
+        if (detecObj.getStatus()) {
+            myViewHolder.status.setChecked(true);
+            myViewHolder.distance_counter.setVisibility(View.VISIBLE);
+        }
+
         myViewHolder.status.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked) {
-                    detecObj.getStatus(true);
+                    detecObj.setStatus(true);
                     myViewHolder.distance_counter.setVisibility(View.VISIBLE);
                     DatabaseUtils.writeNewObjectToDetect(detecObj.getName(), detecObj.getDistance());
                 }
                 else {
-                    detecObj.getStatus(false);
+                    detecObj.setStatus(false);
                     myViewHolder.distance_counter.setVisibility(View.GONE);
                     DatabaseUtils.removeObjectToDetect(detecObj.getName());
                 }
