@@ -1,6 +1,8 @@
 package com.example.testrealsense;
 
-public class DetectableObject  {
+import java.io.Serializable;
+
+public class DetectableObject implements Serializable {
     private int distance;
     private boolean status;
     private String name;
@@ -19,7 +21,7 @@ public class DetectableObject  {
         this.distance = distance;
     }
 
-    public boolean getStatus() {
+    public boolean getStatus(boolean b) {
         return status;
     }
 
