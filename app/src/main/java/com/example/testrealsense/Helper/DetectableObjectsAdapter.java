@@ -1,12 +1,14 @@
 package com.example.testrealsense.Helper;
 
 import android.content.Context;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -89,6 +91,13 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
             }
         });
 
+        myViewHolder.distance.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                return false;
+            }
+        });
+
 
         myViewHolder.minus.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,8 +112,15 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
         myViewHolder.plus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+<<<<<<< Updated upstream
                 if (dectobj.getDistance() < 9) {dectobj.setDistance(dectobj.getDistance()+1);}
                 myViewHolder.distance.setText(String.valueOf(dectobj.getDistance()));
+=======
+                if (distance < 9) {
+                    distance = distance+1;
+                    myViewHolder.distance.setText(String.valueOf(distance));
+                }
+>>>>>>> Stashed changes
             }
         });
 
@@ -118,7 +134,8 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
 
     class MyViewHolder extends RecyclerView.ViewHolder {
 
-        TextView name, distance;
+        TextView name;
+        EditText distance;
         CheckBox status;
         RelativeLayout distance_counter;
         ImageView minus, plus;
@@ -128,7 +145,7 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             name = (TextView) itemView.findViewById(R.id.detectable_objectname);
-            distance = (TextView) itemView.findViewById(R.id.detectable_distance);
+            distance = (EditText) itemView.findViewById(R.id.detectable_distance);
             status = (CheckBox) itemView.findViewById(R.id.detectableCheckBox);
             distance_counter = itemView.findViewById(R.id.distance_counter);
             minus = itemView.findViewById(R.id.minus);

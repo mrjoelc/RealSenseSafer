@@ -19,6 +19,7 @@
             android:orientation="horizontal">
 
             <CheckBox
+                android:layout_gravity="center"
                 android:id="@+id/detectableCheckBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -28,6 +29,7 @@
                 android:checked="false" />
 
             <TextView
+                android:layout_gravity="center"
                 android:id="@+id/detectable_objectname"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -37,15 +39,15 @@
             </TextView>
 
             <RelativeLayout
+                android:layout_gravity="center"
                 android:id="@+id/distance_counter"
                 android:visibility="visible"
-                android:layout_marginTop="-6dp"
-                android:layout_marginLeft="50dp"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <TextView
+                    android:layout_marginLeft="80dp"
                     android:layout_centerVertical="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -67,15 +69,21 @@
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_baseline_remove" />
 
-                    <TextView
+                    <EditText
+                        android:maxLength="3"
                         android:id="@+id/detectable_distance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp"
-                        android:text=""
+                        android:text="0"
+                        android:maxLines="1"
+                        android:inputType="numberDecimal|numberSigned"
                         android:textColor="@android:color/black"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        android:imeOptions="actionDone">
+
+                    </EditText>
                     <ImageView
                         android:id="@+id/plus"
                         android:layout_width="wrap_content"

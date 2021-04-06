@@ -63,6 +63,20 @@ public class BottomsheetC {
         this.detectableObjectButton = detectableObjectButton;
     }
 
+<<<<<<< Updated upstream
+=======
+    public void setModels(){
+        //String[] arraySpinner = Utils.getFiles();
+        //Utils.getFiles();
+        /*String[] arraySpinner = {"Red","Blue","White","Yellow","Black", "Green","Purple","Orange","Grey"};
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(context,
+                android.R.layout.simple_spinner_item, arraySpinner);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down view
+        modelML_spinner.setAdapter(adapter);*/
+    }
+
+>>>>>>> Stashed changes
     public TextView getDistanceView() {
         return distanceView;
     }
