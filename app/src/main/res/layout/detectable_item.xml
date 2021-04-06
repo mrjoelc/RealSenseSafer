@@ -47,11 +47,11 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_marginLeft="80dp"
+                    android:layout_marginLeft="50dp"
                     android:layout_centerVertical="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="distance:"
+                    android:text="Min Distance:"
                     android:textColor="@android:color/black" />
 
                 <LinearLayout

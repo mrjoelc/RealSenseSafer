@@ -1,4 +1,4 @@
-package com.example.testrealsense;
+package com.example.testrealsense.Helper;
 
 import android.content.Context;
 import android.content.res.AssetManager;

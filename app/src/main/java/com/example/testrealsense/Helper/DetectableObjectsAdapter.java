@@ -5,29 +5,15 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.testrealsense.DetectableObject;
-import com.example.testrealsense.Detector;
-import com.example.testrealsense.MainActivity;
 import com.example.testrealsense.R;
-import com.example.testrealsense.SimpleLog;
-import com.example.testrealsense.Utils;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.mlkit.vision.common.InputImage;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -58,16 +44,16 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder myViewHolder, final int i) {
 
-        DetectableObject dectobj = objectList.get(i);
+        DetectableObject detecObj = objectList.get(i);
 
         /*name = objectList.get(i).getName();
         distance = objectList.get(i).getDistance();
         status = objectList.get(i).getStatus();*/
 
-        myViewHolder.name.setText(dectobj.getName());
-        myViewHolder.distance.setText(String.valueOf(dectobj.getDistance()));
+        myViewHolder.name.setText(detecObj.getName());
+        myViewHolder.distance.setText(String.valueOf(detecObj.getDistance()));
 
-        /*if(dectobj.getStatus())
+        /*if(detecObj.getStatus())
             myViewHolder.status.setChecked(true);
         else
             myViewHolder.status.setChecked(false);*/
@@ -81,12 +67,14 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked) {
-                    dectobj.getStatus(true);
+                    detecObj.getStatus(true);
                     myViewHolder.distance_counter.setVisibility(View.VISIBLE);
+                    DatabaseUtils.writeNewObjectToDetect(detecObj.getName(), detecObj.getDistance());
                 }
                 else {
-                    dectobj.getStatus(false);
+                    detecObj.getStatus(false);
                     myViewHolder.distance_counter.setVisibility(View.GONE);
+                    DatabaseUtils.removeObjectToDetect(detecObj.getName());
                 }
             }
         });
@@ -102,25 +90,28 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
         myViewHolder.minus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (dectobj.getDistance() > 0) {dectobj.setDistance(dectobj.getDistance()-1);
-                    myViewHolder.distance.setText(String.valueOf(dectobj.getDistance()));
-
+                if (detecObj.getDistance() > 0) {
+                    detecObj.setDistance(detecObj.getDistance()-1);
+                    myViewHolder.distance.setText(String.valueOf(detecObj.getDistance()));
+                    DatabaseUtils.updateNewObjectToDetectDistance(detecObj.getName(), detecObj.getDistance());
                 }
 
             }
+
         });
         myViewHolder.plus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-<<<<<<< Updated upstream
-                if (dectobj.getDistance() < 9) {dectobj.setDistance(dectobj.getDistance()+1);}
-                myViewHolder.distance.setText(String.valueOf(dectobj.getDistance()));
-=======
-                if (distance < 9) {
+                if (detecObj.getDistance() < 9) {
+                    detecObj.setDistance(detecObj.getDistance()+1);
+                    myViewHolder.distance.setText(String.valueOf(detecObj.getDistance()));
+                    DatabaseUtils.updateNewObjectToDetectDistance(detecObj.getName(), detecObj.getDistance());
+
+                }
+               /* if (distance < 9) {
                     distance = distance+1;
                     myViewHolder.distance.setText(String.valueOf(distance));
-                }
->>>>>>> Stashed changes
+                }*/
             }
         });
 

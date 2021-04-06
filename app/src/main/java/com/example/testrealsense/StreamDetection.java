@@ -4,11 +4,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.testrealsense.Helper.DatabaseUtils;
 import com.example.testrealsense.Helper.GraphicOverlay;
 import com.example.testrealsense.Helper.ObjectGraphics;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -40,7 +40,7 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 
-import static com.example.testrealsense.Utils.rgb2Bitmap;
+import static com.example.testrealsense.Helper.Utils.rgb2Bitmap;
 
 
 public class StreamDetection extends Thread{

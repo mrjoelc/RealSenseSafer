@@ -12,6 +12,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Spinner;
 
+import com.example.testrealsense.Helper.CallbackFirebaseData;
+import com.example.testrealsense.Helper.DatabaseUtils;
+import com.example.testrealsense.Helper.Utils;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;

@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.example.testrealsense.Helper.DatabaseUtils;
 import com.example.testrealsense.Helper.DetectableObjectsAdapter;
 import com.example.testrealsense.Helper.LogAdapter;
 
@@ -24,6 +25,7 @@ public class DetectableListActivity extends AppCompatActivity {
     RecyclerView detectableObjects;
     RecyclerView selectedDetectableObjects;
     DetectableObjectsAdapter detectableObjectsAdapter;
+    DatabaseUtils databaseUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +45,7 @@ public class DetectableListActivity extends AppCompatActivity {
 
         for (int i=0; i<6; i++) {
             DetectableObject d_o;
-            d_o = new DetectableObject(i+1, false, "object"+i);
+            d_o = new DetectableObject(0, false, "Object"+i);
             list.add(d_o);
         }
 

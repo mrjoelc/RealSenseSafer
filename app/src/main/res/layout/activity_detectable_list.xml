@@ -27,7 +27,7 @@
                 android:layout_marginRight="20dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Detectable object list"
+                android:text="DETECTABLE OBJECT LIST"
                 android:textStyle="bold"
                 android:textSize="20dp"
                 android:textColor="#ffffff"/>

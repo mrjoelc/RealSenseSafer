@@ -1,4 +1,4 @@
-package com.example.testrealsense;
+package com.example.testrealsense.Helper;
 
 import android.app.Activity;
 import android.content.Context;
@@ -28,7 +28,7 @@ public class DatabaseUtils {
     private static Context mContext;
 
     private FirebaseAuth mAuth;
-    private DatabaseReference mDatabase;
+    private static DatabaseReference mDatabase;
     private static String userUID;
 
 
@@ -86,6 +86,18 @@ public class DatabaseUtils {
                                 .child(date[2])
                                 .child(hourInString)
                                 .setValue(map);
+    }
+
+    public static void writeNewObjectToDetect(String objectName, float distance){
+        mDatabase.child("config/objectsToDetect").child(objectName).setValue(distance);
+    }
+
+    public static void updateNewObjectToDetectDistance(String objectName, float distance){
+        mDatabase.child("config/objectsToDetect").child(objectName).setValue(distance);
+    }
+
+    public static void removeObjectToDetect(String objectName){
+        mDatabase.child("config/objectsToDetect").child(objectName).removeValue();
     }
 
     private void signInAnonymous(){

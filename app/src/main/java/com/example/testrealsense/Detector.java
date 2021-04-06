@@ -5,6 +5,7 @@ import android.os.SystemClock;
 
 import com.example.testrealsense.Helper.GraphicOverlay;
 import com.example.testrealsense.Helper.ObjectGraphics;
+import com.example.testrealsense.Helper.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.mlkit.common.model.LocalModel;

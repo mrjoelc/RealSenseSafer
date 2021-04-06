@@ -3,7 +3,6 @@ package com.example.testrealsense.Helper;
 import android.graphics.Color;
 import android.graphics.RectF;
 
-import com.example.testrealsense.Utils;
 import com.google.mlkit.vision.objects.DetectedObject;
 
 import java.util.HashMap;

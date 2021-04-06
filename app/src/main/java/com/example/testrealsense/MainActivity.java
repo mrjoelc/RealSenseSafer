@@ -1,6 +1,5 @@
 package com.example.testrealsense;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -11,18 +10,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Matrix;
-import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -34,55 +26,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.example.testrealsense.Helper.ObjectGraphics;
+import com.example.testrealsense.Helper.DatabaseUtils;
 import com.example.testrealsense.Helper.GraphicOverlay;
-import com.example.testrealsense.Helper.TextOverlay;
-import com.example.testrealsense.Helper.WriteLogcat;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
+import com.example.testrealsense.Helper.Utils;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.mlkit.common.model.LocalModel;
 import com.google.mlkit.vision.common.InputImage;
-import com.google.mlkit.vision.objects.DetectedObject;
-import com.google.mlkit.vision.objects.ObjectDetection;
-import com.google.mlkit.vision.objects.ObjectDetector;
-import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions;
-import com.intel.realsense.librealsense.Align;
-import com.intel.realsense.librealsense.Colorizer;
-import com.intel.realsense.librealsense.Config;
-import com.intel.realsense.librealsense.DepthFrame;
 import com.intel.realsense.librealsense.DeviceList;
 import com.intel.realsense.librealsense.DeviceListener;
-import com.intel.realsense.librealsense.Extension;
-import com.intel.realsense.librealsense.Frame;
-import com.intel.realsense.librealsense.FrameSet;
-import com.intel.realsense.librealsense.Pipeline;
-import com.intel.realsense.librealsense.PipelineProfile;
 import com.intel.realsense.librealsense.RsContext;
-import com.intel.realsense.librealsense.StreamType;
-import com.intel.realsense.librealsense.VideoFrame;
 
 import org.json.JSONException;
 
-import static com.example.testrealsense.Utils.*;
-
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity{
@@ -235,6 +191,7 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 databaseUtils.writeTooCloseDistanceLog((float) 0.3,"OggettoPROVA");
+                //databaseUtils.writeNewObjectToDetect("Bottle", 0.65f);
             }
         });
     }

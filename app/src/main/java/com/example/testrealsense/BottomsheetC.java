@@ -63,8 +63,6 @@ public class BottomsheetC {
         this.detectableObjectButton = detectableObjectButton;
     }
 
-<<<<<<< Updated upstream
-=======
     public void setModels(){
         //String[] arraySpinner = Utils.getFiles();
         //Utils.getFiles();
@@ -76,7 +74,6 @@ public class BottomsheetC {
         modelML_spinner.setAdapter(adapter);*/
     }
 
->>>>>>> Stashed changes
     public TextView getDistanceView() {
         return distanceView;
     }

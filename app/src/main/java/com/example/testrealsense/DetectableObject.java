@@ -3,7 +3,7 @@ package com.example.testrealsense;
 import java.io.Serializable;
 
 public class DetectableObject implements Serializable {
-    private int distance;
+    private float distance;
     private boolean status;
     private String name;
 
@@ -13,11 +13,11 @@ public class DetectableObject implements Serializable {
         this.name = name;
     }
 
-    public int getDistance() {
+    public float getDistance() {
         return distance;
     }
 
-    public void setDistance(int distance) {
+    public void setDistance(float distance) {
         this.distance = distance;
     }
 
