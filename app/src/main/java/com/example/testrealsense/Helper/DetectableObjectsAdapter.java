@@ -96,9 +96,11 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
             @Override
             public void onClick(View v) {
                 if (detecObj.getDistance() > 0) {
-                    detecObj.setDistance(detecObj.getDistance()-1);
-                    myViewHolder.distance.setText(String.valueOf(detecObj.getDistance()));
-                    DatabaseUtils.updateNewObjectToDetectDistance(detecObj.getName(), detecObj.getDistance());
+                    float value = detecObj.getDistance()-1;
+                    if (value<0) value=0;
+                    detecObj.setDistance(value);
+                    myViewHolder.distance.setText(String.valueOf(value));
+                    DatabaseUtils.updateNewObjectToDetectDistance(detecObj.getName(), value);
                 }
 
             }
@@ -108,9 +110,11 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
             @Override
             public void onClick(View v) {
                 if (detecObj.getDistance() < 9) {
-                    detecObj.setDistance(detecObj.getDistance()+1);
-                    myViewHolder.distance.setText(String.valueOf(detecObj.getDistance()));
-                    DatabaseUtils.updateNewObjectToDetectDistance(detecObj.getName(), detecObj.getDistance());
+                    float value = detecObj.getDistance()+1;
+                    if (value>9) value=9;
+                    detecObj.setDistance(value);
+                    myViewHolder.distance.setText(String.valueOf(value));
+                    DatabaseUtils.updateNewObjectToDetectDistance(detecObj.getName(), value);
 
                 }
                /* if (distance < 9) {
