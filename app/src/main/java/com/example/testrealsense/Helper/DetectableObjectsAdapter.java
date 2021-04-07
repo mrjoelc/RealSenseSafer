@@ -84,10 +84,18 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
             }
         });
 
+
         myViewHolder.distance.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                return false;
+                float value = Float.parseFloat(v.getText().toString());
+                if (value<0 || value>9) value=0;
+                detecObj.setDistance(value);
+                myViewHolder.distance.setText(String.valueOf(value));
+                DatabaseUtils.updateNewObjectToDetectDistance(detecObj.getName(), value);
+                //System.out.println(value);
+                return true;
+
             }
         });
 
