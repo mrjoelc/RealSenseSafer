@@ -46,21 +46,6 @@
         android:layout_height="wrap_content">
     </androidx.recyclerview.widget.RecyclerView>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_marginTop="10dp"
-        android:background="@android:color/darker_gray" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/unselected_objects"
-        android:background="#F4F4F4"
-        android:layout_width="match_parent"
-        android:layout_marginTop="10dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_height="wrap_content">
-    </androidx.recyclerview.widget.RecyclerView>
 
     <TextView
         android:id="@+id/endpage"

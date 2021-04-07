@@ -12,14 +12,16 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.example.testrealsense.DetectableListActivity;
 import com.example.testrealsense.DetectableObject;
 import com.example.testrealsense.R;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
+import java.util.List;
 
-public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObjectsAdapter.MyViewHolder> {
+public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObjectsAdapter.MyViewHolder>{
 
     /*String name;
     int distance ;
@@ -27,11 +29,17 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
 
 
     Context context;
-    ArrayList<DetectableObject> objectList;
+    List<DetectableObject> objectList;
+    AdapterCallback callback;
 
 
-    public DetectableObjectsAdapter(Context c, ArrayList<DetectableObject> objectList) {
-        context = c;
+    public interface AdapterCallback{
+        void onItemClicked();
+    }
+
+    public DetectableObjectsAdapter(Context c,  AdapterCallback callback, List<DetectableObject> objectList) {
+        this.callback = callback;
+        this.context = c;
         this.objectList = objectList;
     }
 
@@ -46,17 +54,9 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
 
         DetectableObject detecObj = objectList.get(i);
 
-        /*name = objectList.get(i).getName();
-        distance = objectList.get(i).getDistance();
-        status = objectList.get(i).getStatus();*/
-
         myViewHolder.name.setText(detecObj.getName());
         myViewHolder.distance.setText(String.valueOf(detecObj.getDistance()));
 
-        /*if(detecObj.getStatus())
-            myViewHolder.status.setChecked(true);
-        else
-            myViewHolder.status.setChecked(false);*/
 
         if (myViewHolder.status.isChecked())
             myViewHolder.distance_counter.setVisibility(View.VISIBLE);
@@ -68,6 +68,7 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
             myViewHolder.distance_counter.setVisibility(View.VISIBLE);
         }
 
+
         myViewHolder.status.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -75,15 +76,38 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
                     detecObj.setStatus(true);
                     myViewHolder.distance_counter.setVisibility(View.VISIBLE);
                     DatabaseUtils.writeNewObjectToDetect(detecObj.getName(), detecObj.getDistance());
+
+                    int fromPosition = i;
+                    int toPosition = 0;
+
+                    // update data array
+                    DetectableObject item = objectList.get(fromPosition);
+                    objectList.remove(fromPosition);
+                    objectList.add(toPosition, item);
+
+                    if(callback != null) {
+                        callback.onItemClicked();
+                    }
                 }
                 else {
                     detecObj.setStatus(false);
                     myViewHolder.distance_counter.setVisibility(View.GONE);
                     DatabaseUtils.removeObjectToDetect(detecObj.getName());
+
+                    int fromPosition = i;
+                    int toPosition = objectList.size()-1;
+
+                    DetectableObject item = objectList.get(fromPosition);
+                    objectList.remove(fromPosition);
+                    objectList.add(toPosition, item);
+
+                    if(callback != null) {
+                        callback.onItemClicked();
+                    }
+
                 }
             }
         });
-
 
         myViewHolder.distance.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -98,6 +122,8 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
 
             }
         });
+
+
 
 
         myViewHolder.minus.setOnClickListener(new View.OnClickListener() {
@@ -133,6 +159,7 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
         });
 
 
+
     }
 
     @Override
@@ -140,7 +167,9 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
         return objectList.size();
     }
 
-    class MyViewHolder extends RecyclerView.ViewHolder {
+
+
+    static class MyViewHolder extends RecyclerView.ViewHolder {
 
         TextView name;
         EditText distance;

@@ -283,6 +283,6 @@
         android:id="@+id/detectableobjectButton"
         android:layout_width="200dp"
         android:layout_height="60dp"
-        android:text="menage object"></Button>
+        android:text="manage object" />
 
 </LinearLayout>
