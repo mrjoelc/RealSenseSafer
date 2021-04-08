@@ -33,6 +33,11 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
     List<DetectableObject> objectList;
     AdapterCallback callback;
 
+    public void updateList(List<DetectableObject> list){
+        objectList = list;
+        notifyDataSetChanged();
+    }
+
 
     public interface AdapterCallback{
         void onItemClicked();

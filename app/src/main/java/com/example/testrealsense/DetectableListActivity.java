@@ -7,7 +7,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.example.testrealsense.Helper.DetectableObjectsAdapter;
 import com.example.testrealsense.Helper.Utils;
@@ -18,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class DetectableListActivity extends AppCompatActivity implements DetectableObjectsAdapter.AdapterCallback {
 
@@ -28,6 +33,9 @@ public class DetectableListActivity extends AppCompatActivity implements Detecta
     HashMap<String, Float> objectDictUnselected;
     DetectableObject d_o;
     Boolean isSelected;
+
+    EditText searchBar;
+    Button searchButton;
 
 
 
@@ -42,6 +50,8 @@ public class DetectableListActivity extends AppCompatActivity implements Detecta
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         selectedDetectableObjects = findViewById(R.id.selected_objects);
+        searchBar = findViewById(R.id.search_bar);
+        searchButton = findViewById(R.id.search_button);
 
         objectsListToDetect = new ArrayList<>();
 
@@ -72,6 +82,41 @@ public class DetectableListActivity extends AppCompatActivity implements Detecta
         detectableObjectsAdapter = new DetectableObjectsAdapter(this, this, objectsListToDetect);
         selectedDetectableObjects.setAdapter(detectableObjectsAdapter);
         selectedDetectableObjects.setLayoutManager(new LinearLayoutManager(this));
+
+        searchBar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence text, int start, int before, int count) {
+
+                filter(text.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                filter(editable.toString());
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                // TODO Auto-generated method stub
+            }
+
+        });
+    }
+
+    void filter(String text){
+        List<DetectableObject> temp = new ArrayList();
+        for(DetectableObject d: objectsListToDetect){
+            //or use .equal(text) with you want equal match
+            //use .toLowerCase() for better matches
+
+            //key insensitive search
+            if(Pattern.compile(Pattern.quote(text), Pattern.CASE_INSENSITIVE).matcher(d.getName()).find()){
+                temp.add(d);
+            }
+        }
+        //update recyclerview
+        detectableObjectsAdapter.updateList(temp);
     }
 
     void takeObjectDict(){
