@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.example.testrealsense.DetectableListActivity;
 import com.example.testrealsense.DetectableObject;
+import com.example.testrealsense.MainActivity;
 import com.example.testrealsense.R;
 
 import androidx.annotation.NonNull;
@@ -52,10 +53,28 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder myViewHolder, final int i) {
 
+        myViewHolder.status.setOnCheckedChangeListener(null);
+
+
         DetectableObject detecObj = objectList.get(i);
 
-        myViewHolder.name.setText(detecObj.getName());
-        myViewHolder.distance.setText(String.valueOf(detecObj.getDistance()));
+        myViewHolder.name.setText(objectList.get(myViewHolder.getAdapterPosition()).getName());
+        myViewHolder.distance.setText(String.valueOf(objectList.get(myViewHolder.getAdapterPosition()).getDistance()));
+
+
+        if(objectList.get(myViewHolder.getAdapterPosition()).getStatus()){
+            myViewHolder.status.setChecked(true);
+        }
+        else{
+            myViewHolder.status.setChecked(false);
+        }
+
+
+        if (MainActivity.objectDict != null) {
+            myViewHolder.status.setChecked(MainActivity.objectDict.containsKey(detecObj.getName()));
+        }else{
+            myViewHolder.status.setChecked(false);
+        }
 
 
         if (myViewHolder.status.isChecked())
@@ -75,7 +94,7 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
                 if(isChecked) {
                     detecObj.setStatus(true);
                     myViewHolder.distance_counter.setVisibility(View.VISIBLE);
-                    DatabaseUtils.writeNewObjectToDetect(detecObj.getName(), detecObj.getDistance());
+                    DatabaseUtils.writeNewObjectToDetect(detecObj.getName(), Float.parseFloat(String.valueOf(detecObj.getDistance())));
 
                     int fromPosition = i;
                     int toPosition = 0;

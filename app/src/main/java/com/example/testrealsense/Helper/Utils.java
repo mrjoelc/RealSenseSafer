@@ -165,11 +165,10 @@ public class Utils {
         return color;
     }
 
-    public static HashMap jsonToMap(Context context, boolean b) throws JSONException, IOException {
+    public static HashMap jsonToMap(Context context) throws JSONException, IOException {
         AssetManager manager = context.getAssets();
         InputStream file;
-        if (b) file = manager.open("dict/dictSelected.json");
-        else file = manager.open("dict/dict.json");
+        file = manager.open("dict/dict.json");
         byte[] formArray = new byte[file.available()];
         file.read(formArray);
         file.close();

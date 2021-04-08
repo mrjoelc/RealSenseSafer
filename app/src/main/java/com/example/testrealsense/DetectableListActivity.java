@@ -6,7 +6,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -22,11 +21,13 @@ import java.util.List;
 
 public class DetectableListActivity extends AppCompatActivity implements DetectableObjectsAdapter.AdapterCallback {
 
-    List<DetectableObject> selected_list;
+    List<DetectableObject> objectsListToDetect;
     RecyclerView selectedDetectableObjects;
     DetectableObjectsAdapter detectableObjectsAdapter;
     HashMap<String, Float> objectDictSelected;
     HashMap<String, Float> objectDictUnselected;
+    DetectableObject d_o;
+    Boolean isSelected;
 
 
 
@@ -42,27 +43,33 @@ public class DetectableListActivity extends AppCompatActivity implements Detecta
 
         selectedDetectableObjects = findViewById(R.id.selected_objects);
 
-        selected_list = new ArrayList<>();
+        objectsListToDetect = new ArrayList<>();
 
 
-        Intent intent = getIntent();
-        objectDictSelected = (HashMap<String, Float>) intent.getSerializableExtra("DICT");
+        //Intent intent = getIntent();
+        //objectDictSelected = (HashMap<String, Float>) intent.getSerializableExtra("DICT");
 
         takeObjectDict();
         for (HashMap.Entry<String, Float> obj : objectDictUnselected.entrySet()) {
-            DetectableObject d_o;
-            d_o = new DetectableObject(obj.getKey(), obj.getValue(),false);
-            selected_list.add(0,d_o);
+            isSelected=false;
+            if ( MainActivity.objectDict!=null && MainActivity.objectDict.containsKey(obj.getKey())){
+                isSelected=true;
+            }
+            d_o = new DetectableObject(obj.getKey(), obj.getValue(),isSelected);
+            if (isSelected) {
+                objectsListToDetect.add(0, d_o);
+            } else {
+                objectsListToDetect.add(d_o);
+            }
         }
 
-        for (HashMap.Entry<String, Float> obj : objectDictSelected.entrySet()) {
+        /*for (HashMap.Entry<String, Float> obj : objectDictSelected.entrySet()) {
             DetectableObject d_o;
             d_o = new DetectableObject(obj.getKey(), obj.getValue(),true);
-            selected_list.add(0,d_o);
-        }
+            objectsListToDetect.add(0,d_o);
+        }*/
 
-
-        detectableObjectsAdapter = new DetectableObjectsAdapter(this, this,selected_list);
+        detectableObjectsAdapter = new DetectableObjectsAdapter(this, this, objectsListToDetect);
         selectedDetectableObjects.setAdapter(detectableObjectsAdapter);
         selectedDetectableObjects.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -70,7 +77,7 @@ public class DetectableListActivity extends AppCompatActivity implements Detecta
     void takeObjectDict(){
         /** prelievo  oggetti e distanze critiche da file json **/
         try {
-            objectDictUnselected = Utils.jsonToMap(this, false);
+            objectDictUnselected = Utils.jsonToMap(this);
         } catch (JSONException | IOException e) {
             e.printStackTrace();
         }

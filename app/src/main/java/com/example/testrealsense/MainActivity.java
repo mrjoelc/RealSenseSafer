@@ -1,5 +1,6 @@
 package com.example.testrealsense;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -26,10 +27,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.example.testrealsense.Helper.CallbackFirebaseData;
 import com.example.testrealsense.Helper.DatabaseUtils;
 import com.example.testrealsense.Helper.GraphicOverlay;
 import com.example.testrealsense.Helper.Utils;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.mlkit.vision.common.InputImage;
 import com.intel.realsense.librealsense.DeviceList;
 import com.intel.realsense.librealsense.DeviceListener;
@@ -84,7 +91,7 @@ public class MainActivity extends AppCompatActivity{
     Detector detector;
     StreamDetection stream_detection;
 
-    HashMap<String, Float> objectDict;
+    public static HashMap<String, Float> objectDict;
 
     boolean jsonAvaiable = true;
 
@@ -126,6 +133,7 @@ public class MainActivity extends AppCompatActivity{
         detectableObjectButton = findViewById(R.id.detectableobjectButton);
         //distanceView = findViewById(R.id.distanceTextView);
 
+        databaseUtils = new DatabaseUtils(this);
 
         bs = new BottomsheetC(this,sheetBehavior, bottomSheetLayout, bottomSheetArrowImageView, gestureLayout);
         bs.setContentBottomSheet(fps,msDetection,depthResolution,rgbResolution, modelML_spinner, distance_spinner, computation_spinner, detectableObjectButton);
@@ -144,10 +152,9 @@ public class MainActivity extends AppCompatActivity{
         });
 
         //WriteLogcat wl = new WriteLogcat();
-        takeObjectDict();
+        //takeObjectDict();
 
-        databaseUtils = new DatabaseUtils(this);
-
+        getObjectsListFromFirebase();
         //stream_detection = new StreamDetection(img1,graphicOverlay,distanceView,fps, msDetection, this, objectDict, databaseUtils);
         stream_detection = new StreamDetection(img1,graphicOverlay,bs, this, objectDict, databaseUtils);
 
@@ -158,6 +165,29 @@ public class MainActivity extends AppCompatActivity{
         sendLogButtonListener();
         loadLocalImageButtonListener();
         detectableObjectButtonListener();
+    }
+
+
+    public static void getObjectsListFromFirebase(){
+        String path = "config/objectsToDetect";
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
+        objectDict = new HashMap<>();
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+               objectDict = (HashMap) snapshot.getValue();
+               if(snapshot.exists()) {
+                   System.out.print("Data ON Firebase: ");
+                   System.out.println(snapshot.getValue());
+               }else System.out.println("Data ON Firebase: NULL");
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
     void loadLocalImageButtonListener(){
@@ -217,10 +247,9 @@ public class MainActivity extends AppCompatActivity{
         });
     }
 
-    void takeObjectDict(){
-        /** prelievo  oggetti e distanze critiche da file json **/
+    /*void takeObjectDict(){
         try {
-            objectDict = Utils.jsonToMap(this, true);
+            objectDict = Utils.jsonToMap(this);
         } catch (JSONException e) {
             e.printStackTrace();
             jsonAvaiable = false;
@@ -228,7 +257,7 @@ public class MainActivity extends AppCompatActivity{
             e.printStackTrace();
             jsonAvaiable = false;
         }
-    }
+    }*/
 
     void checkPermission(){
         /*ANDROID 9 PERMISSIONS*/
