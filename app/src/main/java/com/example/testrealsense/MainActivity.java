@@ -45,7 +45,11 @@ import com.intel.realsense.librealsense.RsContext;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity{
@@ -57,7 +61,7 @@ public class MainActivity extends AppCompatActivity{
     private LinearLayout bottomSheetLayout;
     protected ImageView bottomSheetArrowImageView;
     private LinearLayout gestureLayout;
-    BottomsheetC bs;
+    public static BottomsheetC bs;
 
     private boolean mPermissionsGranted = false;
 
@@ -90,6 +94,10 @@ public class MainActivity extends AppCompatActivity{
 
     Detector detector;
     StreamDetection stream_detection;
+
+    String MODEL;
+
+    Boolean firstStart = true;
 
     public static HashMap<String, Float> objectDict;
 
@@ -135,21 +143,28 @@ public class MainActivity extends AppCompatActivity{
 
         databaseUtils = new DatabaseUtils(this);
 
+        MODEL = "";
+
         bs = new BottomsheetC(this,sheetBehavior, bottomSheetLayout, bottomSheetArrowImageView, gestureLayout);
         bs.setContentBottomSheet(fps,msDetection,depthResolution,rgbResolution, modelML_spinner, distance_spinner, computation_spinner, detectableObjectButton);
         bs.getModelML_spinner().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                System.out.println("Selected Model for detection: " + bs.getModelML_spinner().getSelectedItem().toString());
-
+                if (!firstStart) {
+                    System.out.println("Selected Model for detection: " + bs.getModelML_spinner().getSelectedItem().toString());
+                    DatabaseUtils.writeModel(bs.getModelML_spinner().getSelectedItem().toString());
+                    MODEL = bs.getModelML_spinner().getSelectedItem().toString();
+                    System.out.println("SPINNER " + MODEL);
+                }
+                else firstStart = false;
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
                 // your code here
             }
-
         });
+
 
         //WriteLogcat wl = new WriteLogcat();
         //takeObjectDict();
@@ -168,6 +183,14 @@ public class MainActivity extends AppCompatActivity{
     }
 
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        getModelFromFirebase();
+
+    }
+
     public static void getObjectsListFromFirebase(){
         String path = "config/objectsToDetect";
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
@@ -180,6 +203,27 @@ public class MainActivity extends AppCompatActivity{
                    System.out.print("Data ON Firebase: ");
                    System.out.println(snapshot.getValue());
                }else System.out.println("Data ON Firebase: NULL");
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
+    public void getModelFromFirebase(){
+        String path = "config/model";
+        List<String> models = Arrays.asList(getResources().getStringArray(R.array.models));
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // poi metteremo getKey
+               bs.getModelML_spinner().setSelection(models.indexOf(snapshot.getValue()));
+               MODEL = snapshot.getValue().toString();
+               System.out.println("FIREBASE " + MODEL);
             }
 
             @Override
