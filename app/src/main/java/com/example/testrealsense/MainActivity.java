@@ -97,7 +97,9 @@ public class MainActivity extends AppCompatActivity{
 
     String MODEL;
 
-    static Boolean firstStart = true;
+    static Boolean firstStartModel = true;
+    static Boolean firstStartComputation = true;
+    static Boolean firstStartDistance = true;
 
     public static HashMap<String, Float> objectDict;
 
@@ -147,11 +149,13 @@ public class MainActivity extends AppCompatActivity{
         bs = new BottomsheetC(this,sheetBehavior, bottomSheetLayout, bottomSheetArrowImageView, gestureLayout);
         bs.setContentBottomSheet(fps,msDetection,depthResolution,rgbResolution, modelML_spinner, distance_spinner, computation_spinner, detectableObjectButton);
 
-
-
         //WriteLogcat wl = new WriteLogcat();
-        spinnerSelectedListener();
+        getModelFromFirebase();
         getObjectsListFromFirebase();
+        getComputationTypeFromFirebase();
+
+        spinnerSelectedListener();
+
         //stream_detection = new StreamDetection(img1,graphicOverlay,distanceView,fps, msDetection, this, objectDict, databaseUtils);
         stream_detection = new StreamDetection(img1,graphicOverlay,bs, this, objectDict, databaseUtils);
 
@@ -169,27 +173,54 @@ public class MainActivity extends AppCompatActivity{
     protected void onStart() {
         super.onStart();
 
-        getModelFromFirebase();
-
     }
 
-    public static void spinnerSelectedListener(){
+    public static void spinnerSelectedListener() {
         bs.getModelML_spinner().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                if (!firstStart) {
+                if (!firstStartModel) {
                     System.out.println("Selected Model for detection: " + bs.getModelML_spinner().getSelectedItem().toString());
                     DatabaseUtils.writeModel(bs.getModelML_spinner().getSelectedItem().toString());
                 }
-                else firstStart = false;
-            }
+                else firstStartModel = false;
 
+            }
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
                 // your code here
             }
         });
+
+        bs.getComputation_spinner().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (!firstStartComputation) {
+                    System.out.println("Selected computation Type: " + bs.getComputation_spinner().getSelectedItem().toString());
+                    DatabaseUtils.writeComputationType(bs.getComputation_spinner().getSelectedItem().toString());
+                } else firstStartComputation = false;
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        bs.getDistance_spinner().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (!firstStartDistance) {
+                    System.out.println("Selected distance Type: " + bs.getDistance_spinner().getSelectedItem().toString());
+                    DatabaseUtils.writeDistanceType(bs.getDistance_spinner().getSelectedItem().toString());
+                } else firstStartDistance = false;
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
+
 
     public static void getObjectsListFromFirebase(){
         String path = "config/objectsToDetect";
@@ -203,6 +234,25 @@ public class MainActivity extends AppCompatActivity{
                    System.out.print("Data ON Firebase: ");
                    System.out.println(snapshot.getValue());
                }else System.out.println("Data ON Firebase: NULL");
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    public void getComputationTypeFromFirebase(){
+        String path = "config/computation";
+        List<String> computation = Arrays.asList(getResources().getStringArray(R.array.computation));
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()) {
+                    bs.getComputation_spinner().setSelection(computation.indexOf(snapshot.getValue()));
+                }else System.out.println("Data ON Firebase: NULL");
             }
 
             @Override

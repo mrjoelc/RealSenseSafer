@@ -96,6 +96,14 @@ public class DatabaseUtils {
         mDatabase.child("config/model").setValue(model);
     }
 
+    public static void writeComputationType(String computation){
+        mDatabase.child("config/computation").setValue(computation);
+    }
+
+    public static void writeDistanceType(String distance){
+        mDatabase.child("config/distance").setValue(distance);
+    }
+
     public static void updateNewObjectToDetectDistance(String objectName, float distance){
         mDatabase.child("config/objectsToDetect").child(objectName).setValue(distance);
     }

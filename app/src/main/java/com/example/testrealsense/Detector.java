@@ -84,7 +84,7 @@ public class Detector {
                 for (DetectedObject detectedObject : detectedObjects) {
                     //System.out.println(detectedObject.getLabels().get(0).getText());
                     /** Controllo della presenza dell'ggetto identificato nella lista di oggetti critici **/
-                   // if (detectedObject.getLabels().size() > 0  && objectDict.containsKey(detectedObject.getLabels().get(0).getText())) {
+                    if (detectedObject.getLabels().size() > 0  && objectDict.containsKey(detectedObject.getLabels().get(0).getText())) {
                         //String label = detectedObject.getLabels().get(0).getText();
                         //Utils.calculateScaleFactor(graphicOverlay, image.getWidth());
                         alarm = false;
@@ -94,7 +94,7 @@ public class Detector {
 
                         drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, scaleFactor, 5, alarm);
                         drawBoundingBoxLabel.drawBoundingBoxAndLabel();
-                   // }
+                    }
 
                 }
 
