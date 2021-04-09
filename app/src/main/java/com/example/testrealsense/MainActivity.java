@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity{
 
     String MODEL;
 
-    Boolean firstStart = true;
+    static Boolean firstStart = true;
 
     public static HashMap<String, Float> objectDict;
 
@@ -143,32 +143,14 @@ public class MainActivity extends AppCompatActivity{
 
         databaseUtils = new DatabaseUtils(this);
 
-        MODEL = "";
 
         bs = new BottomsheetC(this,sheetBehavior, bottomSheetLayout, bottomSheetArrowImageView, gestureLayout);
         bs.setContentBottomSheet(fps,msDetection,depthResolution,rgbResolution, modelML_spinner, distance_spinner, computation_spinner, detectableObjectButton);
-        bs.getModelML_spinner().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                if (!firstStart) {
-                    System.out.println("Selected Model for detection: " + bs.getModelML_spinner().getSelectedItem().toString());
-                    DatabaseUtils.writeModel(bs.getModelML_spinner().getSelectedItem().toString());
-                    MODEL = bs.getModelML_spinner().getSelectedItem().toString();
-                    System.out.println("SPINNER " + MODEL);
-                }
-                else firstStart = false;
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parentView) {
-                // your code here
-            }
-        });
 
 
         //WriteLogcat wl = new WriteLogcat();
-        //takeObjectDict();
-
+        spinnerSelectedListener();
         getObjectsListFromFirebase();
         //stream_detection = new StreamDetection(img1,graphicOverlay,distanceView,fps, msDetection, this, objectDict, databaseUtils);
         stream_detection = new StreamDetection(img1,graphicOverlay,bs, this, objectDict, databaseUtils);
@@ -191,6 +173,24 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
+    public static void spinnerSelectedListener(){
+        bs.getModelML_spinner().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                if (!firstStart) {
+                    System.out.println("Selected Model for detection: " + bs.getModelML_spinner().getSelectedItem().toString());
+                    DatabaseUtils.writeModel(bs.getModelML_spinner().getSelectedItem().toString());
+                }
+                else firstStart = false;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
+            }
+        });
+    }
+
     public static void getObjectsListFromFirebase(){
         String path = "config/objectsToDetect";
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
@@ -210,7 +210,6 @@ public class MainActivity extends AppCompatActivity{
 
             }
         });
-
     }
 
     public void getModelFromFirebase(){
@@ -220,12 +219,8 @@ public class MainActivity extends AppCompatActivity{
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // poi metteremo getKey
                bs.getModelML_spinner().setSelection(models.indexOf(snapshot.getValue()));
-               MODEL = snapshot.getValue().toString();
-               System.out.println("FIREBASE " + MODEL);
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
