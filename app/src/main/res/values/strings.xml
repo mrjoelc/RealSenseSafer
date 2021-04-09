@@ -124,8 +124,8 @@
         <item>clustering</item>
     </string-array>
     <string-array name="computation" translatable="false">
-        <item>locale</item>
-        <item>remota</item>
+        <item>local</item>
+        <item>remote</item>
     </string-array>
 
 

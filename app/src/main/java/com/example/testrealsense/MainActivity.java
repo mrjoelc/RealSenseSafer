@@ -95,8 +95,6 @@ public class MainActivity extends AppCompatActivity{
     Detector detector;
     StreamDetection stream_detection;
 
-    String MODEL;
-
     static Boolean firstStartModel = true;
     static Boolean firstStartComputation = true;
     static Boolean firstStartDistance = true;
@@ -280,7 +278,6 @@ public class MainActivity extends AppCompatActivity{
     }
 
     void loadLocalImageButtonListener(){
-
         loadLocalSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -290,9 +287,13 @@ public class MainActivity extends AppCompatActivity{
                     imgBM = Utils.loadBitmapFromAssets(MainActivity.this, "img/image1.jpg");
                     img1.setImageBitmap(imgBM);
                     image = InputImage.fromBitmap(imgBM, 0);
-                    detector = new Detector(MainActivity.this, graphicOverlay, objectDict,bs);
-                    detector.setImageToDetect(image);
-                    detector.startDetection();
+
+                    if (bs.getComputation_spinner().getSelectedItem().toString().equals("local")) {
+                        detector = new Detector(MainActivity.this, graphicOverlay, objectDict, bs);
+                        detector.setImageToDetect(image);
+                        detector.startDetection();
+                    }
+
 
                 }
                 else {
