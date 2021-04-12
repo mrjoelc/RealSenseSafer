@@ -15,6 +15,8 @@ import com.google.mlkit.vision.objects.ObjectDetection;
 import com.google.mlkit.vision.objects.ObjectDetector;
 import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions;
 
+
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
@@ -72,7 +74,6 @@ public class Detector {
     public void startDetection(){
         objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
         long startTime = SystemClock.elapsedRealtime();
-
         objectDetector.process(image).addOnCompleteListener(new OnCompleteListener<List<DetectedObject>>() {
             @Override
             public void onComplete(@NonNull Task<List<DetectedObject>> task) {
@@ -84,7 +85,7 @@ public class Detector {
                 for (DetectedObject detectedObject : detectedObjects) {
                     //System.out.println(detectedObject.getLabels().get(0).getText());
                     /** Controllo della presenza dell'ggetto identificato nella lista di oggetti critici **/
-                    if (detectedObject.getLabels().size() > 0  && objectDict.containsKey(detectedObject.getLabels().get(0).getText())) {
+                    if (detectedObject.getLabels().size() > 0  && objectDict!=null && objectDict.containsKey(detectedObject.getLabels().get(0).getText())) {
                         //String label = detectedObject.getLabels().get(0).getText();
                         //Utils.calculateScaleFactor(graphicOverlay, image.getWidth());
                         alarm = false;

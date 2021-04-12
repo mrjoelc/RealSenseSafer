@@ -5,6 +5,7 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.util.Log;
 
 import com.google.mlkit.vision.objects.DetectedObject;
@@ -12,10 +13,12 @@ import com.google.mlkit.vision.objects.DetectedObject;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -163,6 +166,25 @@ public class Utils {
         }
 
         return color;
+    }
+
+    public static HashMap TXTToMap(Context context, String filename) throws JSONException, IOException {
+        AssetManager manager = context.getAssets();
+        InputStream file;
+        file = manager.open("dict/"+filename);
+        HashMap<String, Float> map = new HashMap<String, Float>();
+
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(file));
+        
+        do {
+            map.put(reader.readLine(), 0.0f);
+            // do something with the line
+        } while (reader.readLine() != null);
+
+        System.out.println(map);
+
+        return map;
     }
 
     public static HashMap jsonToMap(Context context) throws JSONException, IOException {

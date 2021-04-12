@@ -45,8 +45,9 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'com.intel.realsense:librealsense:2.+@aar'
-    implementation 'com.google.mlkit:object-detection-custom:16.0.0'
+    implementation 'com.google.mlkit:object-detection-custom:16.3.1'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    //implementation 'org.tensorflow:tensorflow-lite-task-vision:0.0.0-nightly-SNAPSHOT'
 
 }
 

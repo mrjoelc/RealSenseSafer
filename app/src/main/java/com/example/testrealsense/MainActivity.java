@@ -45,6 +45,7 @@ import com.intel.realsense.librealsense.RsContext;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;

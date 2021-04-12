@@ -60,8 +60,10 @@ public class DetectableListActivity extends AppCompatActivity implements Detecta
 
         //Intent intent = getIntent();
         //objectDictSelected = (HashMap<String, Float>) intent.getSerializableExtra("DICT");
-
-        takeObjectDict();
+        String s = "dict.txt";
+        if(!MainActivity.bs.modelML_spinner.getSelectedItem().toString().equals("lite-model_object_detection_mobile_object_labeler_v1_1.tflite"))
+            s = "dict2.txt";
+        takeObjectDictFromTXT(s);
         for (HashMap.Entry<String, Float> obj : objectDictUnselected.entrySet()) {
             isSelected=false;
             if ( MainActivity.objectDict!=null && MainActivity.objectDict.containsKey(obj.getKey())){
@@ -127,6 +129,15 @@ public class DetectableListActivity extends AppCompatActivity implements Detecta
         }
         //update recyclerview
         detectableObjectsAdapter.updateList(temp);
+    }
+
+    void takeObjectDictFromTXT(String filename){
+        /** prelievo  oggetti e distanze critiche da file json **/
+        try {
+            objectDictUnselected = Utils.TXTToMap(this, filename);
+        } catch (JSONException | IOException e) {
+            e.printStackTrace();
+        }
     }
 
     void takeObjectDict(){

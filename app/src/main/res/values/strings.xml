@@ -115,8 +115,11 @@
     </string-array>
     <string-array name="models" translatable="false">
         <item>lite-model_object_detection_mobile_object_labeler_v1_1.tflite</item>
-        <item>mobilenet_v1_0.25_128_quantized_1_metadata_1.tflite</item>
-        <item>model.tflite</item>
+        <item>mobilenet_v1_1.0_160_quantized_1_metadata_1.tflite</item>
+        <item>mobilenet_v2_1.0_224_quantized_1_metadata_1.tflite</item>
+        <item>mnasnet_1.3_224_1_metadata_1.tflite</item>
+        <item>squeezenet_1_metadata_1.tflite</item>
+        <item>out.lite</item>
     </string-array>
     <string-array name="distances" translatable="false">
         <item>media</item>
