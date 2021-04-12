@@ -245,7 +245,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Distance detection type"
+            android:text="Distance detection type: "
             android:textColor="@android:color/black" />
 
         <Spinner
@@ -259,6 +259,7 @@
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/thread_line"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -266,7 +267,29 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Computation"
+            android:text="Thread number: "
+            android:textColor="@android:color/black" />
+
+        <Spinner
+            android:id="@+id/thread_spinner"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_alignParentRight="true"
+            android:entries="@array/threads"
+            />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Computation: "
             android:textColor="@android:color/black" />
 
         <Spinner
@@ -279,7 +302,10 @@
             />
     </RelativeLayout>
 
+
+
     <Button
+        android:layout_marginTop="20dp"
         android:id="@+id/detectableobjectButton"
         android:layout_width="200dp"
         android:layout_height="60dp"

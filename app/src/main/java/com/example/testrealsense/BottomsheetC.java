@@ -30,6 +30,7 @@ public class BottomsheetC {
     Spinner modelML_spinner;
     Spinner distance_spinner;
     Spinner computation_spinner;
+    Spinner thread_spinner;
     Context context;
 
     Button detectableObjectButton;
@@ -52,6 +53,7 @@ public class BottomsheetC {
                                       Spinner modelML_spinner,
                                       Spinner distance_spinner,
                                       Spinner computation_spinner,
+                                      Spinner thread_spinner,
                                       Button detectableObjectButton){
         this.fps = fps;
         this.msDetection = msDetection;
@@ -60,7 +62,17 @@ public class BottomsheetC {
         this.modelML_spinner = modelML_spinner;
         this.distance_spinner = distance_spinner;
         this.computation_spinner = computation_spinner;
+        this.thread_spinner = thread_spinner;
+        thread_spinner.setSelection(3);
         this.detectableObjectButton = detectableObjectButton;
+    }
+
+    public Spinner getThread_spinner() {
+        return thread_spinner;
+    }
+
+    public void setThread_spinner(Spinner thread_spinner) {
+        this.thread_spinner = thread_spinner;
     }
 
     public TextView getDistanceView() {

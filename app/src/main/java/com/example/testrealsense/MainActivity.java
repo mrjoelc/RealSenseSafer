@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity{
     Spinner modelML_spinner;
     Spinner distance_spinner;
     Spinner computation_spinner;
+    Spinner thread_spinner;
     Button detectableObjectButton;
 
     ImageView img1;
@@ -139,6 +140,7 @@ public class MainActivity extends AppCompatActivity{
         modelML_spinner = findViewById(R.id.modelML_spinner);
         distance_spinner = findViewById(R.id.distance_spinner);
         computation_spinner = findViewById(R.id.computation_spinner);
+        thread_spinner = findViewById(R.id.thread_spinner);
         detectableObjectButton = findViewById(R.id.detectableobjectButton);
         //distanceView = findViewById(R.id.distanceTextView);
 
@@ -146,7 +148,7 @@ public class MainActivity extends AppCompatActivity{
 
 
         bs = new BottomsheetC(this,sheetBehavior, bottomSheetLayout, bottomSheetArrowImageView, gestureLayout);
-        bs.setContentBottomSheet(fps,msDetection,depthResolution,rgbResolution, modelML_spinner, distance_spinner, computation_spinner, detectableObjectButton);
+        bs.setContentBottomSheet(fps,msDetection,depthResolution,rgbResolution, modelML_spinner, distance_spinner, computation_spinner, thread_spinner, detectableObjectButton);
 
         //WriteLogcat wl = new WriteLogcat();
         getModelFromFirebase();
@@ -194,9 +196,16 @@ public class MainActivity extends AppCompatActivity{
         bs.getComputation_spinner().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                if(bs.getComputation_spinner().getSelectedItem().toString().equals("local"))
+                    bs.getThread_spinner().setEnabled(true);
+                else
+                    bs.getThread_spinner().setEnabled(false);
+
                 if (!firstStartComputation) {
                     System.out.println("Selected computation Type: " + bs.getComputation_spinner().getSelectedItem().toString());
                     DatabaseUtils.writeComputationType(bs.getComputation_spinner().getSelectedItem().toString());
+
                 } else firstStartComputation = false;
             }
             @Override
