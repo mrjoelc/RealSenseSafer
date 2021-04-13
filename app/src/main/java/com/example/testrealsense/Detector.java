@@ -1,21 +1,21 @@
 package com.example.testrealsense;
 
 import android.content.Context;
+import android.graphics.RectF;
+import android.media.MediaPlayer;
 import android.os.SystemClock;
 
+import com.example.testrealsense.Helper.DatabaseUtils;
 import com.example.testrealsense.Helper.GraphicOverlay;
 import com.example.testrealsense.Helper.ObjectGraphics;
 import com.example.testrealsense.Helper.Utils;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.mlkit.common.model.LocalModel;
-import com.google.mlkit.vision.common.InputImage;
-import com.google.mlkit.vision.objects.DetectedObject;
-import com.google.mlkit.vision.objects.ObjectDetection;
-import com.google.mlkit.vision.objects.ObjectDetector;
-import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions;
+import com.intel.realsense.librealsense.DepthFrame;
 
+import org.tensorflow.lite.support.image.TensorImage;
+import org.tensorflow.lite.task.vision.detector.Detection;
+import org.tensorflow.lite.task.vision.detector.ObjectDetector;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -23,14 +23,13 @@ import java.util.List;
 import androidx.annotation.NonNull;
 
 public class Detector {
-    private LocalModel localModel;
     ObjectDetector objectDetector;
-    CustomObjectDetectorOptions customObjectDetectorOptions;
+    ObjectDetector.ObjectDetectorOptions options;
     Context context;
     BottomsheetC bs;
     boolean alarm;
     String assetmodel;
-    static InputImage image;
+    static TensorImage image;
 
     GraphicOverlay graphicOverlay;
     ObjectGraphics drawBoundingBoxLabel;
@@ -38,7 +37,7 @@ public class Detector {
     HashMap<String, Float> objectDict;
 
     Float scaleFactor;
-    float[] points;
+    MediaPlayer mp;
 
     public Detector(Context context, GraphicOverlay graphicOverlay, HashMap<String, Float> objectDict, BottomsheetC bs) {
         this.context = context;
@@ -46,62 +45,82 @@ public class Detector {
         this.objectDict = objectDict;
         this.graphicOverlay = graphicOverlay;
         scaleFactor = Utils.calculateScaleFactor(graphicOverlay, 640);
-
+        mp = MediaPlayer.create(context, R.raw.alert_attention);
         setLocalModel();
     }
 
     public void setLocalModel(){
         assetmodel = bs.getModelML_spinner().getSelectedItem().toString();
-
-        localModel = new LocalModel.Builder()
-                //.setAssetFilePath("models/lite-model_object_detection_mobile_object_labeler_v1_1.tflite")
-                .setAssetFilePath("models/"+assetmodel)
+        bs.getNthread_value();
+        options = ObjectDetector.ObjectDetectorOptions.builder()
+                .setScoreThreshold(0.5f)  // Evaluate your model in the Google Cloud Console
+                .setNumThreads(Integer.parseInt(bs.getNthread_value().getText().toString()))
+                // to determine an appropriate value.
                 .build();
-        customObjectDetectorOptions =
-                new CustomObjectDetectorOptions.Builder(localModel)
-                        .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
-                        .enableMultipleObjects()
-                        .enableClassification()
-                        .setClassificationConfidenceThreshold(0.5f)
-                        .setMaxPerObjectLabelCount(1)
-                        .build();
+
+        try {
+            objectDetector = ObjectDetector.createFromFileAndOptions(context, "models/"+assetmodel, options);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void setImageToDetect(InputImage image){
+    public void setImageToDetect(TensorImage image){
         Detector.image = image;
     }
 
     public void startDetection(){
-        objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
         long startTime = SystemClock.elapsedRealtime();
-        objectDetector.process(image).addOnCompleteListener(new OnCompleteListener<List<DetectedObject>>() {
-            @Override
-            public void onComplete(@NonNull Task<List<DetectedObject>> task) {
-                graphicOverlay.clear();
 
-                computeDetectionTime(startTime);
+        List<Detection> results = objectDetector.detect(image);
 
-                List<DetectedObject> detectedObjects = task.getResult();
-                for (DetectedObject detectedObject : detectedObjects) {
-                    //System.out.println(detectedObject.getLabels().get(0).getText());
-                    /** Controllo della presenza dell'ggetto identificato nella lista di oggetti critici **/
-                    if (detectedObject.getLabels().size() > 0  && objectDict!=null && objectDict.containsKey(detectedObject.getLabels().get(0).getText())) {
-                        //String label = detectedObject.getLabels().get(0).getText();
-                        //Utils.calculateScaleFactor(graphicOverlay, image.getWidth());
-                        alarm = false;
-                        points = Utils.getScaledBoundingBox(detectedObject, scaleFactor);
+        computeDetectionTime(startTime);
 
-                        //System.out.println(detectedObject.getBoundingBox().toString());
+        for (Detection detectedObject : results) {
+            if (detectedObject.getCategories().size() > 0
+                    && objectDict!=null
+                    && objectDict.containsKey(detectedObject.getCategories().get(0).getLabel())){
 
-                        drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, scaleFactor, 5, alarm);
-                        drawBoundingBoxLabel.drawBoundingBoxAndLabel();
-                    }
+                alarm = false;
 
+                drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, scaleFactor, 5, alarm);
+                drawBoundingBoxLabel.drawBoundingBoxAndLabel();
+            }
+
+
+        }
+        computeFPS(startTime);
+
+    }
+
+    public void startDetectionForRealSenseStream(DepthFrame depth){
+        long startTime = SystemClock.elapsedRealtime();
+
+        List<Detection> results = objectDetector.detect(image);
+
+        computeDetectionTime(startTime);
+
+        for (Detection detectedObject : results) {
+            if (detectedObject.getCategories().size() > 0
+                    && objectDict!=null
+                    && objectDict.containsKey(detectedObject.getCategories().get(0).getLabel())){
+
+                String label = detectedObject.getCategories().get(0).getLabel();
+                float depthValue = -1f;
+                boolean alarm = false;
+                depthValue = depth.getDistance((int)detectedObject.getBoundingBox().centerX(), (int)detectedObject.getBoundingBox().centerY());
+                if (depthValue < objectDict.get(label)) {
+                    DatabaseUtils.writeTooCloseDistanceLog(depthValue, label);
+                    System.out.println("SUONA NOTIFICA");
+                    mp.start();
+                    alarm = true;
                 }
 
-                computeFPS(startTime);
+                drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, scaleFactor, depthValue, alarm);
+                drawBoundingBoxLabel.drawBoundingBoxAndLabel();
             }
-        });
+        }
+        computeFPS(startTime);
     }
 
 
@@ -109,7 +128,7 @@ public class Detector {
         float endTime2 = SystemClock.elapsedRealtime();
         float elapsedMilliSeconds2 = endTime2 - startTime;
         float elapsedSeconds2 =  1000 / elapsedMilliSeconds2;
-        bs.getFps().setText(elapsedSeconds2+"fps");
+        bs.getFps().setText(String.format("%sfps", elapsedSeconds2));
     }
 
     void computeDetectionTime(float startTime) {

@@ -42,6 +42,10 @@ public class DatabaseUtils {
 
     }
 
+    public static void writeNthreads(int value) {
+        mDatabase.child("config/nThreads").setValue(value);
+    }
+
     public FirebaseUser getFireBaseUser(){
         return mAuth.getCurrentUser();
     }
@@ -69,7 +73,7 @@ public class DatabaseUtils {
 
     }
 
-    public void writeTooCloseDistanceLog(float distance, String object){
+    public static void writeTooCloseDistanceLog(float distance, String object){
        // SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String[] date = Utils.getCurrentDay();
 

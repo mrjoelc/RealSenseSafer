@@ -5,7 +5,6 @@ import android.os.Build;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -26,14 +25,18 @@ public class BottomsheetC {
     TextView msDetection;
     TextView depthResolution;
     TextView rgbResolution;
+    TextView Nthread_value;
+    ImageView Nthread_plus;
+    ImageView Nthread_minus;
 
     Spinner modelML_spinner;
     Spinner distance_spinner;
     Spinner computation_spinner;
-    Spinner thread_spinner;
     Context context;
 
     Button detectableObjectButton;
+
+
 
     public BottomsheetC(Context context, BottomSheetBehavior<LinearLayout> sheetBehavior, LinearLayout bottomSheetLayout, ImageView bottomSheetArrowImageView, LinearLayout gestureLayout) {
         this.sheetBehavior = sheetBehavior;
@@ -53,7 +56,9 @@ public class BottomsheetC {
                                       Spinner modelML_spinner,
                                       Spinner distance_spinner,
                                       Spinner computation_spinner,
-                                      Spinner thread_spinner,
+                                      TextView Nthread_value,
+                                      ImageView Nthread_minus,
+                                      ImageView Nthread_plus,
                                       Button detectableObjectButton){
         this.fps = fps;
         this.msDetection = msDetection;
@@ -62,17 +67,21 @@ public class BottomsheetC {
         this.modelML_spinner = modelML_spinner;
         this.distance_spinner = distance_spinner;
         this.computation_spinner = computation_spinner;
-        this.thread_spinner = thread_spinner;
-        thread_spinner.setSelection(3);
+        this.Nthread_value = Nthread_value;
+        this.Nthread_plus = Nthread_plus;
+        this.Nthread_minus = Nthread_minus;
         this.detectableObjectButton = detectableObjectButton;
+
     }
 
-    public Spinner getThread_spinner() {
-        return thread_spinner;
+
+
+    public TextView getNthread_value() {
+        return Nthread_value;
     }
 
-    public void setThread_spinner(Spinner thread_spinner) {
-        this.thread_spinner = thread_spinner;
+    public void setNthread_value(TextView Nthread_value) {
+        this.Nthread_value = Nthread_value;
     }
 
     public TextView getDistanceView() {

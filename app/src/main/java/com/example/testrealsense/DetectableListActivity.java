@@ -61,8 +61,8 @@ public class DetectableListActivity extends AppCompatActivity implements Detecta
         //Intent intent = getIntent();
         //objectDictSelected = (HashMap<String, Float>) intent.getSerializableExtra("DICT");
         String s = "dict.txt";
-        if(!MainActivity.bs.modelML_spinner.getSelectedItem().toString().equals("lite-model_object_detection_mobile_object_labeler_v1_1.tflite"))
-            s = "dict2.txt";
+        /*if(!MainActivity.bs.modelML_spinner.getSelectedItem().toString().equals("lite-model_object_detection_mobile_object_labeler_v1_1.tflite"))
+            s = "dict2.txt";*/
         takeObjectDictFromTXT(s);
         for (HashMap.Entry<String, Float> obj : objectDictUnselected.entrySet()) {
             isSelected=false;
@@ -140,14 +140,13 @@ public class DetectableListActivity extends AppCompatActivity implements Detecta
         }
     }
 
-    void takeObjectDict(){
-        /** prelievo  oggetti e distanze critiche da file json **/
+    /*void takeObjectDict(String path){
         try {
-            objectDictUnselected = Utils.jsonToMap(this);
+            objectDictUnselected = Utils.jsonToMap(this, path);
         } catch (JSONException | IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     @Override
     public void onBackPressed() {

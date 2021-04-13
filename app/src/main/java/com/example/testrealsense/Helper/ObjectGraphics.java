@@ -3,7 +3,8 @@ package com.example.testrealsense.Helper;
 import android.graphics.Color;
 import android.graphics.RectF;
 
-import com.google.mlkit.vision.objects.DetectedObject;
+
+import org.tensorflow.lite.task.vision.detector.Detection;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,14 +12,14 @@ import java.util.Random;
 
 public class ObjectGraphics {
     final static private Random mRandom = new Random(System.currentTimeMillis());
-    private DetectedObject detectedObject;
+    private Detection detectedObject;
     private GraphicOverlay graphicOverlay;
     static private Map<Integer,Integer> mapID = new HashMap<Integer,Integer>();
     private final float scaleFactor;
     private final float objectDepth;
     private static boolean alarm;
 
-    public ObjectGraphics(DetectedObject detectedObject, GraphicOverlay graphicOverlay, float scaleFactor, float objectDepth, boolean alarm){
+    public ObjectGraphics(Detection detectedObject, GraphicOverlay graphicOverlay, float scaleFactor, float objectDepth, boolean alarm){
         this.detectedObject=detectedObject;
         this.graphicOverlay=graphicOverlay;
         this.scaleFactor = scaleFactor;
@@ -27,6 +28,7 @@ public class ObjectGraphics {
     }
 
     public void drawBoundingBoxAndLabel(){
+
         float[] scaledPoints = Utils.getScaledBoundingBox(detectedObject, scaleFactor);
         RectF boundingBox = new RectF(scaledPoints[0],scaledPoints[1],scaledPoints[2],scaledPoints[3]);
 
@@ -36,7 +38,7 @@ public class ObjectGraphics {
         graphicOverlay.add(rectOverlay);
 
         String objectLabel;
-        if(detectedObject.getLabels().size()>0) objectLabel = detectedObject.getLabels().get(0).getText();
+        if(detectedObject.getCategories().size()>0) objectLabel = detectedObject.getCategories().get(0).getLabel();
         else objectLabel = "Unknown";
 
         TextOverlay labelOverlay = new TextOverlay(graphicOverlay, objectLabel, scaledPoints[2], scaledPoints[3], color);

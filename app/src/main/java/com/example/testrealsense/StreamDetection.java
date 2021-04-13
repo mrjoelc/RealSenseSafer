@@ -11,15 +11,9 @@ import android.widget.TextView;
 import com.example.testrealsense.Helper.DatabaseUtils;
 import com.example.testrealsense.Helper.GraphicOverlay;
 import com.example.testrealsense.Helper.ObjectGraphics;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.mlkit.common.model.LocalModel;
-import com.google.mlkit.vision.common.InputImage;
-import com.google.mlkit.vision.objects.DetectedObject;
-import com.google.mlkit.vision.objects.ObjectDetection;
-import com.google.mlkit.vision.objects.ObjectDetector;
-import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions;
+
 import com.intel.realsense.librealsense.Align;
 import com.intel.realsense.librealsense.Colorizer;
 import com.intel.realsense.librealsense.Config;
@@ -33,6 +27,11 @@ import com.intel.realsense.librealsense.RsContext;
 import com.intel.realsense.librealsense.StreamType;
 import com.intel.realsense.librealsense.VideoFrame;
 
+import org.tensorflow.lite.support.image.TensorImage;
+import org.tensorflow.lite.task.vision.detector.Detection;
+import org.tensorflow.lite.task.vision.detector.ObjectDetector;
+
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -57,13 +56,12 @@ public class StreamDetection extends Thread{
     private RsContext mRsContext;
     private Align mAlign = new Align(StreamType.COLOR);
 
-    private LocalModel localModel;
-    ObjectDetector objectDetector;
+    String assetmodel;
     DatabaseUtils databaseUtils;
 
     private Bitmap realsenseBM;
     private ImageView img1;
-    InputImage image;
+    TensorImage image;
 
     private TextView distanceView;
     GraphicOverlay graphicOverlay;
@@ -87,12 +85,11 @@ public class StreamDetection extends Thread{
 
     static Context context;
 
-    final MediaPlayer mp;
-
     HashMap<String, Float> objectDict;
 
-    CustomObjectDetectorOptions customObjectDetectorOptions;
 
+
+    Detector detector;
     BottomsheetC bs;
 
 
@@ -144,37 +141,11 @@ public class StreamDetection extends Thread{
         this.databaseUtils = databaseUtils;
         this.bs = bs;
 
-        String assetmodel = bs.getModelML_spinner().getSelectedItem().toString();
-
-        localModel = new LocalModel.Builder()
-                //.setAssetFilePath("models/lite-model_object_detection_mobile_object_labeler_v1_1.tflite")
-                .setAssetFilePath("models/"+assetmodel)
-                .build();
-        customObjectDetectorOptions =
-                new CustomObjectDetectorOptions.Builder(localModel)
-                        .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
-                        //.enableMultipleObjects()
-                        .enableClassification()
-                        .setClassificationConfidenceThreshold(0.5f)
-                        .setMaxPerObjectLabelCount(1)
-                        .build();
-
+        detector = new Detector(context, graphicOverlay, objectDict,bs);
 
         mPipeline = new Pipeline();
         mColorizer = new Colorizer();
 
-        //objectDict = new HashMap<String, Float>();
-        //objectDict.put("Person", (float) 0.7);
-
-        mp = MediaPlayer.create( context, R.raw.alert_attention);
-
-        /*try {
-            System.out.println("QUI!!!!!!!!!!");
-            img1.setImageBitmap(Utils.loadBitmapFromAssets(context,"img/cantieri-edili-2.jpg" ));
-
-        } catch (Exception e) {
-            Log.e(TAG, "streaming, error: " + e.getMessage());
-        }*/
     }
 
     //****************************************PER MIGLIORARE PERFORMANCE PROVARE INPUTIMAGE.FROMBYTE ARRAY***********************************************//
@@ -183,7 +154,59 @@ public class StreamDetection extends Thread{
     public void run() {
         super.run();
         try {
-            /** Configurazione frames di streaming **/
+            try (FrameSet frames = mPipeline.waitForFrames()) {
+                try (FrameSet processed = frames.applyFilter(mAlign)) {
+                    try ( Frame depthFrame = processed.first(StreamType.DEPTH)) {
+                        try (Frame colorFrame = processed.first(StreamType.COLOR)) {
+
+                            videoFrame = colorFrame.as(Extension.VIDEO_FRAME);
+
+                            c_size = videoFrame.getDataSize();
+                            c_height = videoFrame.getHeight();
+                            c_width = videoFrame.getWidth();
+                            c_data = new byte[c_size];
+                            videoFrame.getData(c_data);
+
+
+                            if (c_data.length != 0 ) {
+                                realsenseBM = rgb2Bitmap(c_data, c_width, c_height);
+                                image = TensorImage.fromBitmap(realsenseBM);
+
+                                depth = depthFrame.clone().as(Extension.DEPTH_FRAME);
+
+                                detector.setImageToDetect(image);
+                                detector.startDetectionForRealSenseStream(depth);
+
+                                depth.close();
+                                img1.setImageBitmap(realsenseBM);
+                                depthFrame.close();
+                                mHandler.post(StreamDetection.this);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception e) {
+            Log.e(TAG, "streaming, error: " + e.getMessage());
+        }
+    }
+
+
+
+
+
+
+    /*
+
+
+    OLD RUN
+
+
+    @Override
+    public void run() {
+        super.run();
+        try {
             try (FrameSet frames = mPipeline.waitForFrames()) {
                 try (FrameSet processed = frames.applyFilter(mAlign)) {
                     try ( Frame depthFrame = processed.first(StreamType.DEPTH)) {
@@ -206,7 +229,6 @@ public class StreamDetection extends Thread{
                                 objectDetector = ObjectDetection.getClient(customObjectDetectorOptions);
                                 depth = depthFrame.clone().as(Extension.DEPTH_FRAME);
 
-                                /**detection su immagine RGB**/
                                 long startTime = System.currentTimeMillis();
                                 objectDetector.process(image).addOnCompleteListener(new OnCompleteListener<List<DetectedObject>>() {
                                     @Override
@@ -218,21 +240,17 @@ public class StreamDetection extends Thread{
                                         List<DetectedObject> detectedObjects = task.getResult();
                                         for (DetectedObject detectedObject : detectedObjects) {
 
-                                            /** Controllo della presenza dell'ggetto identificato nella lista di oggetti critici **/
                                             if (detectedObject.getLabels().size() > 0  && objectDict.containsKey(detectedObject.getLabels().get(0).getText())) {
                                                 String label = detectedObject.getLabels().get(0).getText();
                                                 depthValue = -1;
                                                 boolean alarm = false;
-                                                /** prelievo della distanza dal depth frame **/
                                                 depthValue = depth.getDistance(detectedObject.getBoundingBox().centerX(), detectedObject.getBoundingBox().centerY());
-                                                /** se la distanza è inferiore a quella critica, riproduci notifica e scrivi sul database **/
                                                 if (depthValue < objectDict.get(label)) {
                                                     databaseUtils.writeTooCloseDistanceLog(depthValue, label);
                                                     System.out.println("SOUNA NOTIFICA");
                                                     mp.start();
                                                     alarm = true;
                                                 }
-                                                /** disegna il boundingbox con un colore opportuno in funzione della distanza **/
                                                 drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, image.getWidth(), depthValue, alarm);
                                                 drawBoundingBoxLabel.drawBoundingBoxAndLabel();
                                             }
@@ -254,7 +272,7 @@ public class StreamDetection extends Thread{
         catch (Exception e) {
             Log.e(TAG, "streaming, error: " + e.getMessage());
         }
-    }
+    }*/
 
     private void configAndStart() throws Exception {
         try(Config config  = new Config())

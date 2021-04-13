@@ -27,7 +27,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.example.testrealsense.Helper.CallbackFirebaseData;
 import com.example.testrealsense.Helper.DatabaseUtils;
 import com.example.testrealsense.Helper.GraphicOverlay;
 import com.example.testrealsense.Helper.Utils;
@@ -37,17 +36,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.mlkit.vision.common.InputImage;
 import com.intel.realsense.librealsense.DeviceList;
 import com.intel.realsense.librealsense.DeviceListener;
 import com.intel.realsense.librealsense.RsContext;
 
-import org.json.JSONException;
+import org.tensorflow.lite.support.image.TensorImage;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -78,21 +72,25 @@ public class MainActivity extends AppCompatActivity{
     private static final int PERMISSIONS_REQUEST_WRITE = 1;
 
     GraphicOverlay graphicOverlay;
-    TextView distanceView;
     TextView fps;
     TextView msDetection;
     TextView depthResolution;
     TextView rgbResolution;
+    TextView Nthread_text;
     Spinner modelML_spinner;
     Spinner distance_spinner;
     Spinner computation_spinner;
-    Spinner thread_spinner;
-    Button detectableObjectButton;
 
     ImageView img1;
+    ImageView Nthread_plus;
+    ImageView Nthread_minus;
+
+
+    Button detectableObjectButton;
+
     Bitmap imgBM;
     Bitmap img;
-    InputImage image;
+    TensorImage image;
 
     Detector detector;
     StreamDetection stream_detection;
@@ -140,15 +138,26 @@ public class MainActivity extends AppCompatActivity{
         modelML_spinner = findViewById(R.id.modelML_spinner);
         distance_spinner = findViewById(R.id.distance_spinner);
         computation_spinner = findViewById(R.id.computation_spinner);
-        thread_spinner = findViewById(R.id.thread_spinner);
+        Nthread_text = findViewById(R.id.Nthread_value);
+        Nthread_plus = findViewById(R.id.Nthread_plus);
+        Nthread_minus = findViewById(R.id.Nthread_minus);
         detectableObjectButton = findViewById(R.id.detectableobjectButton);
-        //distanceView = findViewById(R.id.distanceTextView);
 
         databaseUtils = new DatabaseUtils(this);
 
 
         bs = new BottomsheetC(this,sheetBehavior, bottomSheetLayout, bottomSheetArrowImageView, gestureLayout);
-        bs.setContentBottomSheet(fps,msDetection,depthResolution,rgbResolution, modelML_spinner, distance_spinner, computation_spinner, thread_spinner, detectableObjectButton);
+        bs.setContentBottomSheet(fps,
+                                msDetection,
+                                depthResolution,
+                                rgbResolution,
+                                modelML_spinner,
+                                distance_spinner,
+                                computation_spinner,
+                                Nthread_text,
+                                Nthread_minus,
+                                Nthread_plus,
+                                detectableObjectButton);
 
         //WriteLogcat wl = new WriteLogcat();
         getModelFromFirebase();
@@ -176,13 +185,52 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
-    public static void spinnerSelectedListener() {
+    void startDetection(){
+        graphicOverlay.clear();
+        showConnectLabel(false);
+        imgBM = Utils.loadBitmapFromAssets(MainActivity.this, "img/image1.jpg");
+        img1.setImageBitmap(imgBM);
+        image = TensorImage.fromBitmap(imgBM);
+
+        if (bs.getComputation_spinner().getSelectedItem().toString().equals("local")) {
+            detector = new Detector(MainActivity.this, graphicOverlay, objectDict, bs);
+            detector.setImageToDetect(image);
+            detector.startDetection();
+        }
+    }
+
+    public void spinnerSelectedListener() {
+        bs.Nthread_plus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int value = Integer.parseInt(bs.Nthread_value.getText().toString())+1;
+                if(value<=9) {
+                    bs.Nthread_value.setText(String.valueOf(value));
+                    DatabaseUtils.writeNthreads(value);
+                    startDetection();
+                }
+            }
+        });
+
+        bs.Nthread_minus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int value = Integer.parseInt(bs.Nthread_value.getText().toString())-1;
+                if(value>0) {
+                    bs.Nthread_value.setText(String.valueOf(value));
+                    DatabaseUtils.writeNthreads(value);
+                    startDetection();
+                }
+            }
+        });
+
         bs.getModelML_spinner().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 if (!firstStartModel) {
                     System.out.println("Selected Model for detection: " + bs.getModelML_spinner().getSelectedItem().toString());
                     DatabaseUtils.writeModel(bs.getModelML_spinner().getSelectedItem().toString());
+                    startDetection();
                 }
                 else firstStartModel = false;
 
@@ -197,15 +245,12 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                if(bs.getComputation_spinner().getSelectedItem().toString().equals("local"))
-                    bs.getThread_spinner().setEnabled(true);
-                else
-                    bs.getThread_spinner().setEnabled(false);
+                bs.getNthread_value().setEnabled(bs.getComputation_spinner().getSelectedItem().toString().equals("local"));
 
                 if (!firstStartComputation) {
                     System.out.println("Selected computation Type: " + bs.getComputation_spinner().getSelectedItem().toString());
                     DatabaseUtils.writeComputationType(bs.getComputation_spinner().getSelectedItem().toString());
-
+                    if (position==0) startDetection();
                 } else firstStartComputation = false;
             }
             @Override
@@ -220,6 +265,7 @@ public class MainActivity extends AppCompatActivity{
                 if (!firstStartDistance) {
                     System.out.println("Selected distance Type: " + bs.getDistance_spinner().getSelectedItem().toString());
                     DatabaseUtils.writeDistanceType(bs.getDistance_spinner().getSelectedItem().toString());
+                    startDetection();
                 } else firstStartDistance = false;
             }
             @Override
@@ -292,19 +338,7 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked) {
-                    graphicOverlay.clear();
-                    showConnectLabel(false);
-                    imgBM = Utils.loadBitmapFromAssets(MainActivity.this, "img/image1.jpg");
-                    img1.setImageBitmap(imgBM);
-                    image = InputImage.fromBitmap(imgBM, 0);
-
-                    if (bs.getComputation_spinner().getSelectedItem().toString().equals("local")) {
-                        detector = new Detector(MainActivity.this, graphicOverlay, objectDict, bs);
-                        detector.setImageToDetect(image);
-                        detector.startDetection();
-                    }
-
-
+                    startDetection();
                 }
                 else {
                     graphicOverlay.clear();

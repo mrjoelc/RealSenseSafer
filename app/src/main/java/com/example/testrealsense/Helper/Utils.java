@@ -4,14 +4,13 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.RectF;
 import android.os.Environment;
-import android.os.FileUtils;
 import android.util.Log;
-
-import com.google.mlkit.vision.objects.DetectedObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.tensorflow.lite.task.vision.detector.Detection;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -92,7 +91,7 @@ public class Utils {
 
     }
 
-    public static float[] getScaledBoundingBox(DetectedObject detectedObject, float scaleFactor){
+    public static float[] getScaledBoundingBox(Detection detectedObject, float scaleFactor){
         float left = detectedObject.getBoundingBox().right * scaleFactor ;
         float top = detectedObject.getBoundingBox().top * scaleFactor;
         float right = detectedObject.getBoundingBox().left * scaleFactor;
@@ -187,10 +186,10 @@ public class Utils {
         return map;
     }
 
-    public static HashMap jsonToMap(Context context) throws JSONException, IOException {
+    public static HashMap jsonToMap(Context context, String path) throws JSONException, IOException {
         AssetManager manager = context.getAssets();
         InputStream file;
-        file = manager.open("dict/dict.json");
+        file = manager.open(path);
         byte[] formArray = new byte[file.available()];
         file.read(formArray);
         file.close();
