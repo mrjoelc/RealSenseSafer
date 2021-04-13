@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity{
         getObjectsListFromFirebase();
         getComputationTypeFromFirebase();
 
-        spinnerSelectedListener();
+        bsListeners();
 
         //stream_detection = new StreamDetection(img1,graphicOverlay,distanceView,fps, msDetection, this, objectDict, databaseUtils);
         stream_detection = new StreamDetection(img1,graphicOverlay,bs, this, objectDict, databaseUtils);
@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 
-    public void spinnerSelectedListener() {
+    public void bsListeners() {
         bs.Nthread_plus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -245,8 +245,7 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                bs.getNthread_value().setEnabled(bs.getComputation_spinner().getSelectedItem().toString().equals("local"));
-
+                checkIfRemote();
                 if (!firstStartComputation) {
                     System.out.println("Selected computation Type: " + bs.getComputation_spinner().getSelectedItem().toString());
                     DatabaseUtils.writeComputationType(bs.getComputation_spinner().getSelectedItem().toString());
@@ -273,6 +272,22 @@ public class MainActivity extends AppCompatActivity{
 
             }
         });
+    }
+
+    void checkIfRemote(){
+        if(!bs.getComputation_spinner().getSelectedItem().toString().equals("local")){
+            bs.Nthread_minus.setEnabled(false);
+            bs.Nthread_plus.setEnabled(false);
+            bs.Nthread_value.setTextColor(Color.GRAY);
+            bs.modelML_spinner.setEnabled(false);
+            bs.distance_spinner.setEnabled(false);
+        }else{
+            bs.Nthread_minus.setEnabled(true);
+            bs.Nthread_plus.setEnabled(true);
+            bs.Nthread_value.setTextColor(Color.BLACK);
+            bs.modelML_spinner.setEnabled(true);
+            bs.distance_spinner.setEnabled(true);
+        }
     }
 
 
