@@ -85,7 +85,6 @@ public class MainActivity extends AppCompatActivity{
     ImageView Nthread_plus;
     ImageView Nthread_minus;
 
-
     Button detectableObjectButton;
 
     Bitmap imgBM;
@@ -104,7 +103,6 @@ public class MainActivity extends AppCompatActivity{
     boolean jsonAvaiable = true;
 
     DatabaseUtils databaseUtils;
-
 
     @SuppressLint("ResourceType")
     @Override
@@ -145,7 +143,6 @@ public class MainActivity extends AppCompatActivity{
 
         databaseUtils = new DatabaseUtils(this);
 
-
         bs = new BottomsheetC(this,sheetBehavior, bottomSheetLayout, bottomSheetArrowImageView, gestureLayout);
         bs.setContentBottomSheet(fps,
                                 msDetection,
@@ -178,7 +175,6 @@ public class MainActivity extends AppCompatActivity{
         loadLocalImageButtonListener();
         detectableObjectButtonListener();
     }
-
 
     @Override
     protected void onStart() {
