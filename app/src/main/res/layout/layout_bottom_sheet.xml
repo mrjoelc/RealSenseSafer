@@ -13,7 +13,6 @@
     app:behavior_hideable="false"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-
     <LinearLayout
         android:id="@+id/gesture_layout"
         android:layout_width="match_parent"
@@ -62,7 +61,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="detection time"
+                android:text="Detection time"
                 android:textColor="@android:color/black" />
 
             <TextView

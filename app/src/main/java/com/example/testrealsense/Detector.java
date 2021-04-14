@@ -81,10 +81,14 @@ public class Detector {
                     && objectDict!=null
                     && objectDict.containsKey(detectedObject.getCategories().get(0).getLabel())){
 
-                alarm = false;
-
-                drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, scaleFactor, 5, alarm);
-                drawBoundingBoxLabel.drawBoundingBoxAndLabel();
+                ((MainActivity)context).runOnUiThread(new Runnable()
+                {
+                    public void run()
+                    {
+                        drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, scaleFactor, 0, false);
+                        drawBoundingBoxLabel.drawBoundingBoxAndLabel();
+                    }
+                });
             }
 
 
