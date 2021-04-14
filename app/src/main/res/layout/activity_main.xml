@@ -32,7 +32,8 @@
                 android:scaleType="fitCenter"
                 android:id="@+id/screen_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:src="@drawable/no_image"/>
 
             <!--    <ImageView
                     android:adjustViewBounds="true"

@@ -374,8 +374,7 @@ public class MainActivity extends AppCompatActivity{
                 }
                 else {
                     graphicOverlay.clear();
-                    img = Utils.loadBitmapFromAssets(MainActivity.this, "img/no_image.png");
-                    img1.setImageBitmap(img);
+                    img1.setImageDrawable(getResources().getDrawable(R.drawable.no_image));
                     showConnectLabel(true);
                 }
             }

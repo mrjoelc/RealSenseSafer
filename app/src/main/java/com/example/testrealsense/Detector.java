@@ -83,8 +83,15 @@ public class Detector {
 
                 alarm = false;
 
-                drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, scaleFactor, 5, alarm);
-                drawBoundingBoxLabel.drawBoundingBoxAndLabel();
+                ((MainActivity)context).runOnUiThread(new Runnable()
+                {
+                    public void run()
+                    {
+                        drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, scaleFactor, 0, alarm);
+                        drawBoundingBoxLabel.drawBoundingBoxAndLabel();
+                    }
+                });
+
             }
 
 
