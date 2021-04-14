@@ -182,20 +182,23 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onStart() {
         super.onStart();
+        startDetection();
 
     }
 
     void startDetection(){
-        graphicOverlay.clear();
-        showConnectLabel(false);
-        imgBM = Utils.loadBitmapFromAssets(MainActivity.this, "img/image1.jpg");
-        img1.setImageBitmap(imgBM);
-        image = TensorImage.fromBitmap(imgBM);
+        if (loadLocalSwitch.isChecked()) {
+            graphicOverlay.clear();
+            showConnectLabel(false);
+            imgBM = Utils.loadBitmapFromAssets(MainActivity.this, "img/image1.jpg");
+            img1.setImageBitmap(imgBM);
+            image = TensorImage.fromBitmap(imgBM);
 
-        if (bs.getComputation_spinner().getSelectedItem().toString().equals("local")) {
-            detector = new Detector(MainActivity.this, graphicOverlay, objectDict, bs);
-            detector.setImageToDetect(image);
-            detector.startDetection();
+            if (bs.getComputation_spinner().getSelectedItem().toString().equals("local")) {
+                detector = new Detector(MainActivity.this, graphicOverlay, objectDict, bs);
+                detector.setImageToDetect(image);
+                detector.startDetection();
+            }
         }
     }
 
