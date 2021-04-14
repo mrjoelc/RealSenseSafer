@@ -173,6 +173,7 @@ public class MainActivity extends AppCompatActivity{
         mPermissionsGranted = true;
 
         barChartButtonListener();
+        getNThreadsFromFirebase();
         sendLogButtonListener();
         loadLocalImageButtonListener();
         detectableObjectButtonListener();
@@ -342,6 +343,23 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                bs.getModelML_spinner().setSelection(models.indexOf(snapshot.getValue()));
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
+    public void getNThreadsFromFirebase(){
+        String path = "config/nThreads";
+        int thread_number = 4;
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                bs.Nthread_value.setText(String.valueOf(snapshot.getValue()));
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
