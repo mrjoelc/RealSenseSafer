@@ -66,10 +66,12 @@ public class DetectableListActivity extends AppCompatActivity implements Detecta
         takeObjectDictFromTXT(s);
         for (HashMap.Entry<String, Float> obj : objectDictUnselected.entrySet()) {
             isSelected=false;
+            float distance=0.0f;
             if ( MainActivity.objectDict!=null && MainActivity.objectDict.containsKey(obj.getKey())){
                 isSelected=true;
+                distance=Float.parseFloat(String.valueOf(MainActivity.objectDict.get(obj.getKey())));
             }
-            d_o = new DetectableObject(obj.getKey(), obj.getValue(),isSelected);
+            d_o = new DetectableObject(obj.getKey(), distance, isSelected);
             if (isSelected) {
                 objectsListToDetect.add(0, d_o);
             } else {

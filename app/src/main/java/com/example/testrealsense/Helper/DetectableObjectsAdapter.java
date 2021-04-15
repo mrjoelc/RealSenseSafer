@@ -19,6 +19,9 @@ import com.example.testrealsense.R;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,7 +139,8 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
         myViewHolder.distance.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                float value = Float.parseFloat(v.getText().toString());
+                float value = 0.0f;
+                value += Float.parseFloat(v.getText().toString());
                 if (value<0 || value>9) value=0;
                 detecObj.setDistance(value);
                 myViewHolder.distance.setText(String.valueOf(value));
@@ -146,6 +150,7 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
 
             }
         });
+
 
 
 

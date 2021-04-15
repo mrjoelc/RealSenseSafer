@@ -109,7 +109,7 @@ public class DatabaseUtils {
     }
 
     public static void updateNewObjectToDetectDistance(String objectName, float distance){
-        mDatabase.child("config/objectsToDetect").child(objectName).setValue(distance);
+        mDatabase.child("config/objectsToDetect").child(objectName).setValue(String.valueOf(distance));
     }
 
     public static void removeObjectToDetect(String objectName){

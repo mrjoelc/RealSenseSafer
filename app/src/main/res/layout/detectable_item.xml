@@ -70,15 +70,15 @@
                         android:src="@drawable/ic_baseline_remove" />
 
                     <EditText
-                        android:maxLength="3"
+                        android:maxLength="4"
                         android:id="@+id/detectable_distance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp"
-                        android:text="0"
+                        android:text="0.0"
                         android:maxLines="1"
-                        android:inputType="numberDecimal|numberSigned"
+                        android:inputType="numberDecimal"
                         android:textColor="@android:color/black"
                         android:textSize="14sp"
                         android:imeOptions="actionDone">
