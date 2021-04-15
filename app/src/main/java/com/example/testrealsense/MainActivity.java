@@ -42,9 +42,11 @@ import com.intel.realsense.librealsense.RsContext;
 
 import org.tensorflow.lite.support.image.TensorImage;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 
 public class MainActivity extends AppCompatActivity{
@@ -173,6 +175,18 @@ public class MainActivity extends AppCompatActivity{
         sendLogButtonListener();
         loadLocalImageButtonListener();
         detectableObjectButtonListener();
+
+        /*Kmeans k = new Kmeans(3);
+        Random rand = new Random();
+        List<Float> l = new ArrayList<Float>();
+        for(int i=0; i<10; i++){
+            float randomValue = (float) (0.3 + rand.nextFloat() * (9.0 - 0.3));
+            l.add(randomValue);
+        }
+        k.setPoints(l);
+        k.initCentroids();*/
+
+
     }
 
     @Override
