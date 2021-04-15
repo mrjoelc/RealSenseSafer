@@ -1,12 +1,14 @@
 package com.example.testrealsense;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.MediaPlayer;
 import android.os.SystemClock;
 
 import com.example.testrealsense.Helper.DatabaseUtils;
 import com.example.testrealsense.Helper.GraphicOverlay;
+import com.example.testrealsense.Helper.KMeans.KMeans;
 import com.example.testrealsense.Helper.ObjectGraphics;
 import com.example.testrealsense.Helper.Utils;
 import com.intel.realsense.librealsense.DepthFrame;
@@ -17,6 +19,8 @@ import org.tensorflow.lite.task.vision.detector.ObjectDetector;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -112,7 +116,7 @@ public class Detector {
                 String label = detectedObject.getCategories().get(0).getLabel();
                 float depthValue = -1f;
                 boolean alarm = false;
-                depthValue = depth.getDistance((int)detectedObject.getBoundingBox().centerX(), (int)detectedObject.getBoundingBox().centerY());
+                depthValue = getCorrectDistance(depth, detectedObject);
                 if (depthValue < objectDict.get(label)) {
                     DatabaseUtils.writeTooCloseDistanceLog(depthValue, label);
                     System.out.println("SUONA NOTIFICA");
@@ -125,6 +129,47 @@ public class Detector {
             }
         }
         computeFPS(startTime);
+    }
+
+    public float getCorrectDistance(DepthFrame depth, Detection detectedObject){
+        float depthValue = -1f;
+        switch (bs.distance_spinner.getSelectedItem().toString()){
+            case "Minimum":
+                float minDistance=10f;
+                for(float j=detectedObject.getBoundingBox().top; j<detectedObject.getBoundingBox().bottom; j++){
+                    for (float i=detectedObject.getBoundingBox().left; i<detectedObject.getBoundingBox().right; i++){
+                        float currentDistance = depth.getDistance((int)i,(int)j);
+                        if(currentDistance<minDistance) minDistance = currentDistance;
+                    }
+                }
+                depthValue = minDistance;
+                break;
+            case "Average":
+                float sum=0;
+                float n=0;
+                for(float j=detectedObject.getBoundingBox().top; j<detectedObject.getBoundingBox().bottom; j++){
+                    for (float i=detectedObject.getBoundingBox().left; i<detectedObject.getBoundingBox().right; i++){
+                        sum += depth.getDistance((int)i,(int)j);
+                        n+=1;
+                    }
+                }
+                depthValue = sum/n;
+                break;
+            case "Clustering":
+                List<Float> points = new ArrayList<Float>();
+                for(float j=detectedObject.getBoundingBox().top; j<detectedObject.getBoundingBox().bottom; j++){
+                    for (float i=detectedObject.getBoundingBox().left; i<detectedObject.getBoundingBox().right; i++){
+                        points.add(depth.getDistance((int)i,(int)j));
+                    }
+                }
+                KMeans k = new KMeans(2);
+                k.setPoints(points);
+                k.computeClusters(10);
+                depthValue =  Collections.min(k.getCentroids());
+                break;
+            default: break;
+        }
+        return depthValue;
     }
 
 

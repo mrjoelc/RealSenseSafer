@@ -19,9 +19,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 public class Utils {
 
@@ -103,10 +105,10 @@ public class Utils {
         return (float) graphicOverlay.getWidth() / imageWidth;
     }
 
-    void pointsInsideRect(float[] points){
-        for(float j=points[1]; j<points[3]; j++){
-            for (float i=points[0]; i<points[2]; i++){
-                //Preleva i valori di distanza e computa qualcosa
+    public static void pointsInsideRect(RectF points){
+        List<Float> l = new ArrayList<>();
+        for(float j=points.top; j<points.bottom; j++){
+            for (float i=points.left; i<points.right; i++){
             }
         }
     }
