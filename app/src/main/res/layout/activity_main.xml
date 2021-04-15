@@ -7,22 +7,22 @@
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="@drawable/bgmain4">
+        android:background="@drawable/bgmain4"
+        android:orientation="vertical">
 
-            <ImageView
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter"
-                android:id="@+id/screen_view"
-                android:src="@drawable/no_image"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/screen_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/no_image" />
 
-            <!--    <ImageView
+        <!--    <ImageView
                     android:adjustViewBounds="true"
                     android:scaleType="fitCenter"
                     android:alpha="0.5"
@@ -31,86 +31,83 @@
                     android:layout_height="wrap_content"
                     />-->
 
-            <com.example.testrealsense.Helper.GraphicOverlay
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:scaleType="fitCenter"
-                android:id="@+id/graphicOverlay"
-                />
-
 
         <TextView
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="280dp"
-            android:layout_marginBottom="40dp"
             android:id="@+id/connectCameraText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
             android:layout_gravity="center_vertical|center_horizontal"
-            android:textSize="20dp"
+            android:layout_marginTop="280dp"
+            android:layout_marginBottom="40dp"
             android:text="Connect a RealSense camera"
-            android:textColor="#ffffff"/>
+            android:textColor="#ffffff"
+            android:textSize="20dp" />
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:id="@+id/buttonPanel"
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="190dp"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true">
+            android:orientation="vertical">
 
             <LinearLayout
-                android:layout_marginTop="100dp"
-                android:layout_marginLeft="60dp"
-                android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="100dp"
+                android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/sendLogToFirebase"
-                    android:text="send Log"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
                     android:layout_weight="1"
+                    android:background="@drawable/log_button"
                     android:gravity="center"
-                    android:layout_height="60dp"
-                    android:layout_width="75dp"/>
+                    android:text="send Log"
+                    android:textColor="#FFFF"
+                    android:layout_marginRight="10dp"/>
 
                 <Button
                     android:id="@+id/barchartButton"
-                    android:text="Go to log"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
                     android:layout_weight="1"
+                    android:background="@drawable/log_button"
                     android:gravity="center"
-                    android:layout_height="60dp"
-                    android:layout_width="75dp"/>
+                    android:text="log"
+                    android:textColor="#FFFF"/>
 
                 <LinearLayout
-                    android:layout_weight="1"
-                    android:layout_marginLeft="25dp"
                     android:layout_width="150dp"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    >
+                    android:layout_marginLeft="25dp"
+                    android:layout_weight="2"
+                    android:background="@drawable/log_button"
+                    android:orientation="vertical">
 
                     <Switch
-                        android:text="local image / stream"
+                        android:theme="@style/SwitchTheme"
+                        android:background="@drawable/log_button"
                         android:id="@+id/localImageswitch"
-                        android:layout_gravity="center"
+                        android:layout_width="wrap_content"
                         android:layout_height="50dp"
-
+                        android:layout_gravity="center"
+                        android:layout_margin="10dp"
+                        android:text="local image / stream"
                         android:textColor="#FFFF"
-                        android:textStyle="bold"
-                        android:layout_width="wrap_content"/>
+                        android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
-
-
 
 
         </androidx.appcompat.widget.LinearLayoutCompat>
 
 
-
-
-     <!--   <TableLayout
+        <!--   <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true">
@@ -172,9 +169,17 @@
 
     </RelativeLayout>
 
+    <com.example.testrealsense.Helper.GraphicOverlay
+        android:id="@+id/graphicOverlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="fitCenter"
+        app:layout_anchor="@+id/relativeLayout"
+        app:layout_anchorGravity="center" />
+
     <include
-        android:id="@+id/bottom_sheet_layout"
-        layout="@layout/layout_bottom_sheet"
-        />
+          android:id="@+id/bottom_sheet_layout"
+          layout="@layout/layout_bottom_sheet"
+          />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

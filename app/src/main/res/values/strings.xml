@@ -118,9 +118,9 @@
         <item>lite-model_efficientdet_lite0_detection_metadata_1.tflite</item>
     </string-array>
     <string-array name="distances" translatable="false">
-        <item>media</item>
-        <item>minimo</item>
-        <item>clustering</item>
+        <item>Minimum</item>
+        <item>Average</item>
+        <item>Clustering</item>
     </string-array>
     <string-array name="computation" translatable="false">
         <item>local</item>
