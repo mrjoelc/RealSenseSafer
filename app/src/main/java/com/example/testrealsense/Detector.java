@@ -61,7 +61,6 @@ public class Detector {
                 .setNumThreads(Integer.parseInt(bs.getNthread_value().getText().toString()))
                 // to determine an appropriate value.
                 .build();
-
         try {
             objectDetector = ObjectDetector.createFromFileAndOptions(context, "models/"+assetmodel, options);
         } catch (IOException e) {
@@ -113,18 +112,23 @@ public class Detector {
                     && objectDict!=null
                     && objectDict.containsKey(detectedObject.getCategories().get(0).getLabel())){
 
+                //System.out.println("INSIDE DETECTOR" + objectDict.toString());
+
                 String label = detectedObject.getCategories().get(0).getLabel();
-                float depthValue = -1f;
+                float depthValue = 0.0f;
                 boolean alarm = false;
-                depthValue = getCorrectDistance(depth, detectedObject);
-                if (depthValue < objectDict.get(label)) {
+
+               //depthValue = getCorrectDistance(depth, detectedObject);
+                if (depthValue>0 && depthValue < objectDict.get(label)) {
                     DatabaseUtils.writeTooCloseDistanceLog(depthValue, label);
                     System.out.println("SUONA NOTIFICA");
                     mp.start();
                     alarm = true;
                 }
 
-                drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, scaleFactor, depthValue, alarm);
+                System.out.println(label);
+
+                drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, scaleFactor, 0, alarm);
                 drawBoundingBoxLabel.drawBoundingBoxAndLabel();
             }
         }

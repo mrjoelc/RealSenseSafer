@@ -159,6 +159,7 @@ public class StreamDetection extends Thread{
                     try ( Frame depthFrame = processed.first(StreamType.DEPTH)) {
                         try (Frame colorFrame = processed.first(StreamType.COLOR)) {
 
+                            graphicOverlay.clear();
                             videoFrame = colorFrame.as(Extension.VIDEO_FRAME);
 
                             c_size = videoFrame.getDataSize();
@@ -173,10 +174,11 @@ public class StreamDetection extends Thread{
                                 image = TensorImage.fromBitmap(realsenseBM);
 
 
-                                //detector.setImageToDetect(image);
-                                //detector.startDetectionForRealSenseStream(depthFrame.as(Extension.DEPTH_FRAME));
-
+                                detector.setImageToDetect(image);
                                 img1.setImageBitmap(realsenseBM);
+                                detector.startDetectionForRealSenseStream(depthFrame.as(Extension.DEPTH_FRAME));
+
+
                                 depthFrame.close();
                                 mHandler.post(StreamDetection.this);
                             }
@@ -291,6 +293,7 @@ public class StreamDetection extends Thread{
         try{
             Log.d(TAG, "try start streaming");
             configAndStart();
+            Log.d(TAG, "configAndStart successfully");
             mIsStreaming = true;
             mHandler.post(this); // ? o this::run
             Log.d(TAG, "streaming started successfully");

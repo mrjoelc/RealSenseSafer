@@ -121,7 +121,6 @@ public class MainActivity extends AppCompatActivity{
         img1 = findViewById(R.id.screen_view);
         graphicOverlay = findViewById(R.id.graphicOverlay);
 
-
         //bottomsheet
         gestureLayout = findViewById(R.id.gesture_layout);
         bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
@@ -161,13 +160,12 @@ public class MainActivity extends AppCompatActivity{
         Intent intent = getIntent();
         objectDict = (HashMap<String, Float>) intent.getSerializableExtra("DICT");
 
-
         getComputationTypeFromFirebase();
 
         bsListeners();
 
         //stream_detection = new StreamDetection(img1,graphicOverlay,distanceView,fps, msDetection, this, objectDict, databaseUtils);
-        stream_detection = new StreamDetection(img1,graphicOverlay,bs, this, objectDict, databaseUtils);
+        //stream_detection = new StreamDetection(img1,graphicOverlay,bs, this, objectDict, databaseUtils);
 
         checkPermission();
         mPermissionsGranted = true;
@@ -183,10 +181,9 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onStart() {
         super.onStart();
-        if(localImageSwitch.isChecked())
+        /*if(localImageSwitch.isChecked())
              startLocalDetection();
-        else init();
-
+        else init();*/
     }
 
     void startLocalDetection(){
@@ -376,13 +373,15 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked) {
+                    //graphicOverlay.clear();
+                    /*if(mRsContext != null)
+                        mRsContext.close();*/
                     stream_detection.stop2();
-                   /* if(mRsContext!=null){
-                        mRsContext.close();
-                    }*/
                     startLocalDetection();
                 }
                 else {
+                    //graphicOverlay.clear();
+                    stream_detection = new StreamDetection(img1,graphicOverlay,bs, mAppContext, objectDict, databaseUtils);
                     stream_detection.start();
                 }
             }
@@ -468,19 +467,25 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onResume() {
         super.onResume();
-        if(mPermissionsGranted) {
+        if(localImageSwitch.isChecked())
+            startLocalDetection();
+        else if(mPermissionsGranted) {
+            System.out.println("PERMESSI GARANTITI: " + mPermissionsGranted);
             init();
-        }
-        else
+        } else
             Log.e(TAG, "missing permissions");
     }
+
+
 
     @Override
     protected void onPause() {
         super.onPause();
-        if(mRsContext != null)
+        if(mRsContext != null){
             mRsContext.close();
-        stream_detection.stop2();
+        }
+        if(!localImageSwitch.isChecked())
+            stream_detection.stop2();
         //mColorizer.close();
         //mPipeline.close();
     }
@@ -488,8 +493,6 @@ public class MainActivity extends AppCompatActivity{
     private void init(){
         //RsContext.init must be called once in the application lifetime before any interaction with physical RealSense devices.
         //For multi activities applications use the application context instead of the activity context
-        graphicOverlay.clear();
-
         RsContext.init(mAppContext);
 
         //Register to notifications regarding RealSense devices attach/detach events via the DeviceListener.
@@ -499,10 +502,16 @@ public class MainActivity extends AppCompatActivity{
             if(dl.getDeviceCount() > 0) {
                 showConnectLabel(false);
                 if (!objectDict.isEmpty() && !localImageSwitch.isChecked()) {
-                    stream_detection.start();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            stream_detection = new StreamDetection(img1,graphicOverlay,bs, MainActivity.this, objectDict, databaseUtils);
+                            stream_detection.start();
+                        }
+                    });
                 }
                 else {
-                    Toast.makeText(this, "json not found", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Object Dict is EMPTY!", Toast.LENGTH_SHORT).show();
                 }
             }
         }
