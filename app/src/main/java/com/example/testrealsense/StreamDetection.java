@@ -172,12 +172,10 @@ public class StreamDetection extends Thread{
                                 realsenseBM = rgb2Bitmap(c_data, c_width, c_height);
                                 image = TensorImage.fromBitmap(realsenseBM);
 
-                                depth = depthFrame.clone().as(Extension.DEPTH_FRAME);
 
-                                detector.setImageToDetect(image);
-                                detector.startDetectionForRealSenseStream(depth);
+                                //detector.setImageToDetect(image);
+                                //detector.startDetectionForRealSenseStream(depthFrame.as(Extension.DEPTH_FRAME));
 
-                                depth.close();
                                 img1.setImageBitmap(realsenseBM);
                                 depthFrame.close();
                                 mHandler.post(StreamDetection.this);

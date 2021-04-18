@@ -42,11 +42,9 @@ import com.intel.realsense.librealsense.RsContext;
 
 import org.tensorflow.lite.support.image.TensorImage;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 
 
 public class MainActivity extends AppCompatActivity{
@@ -64,7 +62,7 @@ public class MainActivity extends AppCompatActivity{
 
     Button barChartButton;
     Button sendLogToFirebaseButton;
-    Switch loadLocalSwitch;
+    Switch localImageSwitch;
 
     private Context mAppContext;
     private TextView mBackGroundText;
@@ -118,7 +116,7 @@ public class MainActivity extends AppCompatActivity{
         mBackGroundText = findViewById(R.id.connectCameraText);
 
         barChartButton = findViewById(R.id.barchartButton);
-        loadLocalSwitch = findViewById(R.id.localImageswitch);
+        localImageSwitch = findViewById(R.id.localImageswitch);
         sendLogToFirebaseButton = findViewById(R.id.sendLogToFirebase);
         img1 = findViewById(R.id.screen_view);
         graphicOverlay = findViewById(R.id.graphicOverlay);
@@ -159,7 +157,11 @@ public class MainActivity extends AppCompatActivity{
 
         //WriteLogcat wl = new WriteLogcat();
         getModelFromFirebase();
-        getObjectsListFromFirebase();
+        //getObjectsListFromFirebase();
+        Intent intent = getIntent();
+        objectDict = (HashMap<String, Float>) intent.getSerializableExtra("DICT");
+
+
         getComputationTypeFromFirebase();
 
         bsListeners();
@@ -173,31 +175,22 @@ public class MainActivity extends AppCompatActivity{
         barChartButtonListener();
         getNThreadsFromFirebase();
         sendLogButtonListener();
-        loadLocalImageButtonListener();
+        localImageSwitchListener();
         detectableObjectButtonListener();
-
-        /*Kmeans k = new Kmeans(3);
-        Random rand = new Random();
-        List<Float> l = new ArrayList<Float>();
-        for(int i=0; i<10; i++){
-            float randomValue = (float) (0.3 + rand.nextFloat() * (9.0 - 0.3));
-            l.add(randomValue);
-        }
-        k.setPoints(l);
-        k.initCentroids();*/
-
 
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        startDetection();
+        if(localImageSwitch.isChecked())
+             startLocalDetection();
+        else init();
 
     }
 
-    void startDetection(){
-        if (loadLocalSwitch.isChecked()) {
+    void startLocalDetection(){
+        if (localImageSwitch.isChecked()) {
             graphicOverlay.clear();
             showConnectLabel(false);
             imgBM = Utils.loadBitmapFromAssets(MainActivity.this, "img/image1.jpg");
@@ -220,7 +213,7 @@ public class MainActivity extends AppCompatActivity{
                 if(value<=9) {
                     bs.Nthread_value.setText(String.valueOf(value));
                     DatabaseUtils.writeNthreads(value);
-                    startDetection();
+                    startLocalDetection();
                 }
             }
         });
@@ -232,7 +225,7 @@ public class MainActivity extends AppCompatActivity{
                 if(value>0) {
                     bs.Nthread_value.setText(String.valueOf(value));
                     DatabaseUtils.writeNthreads(value);
-                    startDetection();
+                    startLocalDetection();
                 }
             }
         });
@@ -243,7 +236,7 @@ public class MainActivity extends AppCompatActivity{
                 if (!firstStartModel) {
                     System.out.println("Selected Model for detection: " + bs.getModelML_spinner().getSelectedItem().toString());
                     DatabaseUtils.writeModel(bs.getModelML_spinner().getSelectedItem().toString());
-                    startDetection();
+                    startLocalDetection();
                 }
                 else firstStartModel = false;
 
@@ -262,7 +255,7 @@ public class MainActivity extends AppCompatActivity{
                 if (!firstStartComputation) {
                     System.out.println("Selected computation Type: " + bs.getComputation_spinner().getSelectedItem().toString());
                     DatabaseUtils.writeComputationType(bs.getComputation_spinner().getSelectedItem().toString());
-                    if (position==0) startDetection();
+                    if (position==0) startLocalDetection();
                 } else firstStartComputation = false;
             }
             @Override
@@ -277,7 +270,7 @@ public class MainActivity extends AppCompatActivity{
                 if (!firstStartDistance) {
                     System.out.println("Selected distance Type: " + bs.getDistance_spinner().getSelectedItem().toString());
                     DatabaseUtils.writeDistanceType(bs.getDistance_spinner().getSelectedItem().toString());
-                    startDetection();
+                    startLocalDetection();
                 } else firstStartDistance = false;
             }
             @Override
@@ -304,7 +297,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
 
-    public static void getObjectsListFromFirebase(){
+    /*public static void getObjectsListFromFirebase(){
         String path = "config/objectsToDetect";
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
         objectDict = new HashMap<>();
@@ -323,7 +316,7 @@ public class MainActivity extends AppCompatActivity{
 
             }
         });
-    }
+    }*/
 
     public void getComputationTypeFromFirebase(){
         String path = "config/computation";
@@ -378,17 +371,19 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
-    void loadLocalImageButtonListener(){
-        loadLocalSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+    void localImageSwitchListener(){
+        localImageSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked) {
-                    startDetection();
+                    stream_detection.stop2();
+                   /* if(mRsContext!=null){
+                        mRsContext.close();
+                    }*/
+                    startLocalDetection();
                 }
                 else {
-                    graphicOverlay.clear();
-                    img1.setImageDrawable(getResources().getDrawable(R.drawable.no_image));
-                    showConnectLabel(true);
+                    stream_detection.start();
                 }
             }
         });
@@ -418,6 +413,7 @@ public class MainActivity extends AppCompatActivity{
         bs.getDetectableObjectButton().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                stream_detection.stop2();
                 Intent i=new Intent(MainActivity.this,DetectableListActivity.class);
                 i.putExtra("DICT", objectDict);
                 startActivity(i);
@@ -492,6 +488,8 @@ public class MainActivity extends AppCompatActivity{
     private void init(){
         //RsContext.init must be called once in the application lifetime before any interaction with physical RealSense devices.
         //For multi activities applications use the application context instead of the activity context
+        graphicOverlay.clear();
+
         RsContext.init(mAppContext);
 
         //Register to notifications regarding RealSense devices attach/detach events via the DeviceListener.
@@ -500,7 +498,7 @@ public class MainActivity extends AppCompatActivity{
         try(DeviceList dl = mRsContext.queryDevices()){
             if(dl.getDeviceCount() > 0) {
                 showConnectLabel(false);
-                if (jsonAvaiable) {
+                if (!objectDict.isEmpty() && !localImageSwitch.isChecked()) {
                     stream_detection.start();
                 }
                 else {
@@ -534,6 +532,8 @@ public class MainActivity extends AppCompatActivity{
         public void onDeviceDetach() {
             showConnectLabel(true);
             stream_detection.stop2();
+            graphicOverlay.clear();
+            img1.setImageDrawable(getResources().getDrawable(R.drawable.no_image));
         }
     };
 
