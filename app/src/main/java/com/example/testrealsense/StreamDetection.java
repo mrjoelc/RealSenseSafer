@@ -142,6 +142,8 @@ public class StreamDetection extends Thread{
         mPipeline = new Pipeline();
         mColorizer = new Colorizer();
 
+        count=0;
+
     }
 
     //****************************************PER MIGLIORARE PERFORMANCE PROVARE INPUTIMAGE.FROMBYTE ARRAY***********************************************//
@@ -169,10 +171,13 @@ public class StreamDetection extends Thread{
                                 realsenseBM = rgb2Bitmap(c_data, c_width, c_height);
                                 image = TensorImage.fromBitmap(realsenseBM);
 
-
-                                detector.setImageToDetect(image);
                                 img1.setImageBitmap(realsenseBM);
-                                detector.startDetectionForRealSenseStream(depthFrame.as(Extension.DEPTH_FRAME));
+
+                                if(count%3==0) {
+                                    detector.setImageToDetect(image);
+                                    detector.startDetectionForRealSenseStream(depthFrame.as(Extension.DEPTH_FRAME));
+                                }
+                                count++;
 
 
                                 depthFrame.close();
@@ -291,6 +296,7 @@ public class StreamDetection extends Thread{
             Log.d(TAG, "streaming started successfully");
         } catch (Exception e) {
             Log.d(TAG, "failed to start streaming");
+            start();
         }
     }
 

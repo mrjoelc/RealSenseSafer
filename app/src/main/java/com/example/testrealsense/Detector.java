@@ -178,13 +178,14 @@ public class Detector {
             case "Average":
                 float sum=0;
                 float n=0;
-                for(float j=detectedObject.getBoundingBox().top; j<detectedObject.getBoundingBox().bottom; j++){
-                    for (float i=detectedObject.getBoundingBox().left; i<detectedObject.getBoundingBox().right; i++){
-                        sum += depth.getDistance((int)i,(int)j);
+                for(int j= (int)detectedObject.getBoundingBox().top; j<detectedObject.getBoundingBox().bottom; j++){
+                    for (int i= (int) detectedObject.getBoundingBox().left; i<detectedObject.getBoundingBox().right; i++){
+                        sum += depth.getDistance(fixValueX(i),fixValueY(j));
                         n+=1;
                     }
                 }
                 depthValue = sum/n;
+                System.out.println(depthValue);
                 break;
             case "Clustering":
                 List<Float> points = new ArrayList<Float>();

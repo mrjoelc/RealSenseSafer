@@ -154,6 +154,7 @@ public class MainActivity extends AppCompatActivity{
 
         //WriteLogcat wl = new WriteLogcat();
         getModelFromFirebase();
+        getDistanceDetectionTypeFromFirebase();
         //getObjectsListFromFirebase();
         Intent intent = getIntent();
         objectDict = (HashMap<String, Float>) intent.getSerializableExtra("DICT");
@@ -190,7 +191,7 @@ public class MainActivity extends AppCompatActivity{
                 if(value<=9) {
                     bs.Nthread_value.setText(String.valueOf(value));
                     DatabaseUtils.writeNthreads(value);
-
+                    restartStream();
                 }
             }
         });
@@ -202,6 +203,7 @@ public class MainActivity extends AppCompatActivity{
                 if(value>0) {
                     bs.Nthread_value.setText(String.valueOf(value));
                     DatabaseUtils.writeNthreads(value);
+                    restartStream();
 
                 }
             }
@@ -213,7 +215,7 @@ public class MainActivity extends AppCompatActivity{
                 if (!firstStartModel) {
                     System.out.println("Selected Model for detection: " + bs.getModelML_spinner().getSelectedItem().toString());
                     DatabaseUtils.writeModel(bs.getModelML_spinner().getSelectedItem().toString());
-
+                    restartStream();
                 }
                 else firstStartModel = false;
 
@@ -232,7 +234,9 @@ public class MainActivity extends AppCompatActivity{
                 if (!firstStartComputation) {
                     System.out.println("Selected computation Type: " + bs.getComputation_spinner().getSelectedItem().toString());
                     DatabaseUtils.writeComputationType(bs.getComputation_spinner().getSelectedItem().toString());
-                    //if (position==0) startLocalDetection();
+                    if (position==0) {
+                        restartStream();
+                    }
                 } else firstStartComputation = false;
             }
             @Override
@@ -247,7 +251,7 @@ public class MainActivity extends AppCompatActivity{
                 if (!firstStartDistance) {
                     System.out.println("Selected distance Type: " + bs.getDistance_spinner().getSelectedItem().toString());
                     DatabaseUtils.writeDistanceType(bs.getDistance_spinner().getSelectedItem().toString());
-                    //startLocalDetection();
+                    restartStream();
                 } else firstStartDistance = false;
             }
             @Override
@@ -322,6 +326,23 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                bs.getModelML_spinner().setSelection(models.indexOf(snapshot.getValue()));
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
+    public void getDistanceDetectionTypeFromFirebase(){
+        String path = "config/distance";
+        List<String> distances = Arrays.asList(getResources().getStringArray(R.array.distances));
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                bs.getDistance_spinner().setSelection(distances.indexOf(snapshot.getValue()));
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
@@ -434,6 +455,15 @@ public class MainActivity extends AppCompatActivity{
         init();
         } else
             Log.e(TAG, "missing permissions");
+    }
+
+    void restartStream(){
+        if(mRsContext != null){
+            mRsContext.close();
+        }
+        if(stream_detection!=null)
+            stream_detection.stop2();
+        init();
     }
 
 
