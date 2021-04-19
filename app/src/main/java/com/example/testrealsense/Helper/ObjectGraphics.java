@@ -12,9 +12,9 @@ import java.util.Random;
 
 public class ObjectGraphics {
     final static private Random mRandom = new Random(System.currentTimeMillis());
-    private Detection detectedObject;
-    private GraphicOverlay graphicOverlay;
-    static private Map<Integer,Integer> mapID = new HashMap<Integer,Integer>();
+    private final Detection detectedObject;
+    private final GraphicOverlay graphicOverlay;
+    static private final Map<Integer,Integer> mapID = new HashMap<Integer,Integer>();
     private final float scaleFactor;
     private final float objectDepth;
     private static boolean alarm;
@@ -24,14 +24,13 @@ public class ObjectGraphics {
         this.graphicOverlay=graphicOverlay;
         this.scaleFactor = scaleFactor;
         this.objectDepth = objectDepth;
-        this.alarm = alarm;
+        ObjectGraphics.alarm = alarm;
     }
 
     public void drawBoundingBoxAndLabel(){
 
         float[] scaledPoints = Utils.getScaledBoundingBox(detectedObject, scaleFactor);
         RectF boundingBox = new RectF(scaledPoints[0],scaledPoints[1],scaledPoints[2],scaledPoints[3]);
-
 
         int color = generateColor();
         RectOverlay rectOverlay = new RectOverlay(graphicOverlay, boundingBox, color) ;
@@ -46,6 +45,8 @@ public class ObjectGraphics {
 
         TextOverlay depthOverlay = new TextOverlay(graphicOverlay, String.valueOf(objectDepth), scaledPoints[2], scaledPoints[3] - 45, color);
         graphicOverlay.add(depthOverlay);
+
+
     }
 
 

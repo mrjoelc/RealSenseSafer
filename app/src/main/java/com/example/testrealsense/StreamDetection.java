@@ -87,12 +87,8 @@ public class StreamDetection extends Thread{
 
     HashMap<String, Float> objectDict;
 
-
-
     Detector detector;
     BottomsheetC bs;
-
-
 
     /*public StreamDetection(ImageView img1, GraphicOverlay graphicOverlay, TextView distanceView, TextView fps,TextView msDetection, Context context, HashMap<String, Float> objectDict, DatabaseUtils databaseUtils) {
         localModel = new LocalModel.Builder()
@@ -159,7 +155,7 @@ public class StreamDetection extends Thread{
                     try ( Frame depthFrame = processed.first(StreamType.DEPTH)) {
                         try (Frame colorFrame = processed.first(StreamType.COLOR)) {
 
-                            graphicOverlay.clear();
+
                             videoFrame = colorFrame.as(Extension.VIDEO_FRAME);
 
                             c_size = videoFrame.getDataSize();
@@ -191,10 +187,6 @@ public class StreamDetection extends Thread{
             Log.e(TAG, "streaming, error: " + e.getMessage());
         }
     }
-
-
-
-
 
 
     /*

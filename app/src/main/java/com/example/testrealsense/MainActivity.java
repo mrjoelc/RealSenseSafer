@@ -62,7 +62,6 @@ public class MainActivity extends AppCompatActivity{
 
     Button barChartButton;
     Button sendLogToFirebaseButton;
-    Switch localImageSwitch;
 
     private Context mAppContext;
     private TextView mBackGroundText;
@@ -116,7 +115,6 @@ public class MainActivity extends AppCompatActivity{
         mBackGroundText = findViewById(R.id.connectCameraText);
 
         barChartButton = findViewById(R.id.barchartButton);
-        localImageSwitch = findViewById(R.id.localImageswitch);
         sendLogToFirebaseButton = findViewById(R.id.sendLogToFirebase);
         img1 = findViewById(R.id.screen_view);
         graphicOverlay = findViewById(R.id.graphicOverlay);
@@ -173,7 +171,6 @@ public class MainActivity extends AppCompatActivity{
         barChartButtonListener();
         getNThreadsFromFirebase();
         sendLogButtonListener();
-        localImageSwitchListener();
         detectableObjectButtonListener();
 
     }
@@ -181,26 +178,9 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onStart() {
         super.onStart();
-        /*if(localImageSwitch.isChecked())
-             startLocalDetection();
-        else init();*/
+        System.out.println("On start");
     }
 
-    void startLocalDetection(){
-        if (localImageSwitch.isChecked()) {
-            graphicOverlay.clear();
-            showConnectLabel(false);
-            imgBM = Utils.loadBitmapFromAssets(MainActivity.this, "img/image1.jpg");
-            img1.setImageBitmap(imgBM);
-            image = TensorImage.fromBitmap(imgBM);
-
-            if (bs.getComputation_spinner().getSelectedItem().toString().equals("local")) {
-                detector = new Detector(MainActivity.this, graphicOverlay, objectDict, bs);
-                detector.setImageToDetect(image);
-                detector.startDetection();
-            }
-        }
-    }
 
     public void bsListeners() {
         bs.Nthread_plus.setOnClickListener(new View.OnClickListener() {
@@ -210,7 +190,7 @@ public class MainActivity extends AppCompatActivity{
                 if(value<=9) {
                     bs.Nthread_value.setText(String.valueOf(value));
                     DatabaseUtils.writeNthreads(value);
-                    startLocalDetection();
+
                 }
             }
         });
@@ -222,7 +202,7 @@ public class MainActivity extends AppCompatActivity{
                 if(value>0) {
                     bs.Nthread_value.setText(String.valueOf(value));
                     DatabaseUtils.writeNthreads(value);
-                    startLocalDetection();
+
                 }
             }
         });
@@ -233,7 +213,7 @@ public class MainActivity extends AppCompatActivity{
                 if (!firstStartModel) {
                     System.out.println("Selected Model for detection: " + bs.getModelML_spinner().getSelectedItem().toString());
                     DatabaseUtils.writeModel(bs.getModelML_spinner().getSelectedItem().toString());
-                    startLocalDetection();
+
                 }
                 else firstStartModel = false;
 
@@ -252,7 +232,7 @@ public class MainActivity extends AppCompatActivity{
                 if (!firstStartComputation) {
                     System.out.println("Selected computation Type: " + bs.getComputation_spinner().getSelectedItem().toString());
                     DatabaseUtils.writeComputationType(bs.getComputation_spinner().getSelectedItem().toString());
-                    if (position==0) startLocalDetection();
+                    //if (position==0) startLocalDetection();
                 } else firstStartComputation = false;
             }
             @Override
@@ -267,7 +247,7 @@ public class MainActivity extends AppCompatActivity{
                 if (!firstStartDistance) {
                     System.out.println("Selected distance Type: " + bs.getDistance_spinner().getSelectedItem().toString());
                     DatabaseUtils.writeDistanceType(bs.getDistance_spinner().getSelectedItem().toString());
-                    startLocalDetection();
+                    //startLocalDetection();
                 } else firstStartDistance = false;
             }
             @Override
@@ -368,25 +348,6 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
-    void localImageSwitchListener(){
-        localImageSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) {
-                    //graphicOverlay.clear();
-                    /*if(mRsContext != null)
-                        mRsContext.close();*/
-                    stream_detection.stop2();
-                    startLocalDetection();
-                }
-                else {
-                    //graphicOverlay.clear();
-                    stream_detection = new StreamDetection(img1,graphicOverlay,bs, mAppContext, objectDict, databaseUtils);
-                    stream_detection.start();
-                }
-            }
-        });
-    }
 
     void sendLogButtonListener(){
         sendLogToFirebaseButton.setOnClickListener(new View.OnClickListener() {
@@ -467,11 +428,10 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onResume() {
         super.onResume();
-        if(localImageSwitch.isChecked())
-            startLocalDetection();
-        else if(mPermissionsGranted) {
-            System.out.println("PERMESSI GARANTITI: " + mPermissionsGranted);
-            init();
+        if(mPermissionsGranted) {
+        System.out.println("PERMESSI GARANTITI: " + mPermissionsGranted);
+        System.out.println("On resume: " + mPermissionsGranted);
+        init();
         } else
             Log.e(TAG, "missing permissions");
     }
@@ -484,7 +444,7 @@ public class MainActivity extends AppCompatActivity{
         if(mRsContext != null){
             mRsContext.close();
         }
-        if(!localImageSwitch.isChecked())
+        if(stream_detection!=null)
             stream_detection.stop2();
         //mColorizer.close();
         //mPipeline.close();
@@ -498,15 +458,22 @@ public class MainActivity extends AppCompatActivity{
         //Register to notifications regarding RealSense devices attach/detach events via the DeviceListener.
         mRsContext = new RsContext();
         mRsContext.setDevicesChangedCallback(mListener);
+
+        stream_detection = new StreamDetection(img1,graphicOverlay,bs, MainActivity.this, objectDict, databaseUtils);
+
         try(DeviceList dl = mRsContext.queryDevices()){
+            System.out.println("On init() try: " + dl.getDeviceCount());
             if(dl.getDeviceCount() > 0) {
                 showConnectLabel(false);
-                if (!objectDict.isEmpty() && !localImageSwitch.isChecked()) {
+                System.out.println("On init() device count: " + dl.getDeviceCount());
+                if (!objectDict.isEmpty()) {
+                    System.out.println("On init() objectDict: " + objectDict.toString());
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            stream_detection = new StreamDetection(img1,graphicOverlay,bs, MainActivity.this, objectDict, databaseUtils);
+                            //stream_detection = new StreamDetection(img1,graphicOverlay,bs, MainActivity.this, objectDict, databaseUtils);
                             stream_detection.start();
+                            System.out.println("On init(): " + mPermissionsGranted);
                         }
                     });
                 }
@@ -534,7 +501,7 @@ public class MainActivity extends AppCompatActivity{
         @Override
         public void onDeviceAttach() {
             showConnectLabel(false);
-            init();
+            System.out.println("On device attach: " + mPermissionsGranted);
         }
 
         @Override

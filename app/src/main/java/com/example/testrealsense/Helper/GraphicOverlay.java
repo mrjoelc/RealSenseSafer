@@ -75,8 +75,6 @@ public class GraphicOverlay extends View {
         postInvalidate();
     }
 
-
-
     /**
      * Disegna la grafica con gli oggetti associati
      */

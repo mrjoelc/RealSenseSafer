@@ -107,7 +107,10 @@ public class Detector {
 
         computeDetectionTime(startTime);
 
+        graphicOverlay.clear();
+
         for (Detection detectedObject : results) {
+            //System.out.println("#" + results.size());
             if (detectedObject.getCategories().size() > 0
                     && objectDict!=null
                     && objectDict.containsKey(detectedObject.getCategories().get(0).getLabel())){
@@ -118,21 +121,38 @@ public class Detector {
                 float depthValue = 0.0f;
                 boolean alarm = false;
 
-               //depthValue = getCorrectDistance(depth, detectedObject);
-                if (depthValue>0 && depthValue < objectDict.get(label)) {
+               depthValue = getCorrectDistance(depth, detectedObject);
+               //System.out.println(depth.getDistance((int)detectedObject.getBoundingBox().centerX(), (int)detectedObject.getBoundingBox().centerY()));
+               //System.out.println(detectedObject.getBoundingBox());
+
+               /*if (depthValue>0.0f && depthValue < objectDict.get(label)) {
                     DatabaseUtils.writeTooCloseDistanceLog(depthValue, label);
                     System.out.println("SUONA NOTIFICA");
                     mp.start();
                     alarm = true;
-                }
+                }*/
 
-                System.out.println(label);
+                //System.out.println(label);
 
-                drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, scaleFactor, 0, alarm);
+                drawBoundingBoxLabel = new ObjectGraphics(detectedObject, graphicOverlay, scaleFactor, depthValue, alarm);
                 drawBoundingBoxLabel.drawBoundingBoxAndLabel();
             }
         }
         computeFPS(startTime);
+    }
+
+    public int fixValueX(int i){
+        int x = i;
+        if(i<=0) x=1;
+        if(i>=640) x=639;
+        return x;
+    }
+
+    public int fixValueY(int j){
+        int y = j;
+        if(j<=0) y=1;
+        if(j>=480) y=479;
+        return y;
     }
 
     public float getCorrectDistance(DepthFrame depth, Detection detectedObject){
@@ -140,10 +160,17 @@ public class Detector {
         switch (bs.distance_spinner.getSelectedItem().toString()){
             case "Minimum":
                 float minDistance=10f;
-                for(float j=detectedObject.getBoundingBox().top; j<detectedObject.getBoundingBox().bottom; j++){
-                    for (float i=detectedObject.getBoundingBox().left; i<detectedObject.getBoundingBox().right; i++){
-                        float currentDistance = depth.getDistance((int)i,(int)j);
-                        if(currentDistance<minDistance) minDistance = currentDistance;
+                System.out.println(detectedObject.getBoundingBox());
+                for(int j= (int)detectedObject.getBoundingBox().top; j<detectedObject.getBoundingBox().bottom; j++){
+                    for (int i= (int)detectedObject.getBoundingBox().left; i<detectedObject.getBoundingBox().right; i++){
+
+                        //System.out.println(x + " " +y);
+                        float currentDistance = depth.getDistance(fixValueX(i),fixValueY(j));
+                        //System.out.println(currentDistance);
+                        if(currentDistance!=0.0f && currentDistance<minDistance) {
+                            minDistance = currentDistance;
+                            //System.out.println(minDistance);
+                        }
                     }
                 }
                 depthValue = minDistance;
