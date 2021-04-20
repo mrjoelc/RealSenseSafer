@@ -188,9 +188,11 @@ public class Utils {
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(file));
 
+
         String text;
         while ((text = reader.readLine()) != null) {
             map.put(text, 0.0f);
+
             // do something with the line
         }
 

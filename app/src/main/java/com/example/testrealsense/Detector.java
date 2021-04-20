@@ -1,6 +1,7 @@
 package com.example.testrealsense;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.MediaPlayer;
@@ -10,6 +11,7 @@ import com.example.testrealsense.Helper.DatabaseUtils;
 import com.example.testrealsense.Helper.GraphicOverlay;
 import com.example.testrealsense.Helper.KMeans.KMeans;
 import com.example.testrealsense.Helper.ObjectGraphics;
+import com.example.testrealsense.Helper.RectOverlay;
 import com.example.testrealsense.Helper.Utils;
 import com.intel.realsense.librealsense.DepthFrame;
 
@@ -109,11 +111,43 @@ public class Detector {
 
         graphicOverlay.clear();
 
+        System.out.println("Object detected: #" + results.size());
+        //System.out.println(" " + results);
+        /*for (Detection obj: results) {
+            System.out.println(obj.getCategories().get(0).getLabel()+ " ");
+        }*/
+
+
         for (Detection detectedObject : results) {
             //System.out.println("#" + results.size());
             if (detectedObject.getCategories().size() > 0
                     && objectDict!=null
                     && objectDict.containsKey(detectedObject.getCategories().get(0).getLabel())){
+
+
+                for(int i=0; i<results.size(); i++){
+                    //bb e' il rect che cambia sempre, detected Object è quello corrente
+                    RectF bb = results.get(i).getBoundingBox();
+                    //se l'intersezione c'è tra i due e il rect che cambia sempre e' diverso da quello corrente
+                    if(bb.intersect(detectedObject.getBoundingBox()) && results.get(i)!=detectedObject){
+                        System.out.println( detectedObject.getCategories().get(0).getLabel()+ " intersect with " + results.get(i).getCategories().get(0).getLabel());
+                        float[] rect2 = Utils.getScaledBoundingBox(detectedObject,scaleFactor);
+                        float[] rect1 = Utils.getScaledBoundingBox(results.get(i),scaleFactor);
+                        float x5 = Math.max(rect1[0], rect2[0]);
+                        float y5 = Math.max(rect1[1], rect2[1]);
+                        float x6 = Math.min(rect1[2], rect2[2]);
+                        float y6 = Math.min(rect1[3], rect2[3]);
+
+                        RectF intersectionRect = new RectF(x5,y5,x6,y6);
+                        RectOverlay rectOverlay = new RectOverlay(graphicOverlay, intersectionRect, Color.RED) ;
+                        graphicOverlay.add(rectOverlay);
+
+                        /*int x5 = Math.max(x1, x3);
+                        int y5 = Math.max(y1, y3);
+                        int x6 = Math.min(x2, x4);
+                        int y6 = Math.min(y2, y4);*/
+                    }
+                }
 
                 //System.out.println("INSIDE DETECTOR" + objectDict.toString());
 

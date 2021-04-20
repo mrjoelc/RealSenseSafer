@@ -278,7 +278,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
 
-    public static void getObjectsListFromFirebase(){
+    public void getObjectsListFromFirebase(){
         String path = "config/objectsToDetect";
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
         objectDict = new HashMap<>();
@@ -290,6 +290,7 @@ public class MainActivity extends AppCompatActivity{
                    System.out.print("Data ON Firebase: ");
                    System.out.println(snapshot.getValue());
                }else System.out.println("Data ON Firebase: NULL");
+               init();
             }
 
             @Override
