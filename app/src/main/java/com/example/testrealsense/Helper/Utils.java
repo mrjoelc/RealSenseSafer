@@ -5,8 +5,11 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.RectF;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,16 +17,23 @@ import org.tensorflow.lite.task.vision.detector.Detection;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.Buffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Scanner;
+import java.util.stream.Stream;
 
 public class Utils {
 
@@ -169,19 +179,46 @@ public class Utils {
         return color;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public static HashMap TXTToMap(Context context, String filename) throws JSONException, IOException {
         AssetManager manager = context.getAssets();
-        InputStream file;
-        file = manager.open("dict/"+filename);
+        InputStream file = manager.open("dict/"+filename);
         HashMap<String, Float> map = new HashMap<String, Float>();
 
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(file));
-        
-        do {
-            map.put(reader.readLine(), 0.0f);
+
+        String text;
+        while ((text = reader.readLine()) != null) {
+            map.put(text, 0.0f);
             // do something with the line
-        } while (reader.readLine() != null);
+        }
+
+
+        /*
+        InputStream is;
+        BufferedReader reader;
+        File file = new File ("/src/main/assets/dict/dict.txt");
+
+        if (file.exists()) {
+            is = new FileInputStream(file);
+            reader = new BufferedReader(new InputStreamReader(is));
+            String line = reader.readLine();
+            while(line != null){
+                line = reader.readLine();
+                System.out.println(line);
+                map.put(line, 0.0f);
+            }
+        }*/
+
+
+        /*Scanner sc=new Scanner(file);
+
+        while(sc.hasNextLine()) {
+            System.out.println(sc.nextLine());
+            map.put(sc.nextLine(), 0.0f);//returns the line that was skipped
+        }
+        sc.close();     //closes the scanner*/
 
         System.out.println(map);
 

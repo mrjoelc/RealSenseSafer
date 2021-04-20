@@ -133,7 +133,7 @@ public class DetectableListActivity extends AppCompatActivity implements Detecta
         detectableObjectsAdapter.updateList(temp);
     }
 
-    void takeObjectDictFromTXT(String filename){
+    void takeObjectDictFromTXT(String filename) {
         /** prelievo  oggetti e distanze critiche da file json **/
         try {
             objectDictUnselected = Utils.TXTToMap(this, filename);
