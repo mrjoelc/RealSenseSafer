@@ -125,12 +125,13 @@ public class Detector {
                //System.out.println(depth.getDistance((int)detectedObject.getBoundingBox().centerX(), (int)detectedObject.getBoundingBox().centerY()));
                //System.out.println(detectedObject.getBoundingBox());
 
-               /*if (depthValue>0.0f && depthValue < objectDict.get(label)) {
+                //System.out.println(Float.parseFloat(String.valueOf(objectDict.get(label))));
+               if (depthValue>0.0f && depthValue < Float.parseFloat(String.valueOf(objectDict.get(label)))) {
                     DatabaseUtils.writeTooCloseDistanceLog(depthValue, label);
                     System.out.println("SUONA NOTIFICA");
                     mp.start();
                     alarm = true;
-                }*/
+                }
 
                 //System.out.println(label);
 
@@ -180,8 +181,12 @@ public class Detector {
                 float n=0;
                 for(int j= (int)detectedObject.getBoundingBox().top; j<detectedObject.getBoundingBox().bottom; j++){
                     for (int i= (int) detectedObject.getBoundingBox().left; i<detectedObject.getBoundingBox().right; i++){
-                        sum += depth.getDistance(fixValueX(i),fixValueY(j));
-                        n+=1;
+                        float point = depth.getDistance(fixValueX(i),fixValueY(j));
+                        if(point>0.0f){
+                            sum += depth.getDistance(fixValueX(i),fixValueY(j));
+                            n+=1;
+                        }
+
                     }
                 }
                 depthValue = sum/n;
@@ -189,14 +194,17 @@ public class Detector {
                 break;
             case "Clustering":
                 List<Float> points = new ArrayList<Float>();
-                for(float j=detectedObject.getBoundingBox().top; j<detectedObject.getBoundingBox().bottom; j++){
-                    for (float i=detectedObject.getBoundingBox().left; i<detectedObject.getBoundingBox().right; i++){
-                        points.add(depth.getDistance((int)i,(int)j));
+                for(int j= (int)detectedObject.getBoundingBox().top; j<detectedObject.getBoundingBox().bottom; j++){
+                    for (int i= (int)detectedObject.getBoundingBox().left; i<detectedObject.getBoundingBox().right; i++){
+                        float point = depth.getDistance(fixValueX(i),fixValueY(j));
+                        if(point>0.0f)
+                          points.add(point);
                     }
                 }
                 KMeans k = new KMeans(2);
                 k.setPoints(points);
                 k.computeClusters(10);
+                //System.out.println(k.getCentroids());
                 depthValue =  Collections.min(k.getCentroids());
                 break;
             default: break;

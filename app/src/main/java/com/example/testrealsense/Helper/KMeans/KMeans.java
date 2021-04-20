@@ -20,8 +20,8 @@ public class KMeans {
 
     public void setPoints(List<Float> points){
         KMeans.points =points;
-        System.out.print("POINTS: ");
-        System.out.println(points);
+        //System.out.print("POINTS: ");
+        //System.out.println(points);
     }
 
     public List<Float> getCentroids(){

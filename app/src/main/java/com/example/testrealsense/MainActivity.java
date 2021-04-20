@@ -166,6 +166,7 @@ public class MainActivity extends AppCompatActivity{
         //stream_detection = new StreamDetection(img1,graphicOverlay,distanceView,fps, msDetection, this, objectDict, databaseUtils);
         //stream_detection = new StreamDetection(img1,graphicOverlay,bs, this, objectDict, databaseUtils);
 
+        System.out.println("On Create");
         checkPermission();
         mPermissionsGranted = true;
 
@@ -394,7 +395,7 @@ public class MainActivity extends AppCompatActivity{
         bs.getDetectableObjectButton().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                stream_detection.stop2();
+                //stopStream();
                 Intent i=new Intent(MainActivity.this,DetectableListActivity.class);
                 i.putExtra("DICT", objectDict);
                 startActivity(i);
@@ -458,12 +459,16 @@ public class MainActivity extends AppCompatActivity{
     }
 
     void restartStream(){
+        stopStream();
+        init();
+    }
+
+    void stopStream(){
         if(mRsContext != null){
             mRsContext.close();
         }
         if(stream_detection!=null)
             stream_detection.stop2();
-        init();
     }
 
 
@@ -471,11 +476,7 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onPause() {
         super.onPause();
-        if(mRsContext != null){
-            mRsContext.close();
-        }
-        if(stream_detection!=null)
-            stream_detection.stop2();
+        stopStream();
         //mColorizer.close();
         //mPipeline.close();
     }

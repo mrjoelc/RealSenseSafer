@@ -84,7 +84,6 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
             myViewHolder.status.setChecked(false);
         }
 
-
         if (myViewHolder.status.isChecked())
             myViewHolder.distance_counter.setVisibility(View.VISIBLE);
         else
@@ -94,7 +93,6 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
             myViewHolder.status.setChecked(true);
             myViewHolder.distance_counter.setVisibility(View.VISIBLE);
         }
-
 
         myViewHolder.status.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -150,10 +148,6 @@ public class DetectableObjectsAdapter extends RecyclerView.Adapter<DetectableObj
 
             }
         });
-
-
-
-
 
         myViewHolder.minus.setOnClickListener(new View.OnClickListener() {
             @Override
