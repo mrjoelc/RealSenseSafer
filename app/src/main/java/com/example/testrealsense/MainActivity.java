@@ -98,7 +98,6 @@ public class MainActivity extends AppCompatActivity{
 
     public static HashMap<String, Float> objectDict;
 
-    boolean jsonAvaiable = true;
 
     DatabaseUtils databaseUtils;
 
@@ -155,9 +154,9 @@ public class MainActivity extends AppCompatActivity{
         //WriteLogcat wl = new WriteLogcat();
         getModelFromFirebase();
         getDistanceDetectionTypeFromFirebase();
-        //getObjectsListFromFirebase();
-        Intent intent = getIntent();
-        objectDict = (HashMap<String, Float>) intent.getSerializableExtra("DICT");
+        getObjectsListFromFirebase();
+        //Intent intent = getIntent();
+        //objectDict = (HashMap<String, Float>) intent.getSerializableExtra("DICT");
 
         getComputationTypeFromFirebase();
 
@@ -279,7 +278,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
 
-    /*public static void getObjectsListFromFirebase(){
+    public static void getObjectsListFromFirebase(){
         String path = "config/objectsToDetect";
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
         objectDict = new HashMap<>();
@@ -298,7 +297,7 @@ public class MainActivity extends AppCompatActivity{
 
             }
         });
-    }*/
+    }
 
     public void getComputationTypeFromFirebase(){
         String path = "config/computation";

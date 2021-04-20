@@ -28,11 +28,15 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getObjectsListFromFirebase();
+        //getObjectsListFromFirebase();
+
+        Intent homeIntent = new Intent(SplashActivity.this, MainActivity.class);
+        startActivity(homeIntent);
+        finish();
 
     }
 
-    public void getObjectsListFromFirebase(){
+    /*public void getObjectsListFromFirebase(){
         String path = "config/objectsToDetect";
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
         objectDict = new HashMap<>();
@@ -55,5 +59,5 @@ public class SplashActivity extends AppCompatActivity {
 
             }
         });
-    }
+    }*/
 }
