@@ -104,9 +104,9 @@ public class Utils {
     }
 
     public static float[] getScaledBoundingBox(Detection detectedObject, float scaleFactor){
-        float left = detectedObject.getBoundingBox().right * scaleFactor ;
+        float left = detectedObject.getBoundingBox().left * scaleFactor ;
         float top = detectedObject.getBoundingBox().top * scaleFactor;
-        float right = detectedObject.getBoundingBox().left * scaleFactor;
+        float right = detectedObject.getBoundingBox().right * scaleFactor;
         float bottom = detectedObject.getBoundingBox().bottom * scaleFactor;
         return new float[]{(int) left, (int) top, (int) right, (int) bottom};
     }

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class Detector {
     ObjectDetector objectDetector;
@@ -91,14 +92,17 @@ public class Detector {
 
 
                 System.out.println("Considero " + detectedObject.getCategories().get(0).getLabel());
-                List<RectF> intersections = new ArrayList<>();
+                List<RectF> intersectionsRects = new ArrayList<>();
+                List<RectF> containedRects = new ArrayList<>();
                 //Controllo se ci sono intersezioni, nel caso aggiungi ad una lista i corrispondenti rect
                 for(int i=0; i<results.size(); i++){
                     //bb e' il rect che cambia sempre, detected Object è quello corrente
                     RectF bb = results.get(i).getBoundingBox();
                     //se l'intersezione c'è tra i due e il rect che cambia sempre e' diverso da quello corrente
                     if(results.get(i)!=detectedObject && RectF.intersects(detectedObject.getBoundingBox(), bb)){
-                         intersections.add(getIntersectionBoundinBox(detectedObject, results.get(i),true));
+                        if(detectedObject.getBoundingBox().contains(results.get(i).getBoundingBox())){
+                            containedRects.add(results.get(i).getBoundingBox());
+                        } else intersectionsRects.add(getIntersectionBoundinBox(detectedObject, results.get(i),true));
                     }
                 }
 
@@ -108,8 +112,8 @@ public class Detector {
                 alarm = false;
 
                //valuta depthValue scartando valori presenti nei rect che intersecano
-               depthValue = getNotIntersectedDistance(depth, detectedObject.getBoundingBox(), intersections);
-                System.out.println(depthValue);
+               depthValue = getNotOccludedDistance(depth, detectedObject.getBoundingBox(), intersectionsRects, containedRects);
+               System.out.println(depthValue);
 
 
                if (depthValue>0.0f && depthValue < Float.parseFloat(String.valueOf(objectDict.get(label)))) {
@@ -131,17 +135,17 @@ public class Detector {
     public RectF getIntersectionBoundinBox(Detection mainObj, Detection otherObj, boolean draw){
         System.out.println( mainObj.getCategories().get(0).getLabel()+ " intersect with " + otherObj.getCategories().get(0).getLabel());
 
-        float x5 = Math.min(mainObj.getBoundingBox().left, otherObj.getBoundingBox().left);
+        float x5 = Math.max(mainObj.getBoundingBox().left, otherObj.getBoundingBox().left);
         float y5 = Math.max(mainObj.getBoundingBox().top, otherObj.getBoundingBox().top);
-        float x6 = Math.max(mainObj.getBoundingBox().right, otherObj.getBoundingBox().right);
+        float x6 = Math.min(mainObj.getBoundingBox().right, otherObj.getBoundingBox().right);
         float y6 = Math.min(mainObj.getBoundingBox().bottom, otherObj.getBoundingBox().bottom);
 
         if(draw){
             float[] rect1 = Utils.getScaledBoundingBox(mainObj,scaleFactor);
             float[] rect2 = Utils.getScaledBoundingBox(otherObj,scaleFactor);
-            float x5scaled = Math.min(rect1[0], rect2[0]);
+            float x5scaled = Math.max(rect1[0], rect2[0]);
             float y5scaled = Math.max(rect1[1], rect2[1]);
-            float x6scaled = Math.max(rect1[2], rect2[2]);
+            float x6scaled = Math.min(rect1[2], rect2[2]);
             float y6scaled = Math.min(rect1[3], rect2[3]);
 
             RectF intersectionRect = new RectF( x5scaled, y5scaled, x6scaled, y6scaled );
@@ -166,29 +170,41 @@ public class Detector {
         return y;
     }
 
-    public boolean pointIsNotInsideRects(int x, int y, List<RectF> intersectionRects){
+    public boolean pointIsNotInsideRects(int x, int y, List<RectF> intersectionRects, List<RectF> contaniedRects){
         if (intersectionRects==null) return true;
         for (RectF rect: intersectionRects) {
            if(rect.contains(x, y)){
-                 return false;
+               System.out.println("intersection(" + intersectionRects.get(0).left + " " + intersectionRects.get(0).top + ") (" + intersectionRects.get(0).right + " " + intersectionRects.get(0).bottom+ ")");
+               return false;
             }
         }
         return true;
     }
 
-    public float getNotIntersectedDistance(DepthFrame depth, RectF boundingBox, List<RectF> intersectionRects){
+    private boolean objectIsContanied(RectF boundingBox, List<RectF> contaniedRects) {
+        if (contaniedRects==null) return true;
+        for (RectF rect: contaniedRects) {
+            if(boundingBox.equals(rect)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public float getNotOccludedDistance(DepthFrame depth, RectF boundingBox, List<RectF> intersectionRects, List<RectF> contaniedRects){
         float depthValue = -1f;
         switch (bs.distance_spinner.getSelectedItem().toString()){
             case "Minimum":
                 float minDistance=10f;
+                System.out.println("original(" + boundingBox.left + " " + boundingBox.top + ") (" + boundingBox.right + " " + boundingBox.bottom+ ")");
                 for(int j= (int)boundingBox.top; j<boundingBox.bottom; j++){
                     for (int i= (int)boundingBox.left; i<boundingBox.right; i++){
-                        if(pointIsNotInsideRects(i, j, intersectionRects)) {
+                        if(pointIsNotInsideRects(i, j, intersectionRects, contaniedRects) || objectIsContanied(boundingBox, contaniedRects)) {
                             float currentDistance = depth.getDistance(fixValueX(i), fixValueY(j));
                             if (currentDistance != 0.0f && currentDistance < minDistance) {
                                 minDistance = currentDistance;
                             }
-                        }else System.out.println("non entro");
+                        }
                     }
                 }
                 depthValue = minDistance;
@@ -199,7 +215,7 @@ public class Detector {
                 for(int j= (int)boundingBox.top; j<boundingBox.bottom; j++){
                     for (int i= (int) boundingBox.left; i<boundingBox.right; i++){
                         float point = depth.getDistance(fixValueX(i),fixValueY(j));
-                        if(point>0.0f && pointIsNotInsideRects(i, j, intersectionRects)){
+                        if(point>0.0f && pointIsNotInsideRects(i, j, intersectionRects, contaniedRects) || objectIsContanied(boundingBox, contaniedRects)){
                             sum += depth.getDistance(fixValueX(i),fixValueY(j));
                             n+=1;
                         }
@@ -214,20 +230,21 @@ public class Detector {
                 for(int j= (int)boundingBox.top; j<boundingBox.bottom; j++){
                     for (int i= (int)boundingBox.left; i<boundingBox.right; i++){
                         float point = depth.getDistance(fixValueX(i),fixValueY(j));
-                        if(point>0.0f  && pointIsNotInsideRects(i, j, intersectionRects))
+                        if(point>0.0f  && pointIsNotInsideRects(i, j, intersectionRects, contaniedRects) || objectIsContanied(boundingBox, contaniedRects))
                           points.add(point);
                     }
                 }
                 KMeans k = new KMeans(2);
                 k.setPoints(points);
                 k.computeClusters(10);
-                //System.out.println(k.getCentroids());
+                System.out.println(k.getCentroids());
                 depthValue =  Collections.min(k.getCentroids());
                 break;
             default: break;
         }
         return depthValue;
     }
+
 
 
     void computeFPS(float startTime) {
