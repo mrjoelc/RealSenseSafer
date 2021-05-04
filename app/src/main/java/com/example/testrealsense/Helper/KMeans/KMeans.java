@@ -2,6 +2,7 @@ package com.example.testrealsense.Helper.KMeans;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -38,6 +39,12 @@ public class KMeans {
         for(int i=0; i<iterations; i++){
             relocateCentroid();
             assignPointsToClusters();
+
+        }
+        for (Cluster c: listOfClusters) {
+            System.out.println(c.getPoints().size());
+            //System.out.println(c.getPoints().contains(0.0f));
+
         }
     }
 
@@ -55,6 +62,8 @@ public class KMeans {
         for (int i : listOfIndex) {
             listOfClusters.add(new Cluster(points.get(i)));
         }
+
+        //printAllCentroids();
     }
 
     public void assignPointsToClusters(){
