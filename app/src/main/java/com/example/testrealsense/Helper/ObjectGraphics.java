@@ -40,10 +40,10 @@ public class ObjectGraphics {
         if(detectedObject.getCategories().size()>0) objectLabel = detectedObject.getCategories().get(0).getLabel();
         else objectLabel = "Unknown";
 
-        TextOverlay labelOverlay = new TextOverlay(graphicOverlay, objectLabel, scaledPoints[2], scaledPoints[3], color);
+        TextOverlay labelOverlay = new TextOverlay(graphicOverlay, objectLabel, scaledPoints[0], scaledPoints[3], color);
         graphicOverlay.add(labelOverlay);
 
-        TextOverlay depthOverlay = new TextOverlay(graphicOverlay, String.valueOf(objectDepth), scaledPoints[2], scaledPoints[3] - 45, color);
+        TextOverlay depthOverlay = new TextOverlay(graphicOverlay, String.valueOf(objectDepth), scaledPoints[0], scaledPoints[3] - 45, color);
         graphicOverlay.add(depthOverlay);
 
 

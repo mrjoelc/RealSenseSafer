@@ -41,11 +41,7 @@ public class KMeans {
             assignPointsToClusters();
 
         }
-        for (Cluster c: listOfClusters) {
-            System.out.println(c.getPoints().size());
-            //System.out.println(c.getPoints().contains(0.0f));
 
-        }
     }
 
     public void initClusters(){
