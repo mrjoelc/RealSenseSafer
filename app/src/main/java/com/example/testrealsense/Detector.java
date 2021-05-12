@@ -254,10 +254,11 @@ public class Detector {
                         }
                     }
                 }
+                System.out.println(points.contains(0.000000f));
                 KMeans k = new KMeans(2);
                 k.setPoints(points);
                 k.computeClusters(10);
-                //System.out.println(k.getCentroids());
+                System.out.println(k.getCentroids());
                 depthValue =  Collections.min(k.getCentroids());
                 break;
             default: break;
