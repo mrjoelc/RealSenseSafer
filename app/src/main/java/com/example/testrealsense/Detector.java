@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class Detector {
     ObjectDetector objectDetector;
@@ -180,9 +181,9 @@ public class Detector {
         return true;
     }
 
-    private boolean objectIsContained(RectF boundingBox, List<RectF> containedRects) {
-        if (containedRects==null) return true;
-        for (RectF rect: containedRects) {
+    private boolean objectIsContanied(RectF boundingBox, List<RectF> contaniedRects) {
+        if (contaniedRects==null) return true;
+        for (RectF rect: contaniedRects) {
             if(boundingBox.equals(rect)){
                 return false;
             }
@@ -195,10 +196,10 @@ public class Detector {
         switch (bs.distance_spinner.getSelectedItem().toString()){
             case "Minimum":
                 float minDistance=10f;
-                //System.out.println("original(" + boundingBox.left + " " + boundingBox.top + ") (" + boundingBox.right + " " + boundingBox.bottom+ ")");
+                System.out.println("original(" + boundingBox.left + " " + boundingBox.top + ") (" + boundingBox.right + " " + boundingBox.bottom+ ")");
                 for(int j= (int)boundingBox.top; j<boundingBox.bottom; j++){
                     for (int i= (int)boundingBox.left; i<boundingBox.right; i++){
-                        if(pointIsNotInsideRects(i, j, intersectionRects, contaniedRects) || objectIsContained(boundingBox, contaniedRects)) {
+                        if(pointIsNotInsideRects(i, j, intersectionRects, contaniedRects) || objectIsContanied(boundingBox, contaniedRects)) {
                             float currentDistance = depth.getDistance(fixValueX(i), fixValueY(j));
                             if (currentDistance != 0.0f && currentDistance < minDistance) {
                                 minDistance = currentDistance;
@@ -214,7 +215,7 @@ public class Detector {
                 for(int j= (int)boundingBox.top; j<boundingBox.bottom; j++){
                     for (int i= (int) boundingBox.left; i<boundingBox.right; i++){
                         float point = depth.getDistance(fixValueX(i),fixValueY(j));
-                        if(point>0.0f && ( pointIsNotInsideRects(i, j, intersectionRects, contaniedRects) || objectIsContained(boundingBox, contaniedRects)) ){
+                        if(point>0.0f && ( pointIsNotInsideRects(i, j, intersectionRects, contaniedRects) || objectIsContanied(boundingBox, contaniedRects)) ){
                             sum += depth.getDistance(fixValueX(i),fixValueY(j));
                             n+=1;
                         }
@@ -224,32 +225,12 @@ public class Detector {
                 depthValue = sum/n;
                 System.out.println(depthValue);
                 break;
-            case "Median":
-                List<Float> pointList = new ArrayList<Float>();
-                for(int j= (int)boundingBox.top; j<boundingBox.bottom; j++) {
-                    for (int i = (int) boundingBox.left; i < boundingBox.right; i++) {
-                        float point = depth.getDistance(fixValueX(i), fixValueY(j));
-                        if (point > 0.0f && (pointIsNotInsideRects(i, j, intersectionRects, contaniedRects) || objectIsContained(boundingBox, contaniedRects))) {
-                           pointList.add(point);
-                           //l'ordinamento rallenta tantissimo
-                           //Collections.sort(pointList);
-                        }
-                    }
-                }
-                int middle = pointList.size() / 2;
-                if (pointList.size() % 2 == 0){
-                    Float left = pointList.get(middle - 1);
-                    Float right = pointList.get(middle);
-                    depthValue = (left + right) / 2;
-                }
-                else depthValue = pointList.get(middle);
-                break;
             case "Clustering":
                 List<Float> points = new ArrayList<Float>();
                 for(int j= (int)boundingBox.top; j<boundingBox.bottom; j++){
                     for (int i= (int)boundingBox.left; i<boundingBox.right; i++){
                         float point = depth.getDistance(fixValueX(i),fixValueY(j));
-                        if(point>0.0f  && ( pointIsNotInsideRects(i, j, intersectionRects, contaniedRects) || objectIsContained(boundingBox, contaniedRects)) ){
+                        if(point>0.0f  && ( pointIsNotInsideRects(i, j, intersectionRects, contaniedRects) || objectIsContanied(boundingBox, contaniedRects)) ){
                             points.add(point);
                         }
                     }
