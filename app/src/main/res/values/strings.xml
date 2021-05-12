@@ -120,6 +120,7 @@
     <string-array name="distances" translatable="false">
         <item>Minimum</item>
         <item>Average</item>
+        <item>Median</item>
         <item>Clustering</item>
     </string-array>
     <string-array name="computation" translatable="false">
