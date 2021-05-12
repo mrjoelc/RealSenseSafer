@@ -177,11 +177,11 @@ public class StreamDetection extends Thread{
                                     }
                                 });
 
-                                if(count%3==0) {
+                                //if(count%3==0) {
                                     detector.setImageToDetect(image);
                                     detector.startDetectionForRealSenseStream(depthFrame.as(Extension.DEPTH_FRAME));
-                                }
-                                count++;
+                                //}
+                                //count++;
 
                                 depthFrame.close();
                                 mHandler.post(StreamDetection.this);
