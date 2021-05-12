@@ -497,7 +497,7 @@ public class MainActivity extends AppCompatActivity{
             if(dl.getDeviceCount() > 0) {
                 showConnectLabel(false);
                 System.out.println("On init() device count: " + dl.getDeviceCount());
-                if (!objectDict.isEmpty()) {
+                if (objectDict!=null && !objectDict.isEmpty()) {
                     System.out.println("On init() objectDict: " + objectDict.toString());
                     runOnUiThread(new Runnable() {
                         @Override

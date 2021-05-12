@@ -44,6 +44,8 @@ public class Detector {
 
     float depthValue;
 
+    List<Float> points;
+
     public Detector(Context context, GraphicOverlay graphicOverlay, HashMap<String, Float> objectDict, BottomsheetC bs) {
         this.context = context;
         this.bs=bs;
@@ -225,8 +227,27 @@ public class Detector {
                 depthValue = sum/n;
                 System.out.println(depthValue);
                 break;
+            case "Median":
+                points = new ArrayList<Float>();
+                for(int j= (int)boundingBox.top; j<boundingBox.bottom; j++){
+                    for (int i= (int) boundingBox.left; i<boundingBox.right; i++){
+                        float point = depth.getDistance(fixValueX(i),fixValueY(j));
+                        if(point>0.0f && ( pointIsNotInsideRects(i, j, intersectionRects, contaniedRects) || objectIsContanied(boundingBox, contaniedRects)) ){
+                            points.add(depth.getDistance(fixValueX(i),fixValueY(j)));
+                        }
+
+                    }
+                }
+                int middle = points.size() / 2;
+                if (points.size() % 2 == 0){
+                    Float left = points.get(middle - 1);
+                    Float right = points.get(middle);
+                    depthValue = (left + right) / 2;
+                }
+                else depthValue = points.get(middle);
+                break;
             case "Clustering":
-                List<Float> points = new ArrayList<Float>();
+                points = new ArrayList<Float>();
                 for(int j= (int)boundingBox.top; j<boundingBox.bottom; j++){
                     for (int i= (int)boundingBox.left; i<boundingBox.right; i++){
                         float point = depth.getDistance(fixValueX(i),fixValueY(j));
