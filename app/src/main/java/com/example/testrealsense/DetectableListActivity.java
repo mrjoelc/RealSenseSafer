@@ -1,11 +1,14 @@
 package com.example.testrealsense;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -14,6 +17,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import com.example.testrealsense.Helper.DetectableObjectsAdapter;
 import com.example.testrealsense.Helper.Utils;
@@ -38,9 +42,12 @@ public class DetectableListActivity extends AppCompatActivity implements Detecta
 
     EditText searchBar;
     Button searchButton;
+    Spinner assetModelSpinner;
+    String model;
 
 
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,12 +65,23 @@ public class DetectableListActivity extends AppCompatActivity implements Detecta
         objectsListToDetect = new ArrayList<>();
 
 
-        //Intent intent = getIntent();
+        Intent intent = getIntent();
+        model = intent.getStringExtra("BS");
+        System.out.println(model);
         //objectDictSelected = (HashMap<String, Float>) intent.getSerializableExtra("DICT");
-        String s = "dict.txt";
+        //assetModelSpinner = findViewById(R.id.modelML_spinner);
+        //model = assetModelSpinner.getSelectedItem().toString();
+        String s="";
+        if (model.equals("EDV0_Xenia.tflite") || model.equals("EDV4_Xenia.tflite")){
+            s="dictXenia.txt";
+        }else if(model.equals("EDV0_Kaggle.tflite") || model.equals("EDV0_Roboflow.tflite")){
+            s="dictKR.txt";
+        }else s = "dict.txt";
+
         /*if(!MainActivity.bs.modelML_spinner.getSelectedItem().toString().equals("lite-model_object_detection_mobile_object_labeler_v1_1.tflite"))
             s = "dict2.txt";*/
         takeObjectDictFromTXT(s);
+        //CheckIfSelectedOrNot()
         for (HashMap.Entry<String, Float> obj : objectDictUnselected.entrySet()) {
             isSelected=false;
             float distance=0.0f;
@@ -133,6 +151,7 @@ public class DetectableListActivity extends AppCompatActivity implements Detecta
         detectableObjectsAdapter.updateList(temp);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     void takeObjectDictFromTXT(String filename) {
         /** prelievo  oggetti e distanze critiche da file json **/
         try {

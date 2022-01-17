@@ -256,6 +256,7 @@ public class Detector {
                         }
                     }
                 }
+
                 System.out.println(points.contains(0.000000f));
                 KMeans k = new KMeans(2);
                 k.setPoints(points);

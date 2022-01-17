@@ -398,6 +398,7 @@ public class MainActivity extends AppCompatActivity{
                 //stopStream();
                 Intent i=new Intent(MainActivity.this,DetectableListActivity.class);
                 i.putExtra("DICT", objectDict);
+                i.putExtra("BS", bs.modelML_spinner.getSelectedItem().toString());
                 startActivity(i);
             }
         });
@@ -471,8 +472,6 @@ public class MainActivity extends AppCompatActivity{
             stream_detection.stop2();
     }
 
-
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -525,7 +524,6 @@ public class MainActivity extends AppCompatActivity{
             }
         });
     }
-
 
     /** listener collegamento device **/
     private DeviceListener mListener = new DeviceListener() {

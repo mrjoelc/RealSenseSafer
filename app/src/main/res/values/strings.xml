@@ -116,6 +116,10 @@
     <string-array name="models" translatable="false">
         <item>lite-model_ssd_mobilenet_v1_1_metadata_2.tflite</item>
         <item>lite-model_efficientdet_lite0_detection_metadata_1.tflite</item>
+        <item>EDV0_Kaggle.tflite</item>
+        <item>EDV0_Roboflow.tflite</item>
+        <item>EDV0_Xenia.tflite</item>
+        <item>EDV4_Xenia.tflite</item>
     </string-array>
     <string-array name="distances" translatable="false">
         <item>Minimum</item>
